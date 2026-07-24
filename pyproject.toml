@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dual-llm-router"
+version = "0.1.0"
+description = "Dual-LLM Agentic Framework — Planner/Executor Split (Hermes 4 + Laguna S 2.1)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "litellm>=1.0.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+
+[tool.pyright]
+extraPaths = ["."]
+
