@@ -85,7 +85,42 @@ class TestDualLLMRouter(unittest.TestCase):
 
         self.assertEqual(result["status"], "completed")
         self.assertEqual(result["task_spec"]["goal"], "Mock Goal")
+        self.assertTrue(result["executor_result"]["success"])
+        self.assertTrue(result["executor_result"]["verification_report"]["criteria_passed"])
         self.assertEqual(result["metrics"]["total_calls"], 2)
+
+    @patch("src.agents.planner.completion")
+    def test_orchestrator_planning_failure(self, mock_planner_completion):
+        mock_planner_completion.side_effect = Exception("OpenRouter API 500 error")
+
+        orchestrator = DualLLMRouterOrchestrator(workspace_root="/tmp/test_router_workspace")
+        result = orchestrator.run("Create test file")
+
+        self.assertEqual(result["status"], "planning_failed")
+        self.assertIn("OpenRouter API 500 error", result["error"])
+        self.assertIsNone(result["task_spec"])
+
+    @patch("src.agents.planner.completion")
+    @patch("src.agents.executor.completion")
+    def test_orchestrator_execution_failure(self, mock_executor_completion, mock_planner_completion):
+        mock_planner_resp = MagicMock()
+        mock_planner_resp.choices = [
+            MagicMock(message=MagicMock(content=json.dumps({
+                "goal": "Mock Goal",
+                "target_files": ["missing.py"],
+                "acceptance_criteria": ["missing.py exists"],
+                "step_by_step_plan": ["Do nothing"]
+            })))
+        ]
+        mock_planner_completion.return_value = mock_planner_resp
+        mock_executor_completion.side_effect = Exception("Execution network error")
+
+        orchestrator = DualLLMRouterOrchestrator(workspace_root="/tmp/test_router_workspace")
+        result = orchestrator.run("Create test file")
+
+        self.assertEqual(result["status"], "execution_failed")
+        self.assertIn("Execution network error", result["error"])
+        self.assertEqual(result["task_spec"]["goal"], "Mock Goal")
 
 if __name__ == "__main__":
     unittest.main()

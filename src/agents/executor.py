@@ -1,4 +1,5 @@
 import json
+import os
 import time
 from typing import Dict, Any, List
 from ..config import config
@@ -84,12 +85,16 @@ class ExecutorAgent:
                 latency_seconds=elapsed,
             )
             
-        cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```")
-            
-        execution_plan = json.loads(cleaned_json.strip())
+        cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        try:
+            execution_plan = json.loads(cleaned_json)
+        except Exception as e:
+            execution_plan = {"error": f"Failed to parse execution plan JSON: {e}", "raw_response": raw_json}
+
         tool_results = []
+        all_tools_succeeded = True
         
-        if execute_tools and "actions" in execution_plan:
+        if execute_tools and "actions" in execution_plan and isinstance(execution_plan["actions"], list):
             for action in execution_plan["actions"]:
                 action_type = action.get("type")
                 if action_type == "apply_patch":
@@ -99,16 +104,44 @@ class ExecutorAgent:
                         workspace_root=self.workspace_root,
                     )
                     tool_results.append({"action": action, "result": res})
+                    if not res.get("success", False):
+                        all_tools_succeeded = False
                 elif action_type == "run_shell":
                     res = run_shell(
                         command=action["command"],
                         workspace_root=self.workspace_root,
                     )
                     tool_results.append({"action": action, "result": res})
-                    
+                    if not res.get("success", False):
+                        all_tools_succeeded = False
+
+        # Verify acceptance criteria & target files
+        criteria_verification = []
+        criteria_passed = True
+        
+        # Check target files existence
+        for target_file in task_spec.target_files:
+            file_abs_path = os.path.join(self.workspace_root, target_file)
+            exists = os.path.exists(file_abs_path)
+            criteria_verification.append({
+                "criterion": f"Target file '{target_file}' exists",
+                "passed": exists,
+                "details": "File exists on disk" if exists else "File missing from workspace"
+            })
+            if not exists:
+                criteria_passed = False
+
+        overall_success = all_tools_succeeded and criteria_passed and ("error" not in execution_plan)
+
         return {
+            "success": overall_success,
             "execution_plan": execution_plan,
             "tool_results": tool_results,
+            "verification_report": {
+                "tools_succeeded": all_tools_succeeded,
+                "criteria_passed": criteria_passed,
+                "details": criteria_verification
+            },
             "latency": elapsed,
             "tokens": {"prompt": prompt_tokens, "completion": completion_tokens},
         }

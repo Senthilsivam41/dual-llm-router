@@ -25,6 +25,9 @@ def main():
     print(f"Status: {result['status']}")
     print(f"TaskSpec Goal: {result['task_spec']['goal']}")
     print(f"Acceptance Criteria: {result['task_spec']['acceptance_criteria']}")
+    if result.get("executor_result"):
+        print(f"Verification Report: {result['executor_result'].get('verification_report')}")
+        print(f"Tool Results Count: {len(result['executor_result'].get('tool_results', []))}")
     print(f"\nMetrics: {result['metrics']}")
 
 if __name__ == "__main__":

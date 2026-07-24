@@ -70,10 +70,12 @@ class PlannerAgent:
                 latency_seconds=elapsed,
             )
             
-        cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```")
-            
-        data = json.loads(cleaned_json.strip())
-        task_spec = TaskSpec(**data)
+        cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        try:
+            data = json.loads(cleaned_json)
+            task_spec = TaskSpec(**data)
+        except Exception as e:
+            raise ValueError(f"Failed to parse TaskSpec from LLM response: {e}. Raw response: {raw_json}") from e
         
         return task_spec, {
             "raw_response": raw_json,
