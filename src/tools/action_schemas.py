@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class ActionType(str, Enum):
     SHELL = "shell"
+    RUN_SHELL = "run_shell"
     PATCH = "patch"
     APPLY_PATCH = "apply_patch"
     READ = "read"
@@ -18,7 +19,7 @@ class ActionType(str, Enum):
 
 
 class ShellAction(BaseModel):
-    type: str = Field(default=ActionType.SHELL, pattern=f"^{ActionType.SHELL.value}$")
+    type: str = Field(default=ActionType.SHELL, pattern=f"^({ActionType.SHELL.value}|{ActionType.RUN_SHELL.value})$")
     command: str = Field(min_length=1, max_length=10000)
     cwd: Optional[str] = None
     timeout: Optional[int] = Field(default=120, ge=1, le=300)
@@ -170,6 +171,7 @@ def validate_action(action: Dict[str, Any]) -> ActionModel:
 
     model_map = {
         ActionType.SHELL: ShellAction,
+        ActionType.RUN_SHELL: ShellAction,
         ActionType.PATCH: PatchAction,
         ActionType.APPLY_PATCH: PatchAction,
         ActionType.READ: ReadAction,
