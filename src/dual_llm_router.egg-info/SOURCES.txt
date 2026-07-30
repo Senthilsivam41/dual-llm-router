@@ -15,6 +15,7 @@ src/dual_llm_router.egg-info/top_level.txt
 src/schemas/__init__.py
 src/schemas/task_spec.py
 src/tools/__init__.py
+src/tools/action_schemas.py
 src/tools/patch_tool.py
 src/tools/shell_tool.py
 src/utils/__init__.py

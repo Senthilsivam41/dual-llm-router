@@ -30,7 +30,7 @@ class TestDualLLMRouter(unittest.TestCase):
         # Test path traversal prevention
         res_unsafe = apply_patch("../../outside.py", "bad", workspace_root=workspace)
         self.assertFalse(res_unsafe["success"])
-        self.assertIn("outside workspace", res_unsafe["error"])
+        self.assertIn("traversal not allowed", res_unsafe["error"])
 
     def test_shell_tool(self):
         workspace = "/tmp/test_router_workspace"

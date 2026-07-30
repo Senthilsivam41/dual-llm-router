@@ -5,6 +5,7 @@ from typing import Dict, Any, List
 from ..config import config
 from ..schemas.task_spec import TaskSpec
 from ..tools import apply_patch, run_shell
+from ..tools.action_schemas import validate_actions, ActionModel
 from ..utils.metrics import MetricsLogger
 
 try:
@@ -95,23 +96,35 @@ class ExecutorAgent:
         all_tools_succeeded = True
         
         if execute_tools and "actions" in execution_plan and isinstance(execution_plan["actions"], list):
-            for action in execution_plan["actions"]:
-                action_type = action.get("type")
+            # Validate all actions before execution using Pydantic schemas
+            try:
+                validated_actions: List[ActionModel] = validate_actions(execution_plan["actions"])
+            except ValueError as e:
+                tool_results.append({
+                    "action": execution_plan["actions"],
+                    "result": {"success": False, "error": f"Action validation failed: {e}"}
+                })
+                all_tools_succeeded = False
+                validated_actions = []
+            
+            for action in validated_actions:
+                action_dict = action.model_dump()
+                action_type = action_dict.get("type")
                 if action_type == "apply_patch":
                     res = apply_patch(
-                        file_path=action["file_path"],
-                        new_content=action["content"],
+                        file_path=action_dict["file_path"],
+                        new_content=action_dict.get("patch") or action_dict.get("content"),
                         workspace_root=self.workspace_root,
                     )
-                    tool_results.append({"action": action, "result": res})
+                    tool_results.append({"action": action_dict, "result": res})
                     if not res.get("success", False):
                         all_tools_succeeded = False
                 elif action_type == "run_shell":
                     res = run_shell(
-                        command=action["command"],
+                        command=action_dict["command"],
                         workspace_root=self.workspace_root,
                     )
-                    tool_results.append({"action": action, "result": res})
+                    tool_results.append({"action": action_dict, "result": res})
                     if not res.get("success", False):
                         all_tools_succeeded = False
 
