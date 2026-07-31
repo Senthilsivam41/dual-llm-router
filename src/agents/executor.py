@@ -17,7 +17,7 @@ EXECUTOR_SYSTEM_PROMPT = """You are Laguna S 2.1, an expert agentic execution mo
 Your task is to take a TaskSpec, analyze target files/goals, and produce execution tool calls or code patches to fulfill all acceptance criteria.
 Available tool actions:
 - apply_patch(file_path, new_content)
-- run_shell(command)
+- shell(command)
 
 Output your execution steps as JSON:
 {
@@ -119,7 +119,7 @@ class ExecutorAgent:
                     tool_results.append({"action": action_dict, "result": res})
                     if not res.get("success", False):
                         all_tools_succeeded = False
-                elif action_type == "run_shell":
+                elif action_type == "shell":
                     res = run_shell(
                         command=action_dict["command"],
                         workspace_root=self.workspace_root,
@@ -127,6 +127,15 @@ class ExecutorAgent:
                     tool_results.append({"action": action_dict, "result": res})
                     if not res.get("success", False):
                         all_tools_succeeded = False
+                else:
+                    tool_results.append({
+                        "action": action_dict,
+                        "result": {
+                            "success": False,
+                            "error": f"Unsupported action type: {action_type}",
+                        },
+                    })
+                    all_tools_succeeded = False
 
         # Verify acceptance criteria & target files
         criteria_verification = []

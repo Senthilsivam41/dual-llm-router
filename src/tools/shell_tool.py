@@ -2,7 +2,13 @@ import os
 import shlex
 import subprocess
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+
+
+_PATH_COMMANDS = {"cat", "ls", "mkdir", "touch"}
+_ARGUMENT_FREE_COMMANDS = {"pwd"}
+_TEXT_COMMANDS = {"echo"}
+_ALLOWED_COMMANDS = _PATH_COMMANDS | _ARGUMENT_FREE_COMMANDS | _TEXT_COMMANDS
 
 
 def _is_within_workspace(path: str, workspace_root: str) -> bool:
@@ -15,14 +21,41 @@ def _is_within_workspace(path: str, workspace_root: str) -> bool:
         return False
 
 
+def _validate_command_paths(args: list[str], workspace_root: str) -> Optional[str]:
+    """Return an error when a command argument can address outside the workspace."""
+    command = args[0]
+    command_args = args[1:]
+
+    if command in _ARGUMENT_FREE_COMMANDS and command_args:
+        return f"Command '{command}' does not accept arguments"
+
+    if command not in _PATH_COMMANDS:
+        return None
+
+    for argument in command_args:
+        if argument == "--":
+            continue
+        if argument.startswith("-"):
+            if "/" in argument or ".." in argument:
+                return f"Unsafe option rejected: '{argument}'"
+            continue
+
+        candidate = Path(workspace_root, argument)
+        if Path(argument).is_absolute() or not _is_within_workspace(
+            str(candidate), workspace_root
+        ):
+            return f"Path argument escapes workspace: '{argument}'"
+
+    return None
+
+
 def run_shell(command: str, workspace_root: str = ".", timeout_seconds: int = 120) -> Dict[str, Any]:
-    """Executes sandboxed shell command inside workspace root.
+    """Execute a capability-limited command inside workspace root.
     
     Security features:
     - No shell=True (prevents shell injection)
-    - Command parsed with shlex for safe argument handling
-    - Working directory validated to be within workspace_root
-    - Symlink resolution prevents escape via symlinks
+    - Only a small allowlist of non-interpreter commands is available
+    - Filesystem arguments must resolve within workspace_root
     """
     abs_root = os.path.abspath(workspace_root)
     
@@ -36,6 +69,17 @@ def run_shell(command: str, workspace_root: str = ".", timeout_seconds: int = 12
         args = shlex.split(command)
         if not args:
             return {"success": False, "error": "Empty command"}
+
+        executable = args[0]
+        if executable not in _ALLOWED_COMMANDS:
+            return {
+                "success": False,
+                "error": f"Command not allowed: '{executable}'",
+            }
+
+        path_error = _validate_command_paths(args, abs_root)
+        if path_error:
+            return {"success": False, "error": path_error}
         
         res = subprocess.run(
             args,
