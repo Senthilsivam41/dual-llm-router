@@ -1,15 +1,56 @@
 # .github/workflows/benchmark.yml
+# Publishes benchmark_results_<timestamp>.md under benchmark/published/
+# whenever major code paths change (or on weekly schedule).
 
 name: Benchmark
 
 on:
   push:
-    branches: [main]
+    branches: [main, cursor/**]
+    paths:
+      - "src/**"
+      - "router/**"
+      - "evals/**"
+      - "prompts/**"
+      - "benchmark/easy/**"
+      - "benchmark/medium/**"
+      - "benchmark/hard/**"
+      - "benchmark/extreme/**"
+      - "benchmark/*.py"
+      - "benchmark/*.sh"
+      - "config/evolution.yaml"
+      - "config/ab_tests.yaml"
+      - "scripts/benchmark_*.py"
+      - "scripts/publish_benchmark_results.py"
+      - "scripts/evolve.py"
+      - "scripts/reset.py"
+      - ".github/workflows/benchmark.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "src/**"
+      - "router/**"
+      - "evals/**"
+      - "prompts/**"
+      - "benchmark/easy/**"
+      - "benchmark/medium/**"
+      - "benchmark/hard/**"
+      - "benchmark/extreme/**"
+      - "benchmark/*.py"
+      - "benchmark/*.sh"
+      - "config/evolution.yaml"
+      - "config/ab_tests.yaml"
+      - "scripts/benchmark_*.py"
+      - "scripts/publish_benchmark_results.py"
+      - "scripts/evolve.py"
+      - "scripts/reset.py"
+      - ".github/workflows/benchmark.yml"
   schedule:
-    # Run weekly
-    - cron: "0 0 * * 0"  # Sunday midnight
+    - cron: "0 0 * * 0"  # weekly Sunday midnight UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   benchmark:
@@ -17,6 +58,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,21 +72,91 @@ jobs:
           pip install -r requirements.txt
 
       - name: Bootstrap evolution state
-        run: |
-          python scripts/reset.py
+        run: python scripts/reset.py
 
-      - name: Run benchmark suite
+      - name: Detect major change
+        id: major
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "trigger=${{ github.event_name }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Skip bot republish commits
+          SUBJECT="$(git log -1 --pretty=%s)"
+          if echo "$SUBJECT" | grep -q "chore(benchmark): publish results"; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "trigger=skip_bot" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_REF="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_REF="${{ github.event.before }}"
+          fi
+          if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
+            BASE_REF="HEAD~1"
+          fi
+          export BASE_REF
+          set +e
+          python - <<'PY'
+          import os, sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path.cwd()))
+          from evals.benchmark_publisher import changed_files, is_major_change
+          base = os.environ.get("BASE_REF", "HEAD~1")
+          files = changed_files(base)
+          # Ignore published-output-only diffs
+          files = [f for f in files if not f.startswith("benchmark/published/")]
+          major = is_major_change(files)
+          print("Changed files:")
+          for f in files:
+              print(f"  - {f}")
+          print("major_change=", major)
+          sys.exit(0 if major else 1)
+          PY
+          STATUS=$?
+          set -e
+          if [ "$STATUS" -eq 0 ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "trigger=commit" >> "$GITHUB_OUTPUT"
+
+      - name: Run suite and publish Markdown results
+        if: steps.major.outputs.run == 'true'
         env:
           BENCHMARK_SIMULATE: "1"
         run: |
-          python scripts/benchmark_runner.py --suite easy --variant hermes_v1,laguna_v1 --simulate
+          python scripts/publish_benchmark_results.py \
+            --force \
+            --suite easy \
+            --variant hermes_v1,laguna_v1 \
+            --simulate \
+            --trigger "${{ steps.major.outputs.trigger || github.event_name }}"
 
-      - name: Generate report
-        run: |
-          python scripts/benchmark_dashboard.py --report overall --save .autoclaw/evals/benchmark/report.json
-
-      - name: Upload results
+      - name: Upload runtime artifacts
+        if: steps.major.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
-          path: .autoclaw/evals/benchmark/
+          path: |
+            .autoclaw/evals/benchmark/
+            benchmark/published/
+
+      - name: Commit published reports
+        if: >
+          steps.major.outputs.run == 'true' &&
+          github.event_name != 'pull_request' &&
+          (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/'))
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add benchmark/published/
+          if git diff --staged --quiet; then
+            echo "No published files to commit"
+            exit 0
+          fi
+          git commit -m "chore(benchmark): publish results for ${GITHUB_SHA::7} [skip ci]"
+          git push

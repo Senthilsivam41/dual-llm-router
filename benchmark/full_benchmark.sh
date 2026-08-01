@@ -33,3 +33,8 @@ echo "==> Compare result files"
 
 echo "==> Dashboard"
 "$PYTHON" scripts/benchmark_dashboard.py --report overall --save .autoclaw/evals/benchmark/report.json
+
+echo "==> Publish Markdown results"
+"$PYTHON" scripts/publish_benchmark_results.py \
+  --force --skip-run --suite all --variant hermes_v1,laguna_v1 \
+  --trigger full_benchmark_sh "${SIM_FLAG[@]}"
