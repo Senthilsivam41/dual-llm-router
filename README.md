@@ -208,9 +208,10 @@ python scripts/comparative_benchmark.py --variants hermes_v1,laguna_v1 --suite e
 python scripts/publish_benchmark_results.py --if-major --suite easy --simulate
 ```
 
-Published reports: [`benchmark/published/`](benchmark/published/) (`benchmark_results_<timestamp>.md`)  
-Metrics definitions: [`benchmark/Key_Metrics_Summary.md`](benchmark/Key_Metrics_Summary.md)  
+Published reports: [`benchmark/published/`](benchmark/published/) (`benchmark_results_<timestamp>.md`)
+Metrics definitions: [`benchmark/Key_Metrics_Summary.md`](benchmark/Key_Metrics_Summary.md)
 Suite details: [`benchmark/README.md`](benchmark/README.md)
+CI/CD workflows: [`benchmark/benchmark-cicd.md`](benchmark/benchmark-cicd.md) (PR smoke, weekly suite, nightly evolution)
 
 ## Testing
 

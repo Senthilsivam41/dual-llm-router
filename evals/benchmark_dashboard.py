@@ -200,7 +200,42 @@ class BenchmarkDashboard:
     def save_report(self, path: Optional[Path] = None) -> Path:
         out = Path(path or self.results_path.parent / "report.json")
         out.parent.mkdir(parents=True, exist_ok=True)
+        report = self.generate_report()
         with open(out, "w", encoding="utf-8") as f:
-            json.dump(self.generate_report(), f, indent=2)
+            json.dump(report, f, indent=2)
             f.write("\n")
         return out
+
+    def write_github_summary(self, path: Optional[Path] = None) -> str:
+        """Render a compact Markdown summary for GitHub Actions step summaries."""
+        report = self.generate_report()
+        if report.get("error"):
+            md = f"### Benchmark dashboard\n\n_{report['error']}_\n"
+        else:
+            overall = report.get("overall") or {}
+            lines = [
+                "### Benchmark summary",
+                "",
+                f"- Generated: `{report.get('generated_at', 'n/a')}`",
+                f"- Total runs: **{report.get('total_runs', 0)}**",
+                f"- Success rate: **{float(overall.get('success_rate', 0)):.4f}**",
+                f"- Avg quality: **{float(overall.get('avg_quality', 0)):.4f}**",
+                f"- Avg cost: **{float(overall.get('avg_cost', 0)):.4f}**",
+                f"- Spec rejection: **{float(overall.get('spec_rejection_rate', 0)):.4f}**",
+                f"- Handoff failure: **{float(overall.get('handoff_failure_rate', 0)):.4f}**",
+                "",
+                "| Category | Count | Success | Quality |",
+                "| --- | ---: | ---: | ---: |",
+            ]
+            for category, metrics in sorted((report.get("by_category") or {}).items()):
+                lines.append(
+                    f"| {category} | {metrics.get('count', 0)} | "
+                    f"{float(metrics.get('success_rate', 0)):.4f} | "
+                    f"{float(metrics.get('avg_quality', 0)):.4f} |"
+                )
+            lines.append("")
+            md = "\n".join(lines)
+        if path:
+            Path(path).parent.mkdir(parents=True, exist_ok=True)
+            Path(path).write_text(md, encoding="utf-8")
+        return md
