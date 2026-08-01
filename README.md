@@ -41,6 +41,8 @@ User / Trigger ──► [Planner: Hermes 4] ──► TaskSpec JSON
                                    Run result logged
                              .autoclaw/evals/run_results.json
 ```
+<img width="1024" height="765" alt="image" src="https://github.com/user-attachments/assets/643e0fe9-f621-4616-8017-2d84db249aba" />
+
 
 ### Co-evolution loop
 
@@ -68,6 +70,9 @@ User / Trigger ──► [Planner: Hermes 4] ──► TaskSpec JSON
                                     alerts.jsonl / webhook
                                     (significant fitness gain)
 ```
+
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/a5bbbf59-7466-4a9b-a7a2-40fd9accda02" />
+
 
 **Data plane (gitignored runtime state under `.autoclaw/`):**
 
