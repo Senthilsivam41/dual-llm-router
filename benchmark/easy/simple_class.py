@@ -3,6 +3,7 @@
 TASK = {
     "id": "easy_simple_class",
     "category": "easy",
+    "domain": "oop",
     "spec": (
         "Create `counter.py` with a `Counter` class supporting increment(), decrement(), "
         "and value property (default start 0). Prevent value from going below 0 on decrement. "

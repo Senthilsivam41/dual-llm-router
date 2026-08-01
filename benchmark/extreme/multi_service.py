@@ -3,6 +3,7 @@
 TASK = {
     "id": "extreme_multi_service",
     "category": "extreme",
+    "domain": "systems",
     "spec": (
         "Implement two local services (`orders` and `inventory`) that communicate over HTTP "
         "(or a lightweight in-process bus) to reserve stock when an order is created. Include "

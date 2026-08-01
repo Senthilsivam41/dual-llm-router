@@ -3,6 +3,7 @@
 TASK = {
     "id": "hard_bug_hunt",
     "category": "hard",
+    "domain": "debugging",
     "spec": (
         "The cache in `ttl_cache.py` intermittently returns stale or missing values under "
         "concurrent access and TTL expiry. Find and fix race/TTL bugs, add regression tests."

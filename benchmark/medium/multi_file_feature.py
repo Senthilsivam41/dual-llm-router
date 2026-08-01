@@ -3,6 +3,7 @@
 TASK = {
     "id": "medium_multi_file_feature",
     "category": "medium",
+    "domain": "backend",
     "spec": (
         "Implement a tiny user store across `models/user.py`, `services/user_service.py`, "
         "and `api/users.py` supporting create/get/list with basic email validation. "

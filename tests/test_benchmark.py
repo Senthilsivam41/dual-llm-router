@@ -54,9 +54,15 @@ def _seed_engine(tmp_path: Path) -> EvolutionEngine:
 
 def test_task_suite_loads_all_categories():
     tasks = load_task_modules()
-    assert len(tasks) >= 16
+    assert len(tasks) >= 20
     cats = {t["category"] for t in tasks}
     assert cats == {"easy", "medium", "hard", "extreme"}
+    assert all(t.get("domain") for t in tasks)
+    ids = {t["id"] for t in tasks}
+    assert "easy_basic_function" in ids
+    assert "easy_file_creation" in ids
+    assert "medium_class_with_methods" in ids
+    assert "medium_api_endpoint" in ids
 
 
 def test_benchmark_runner_simulate(tmp_path: Path):
@@ -77,6 +83,12 @@ def test_benchmark_runner_simulate(tmp_path: Path):
     report = dash.generate_report()
     assert report["total_runs"] == len(results)
     assert "overall" in report
+    overall = report["overall"]
+    assert "spec_rejection_rate" in overall
+    assert "handoff_failure_rate" in overall
+    assert "cost_efficiency" in overall
+    assert "by_domain" in report
+    assert all(r.domain for r in results)
 
 
 def test_comparative_benchmark(tmp_path: Path):

@@ -3,6 +3,7 @@
 TASK = {
     "id": "medium_edge_case_bug",
     "category": "medium",
+    "domain": "debugging",
     "spec": (
         "Fix `parse_csv_line(line)` in `csv_lite.py` so quoted commas and empty fields work. "
         "Add failing-first tests then make them pass."

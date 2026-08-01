@@ -3,6 +3,7 @@
 TASK = {
     "id": "extreme_security_audit",
     "category": "extreme",
+    "domain": "security",
     "spec": (
         "Audit `insecure_app/` for path traversal, command injection, and unsafe pickle usage. "
         "Patch each issue with secure defaults, add regression tests, and write SECURITY_FIXES.md "

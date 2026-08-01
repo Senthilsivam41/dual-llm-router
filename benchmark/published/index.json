@@ -1,0 +1,23 @@
+[
+  {
+    "timestamp": "20260801_075236Z",
+    "file": "benchmark_results_20260801_075236Z.md",
+    "commit": "d3016cc",
+    "suite": "easy",
+    "success_rate": "0.8333"
+  },
+  {
+    "timestamp": "20260801_073921Z",
+    "file": "benchmark_results_20260801_073921Z.md",
+    "commit": "71aa23a",
+    "suite": "easy",
+    "success_rate": "1.0000"
+  },
+  {
+    "timestamp": "20260801_073658Z",
+    "file": "benchmark_results_20260801_073658Z.md",
+    "commit": "6228ec3",
+    "suite": "easy",
+    "success_rate": "1.0000"
+  }
+]

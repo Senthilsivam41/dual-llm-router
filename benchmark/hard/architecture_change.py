@@ -3,6 +3,7 @@
 TASK = {
     "id": "hard_architecture_change",
     "category": "hard",
+    "domain": "architecture",
     "spec": (
         "Refactor a small monolith in `app/` into layers: `domain/`, `services/`, and `api/`, "
         "with dependency injection for the repository. Preserve existing CLI behavior and add "

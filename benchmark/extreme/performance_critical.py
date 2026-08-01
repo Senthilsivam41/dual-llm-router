@@ -3,6 +3,7 @@
 TASK = {
     "id": "extreme_performance_critical",
     "category": "extreme",
+    "domain": "performance",
     "spec": (
         "Optimize a request fan-out simulator in `fanout.py` to keep p95 latency under a defined "
         "budget using concurrency limits, caching, and cancellation. Provide a microbenchmark and "

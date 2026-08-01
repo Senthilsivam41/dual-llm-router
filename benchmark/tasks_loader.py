@@ -34,6 +34,8 @@ def load_task_modules(categories: Optional[List[str]] = None) -> List[Dict[str, 
                 task = dict(task)
                 task.setdefault("category", category)
                 task.setdefault("id", f"{category}_{module_info.name}")
+                tags = task.get("tags") or []
+                task.setdefault("domain", tags[0] if tags else "general")
                 tasks.append(task)
     return tasks
 
