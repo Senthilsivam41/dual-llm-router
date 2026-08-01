@@ -1,3 +1,9 @@
+# Dual-LLM Router — Planner/Executor Split (Hermes 4 + Laguna S 2.1)
+
+Prompt co-evolution docs: [`docs/Evolution.md`](docs/Evolution.md)
+
+---
+
 # Project Proposal: Dual-LLM Agentic Framework — Planner/Executor Split (Hermes 4 + Laguna S 2.1)
 
 **Prepared by:** Sendil Sadasivam

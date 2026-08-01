@@ -8,9 +8,15 @@ class DualLLMRouterOrchestrator:
         self,
         planner_model: Optional[str] = None,
         executor_model: Optional[str] = None,
-        workspace_root: str = "."
+        workspace_root: str = ".",
+        planner_system_prompt: Optional[str] = None,
     ):
-        self.planner = PlannerAgent(**({"model_name": planner_model} if planner_model else {}))
+        planner_kwargs: Dict[str, Any] = {}
+        if planner_model:
+            planner_kwargs["model_name"] = planner_model
+        if planner_system_prompt:
+            planner_kwargs["system_prompt"] = planner_system_prompt
+        self.planner = PlannerAgent(**planner_kwargs)
         self.executor = ExecutorAgent(workspace_root=workspace_root, **({"model_name": executor_model} if executor_model else {}))
         self.metrics_logger = MetricsLogger()
 
