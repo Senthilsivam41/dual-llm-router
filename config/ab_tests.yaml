@@ -1,0 +1,8 @@
+# A/B test defaults (mirrors evolution.ab_testing)
+enabled: true
+min_samples_per_variant: 20
+confidence_interval: 0.95
+significance_level: 0.05
+agents:
+  - hermes
+  - laguna

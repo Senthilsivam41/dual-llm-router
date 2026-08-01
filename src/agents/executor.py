@@ -1,39 +1,32 @@
 import json
 import os
 import time
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from ..config import config
 from ..schemas.task_spec import TaskSpec
 from ..tools import apply_patch, run_shell
 from ..tools.action_schemas import validate_actions, ActionModel
 from ..utils.metrics import MetricsLogger
+from prompts.laguna.base import LAGUNA_SYSTEM_PROMPT
 
 try:
     from litellm import completion
 except ImportError:
     completion = None
 
-EXECUTOR_SYSTEM_PROMPT = """You are Laguna S 2.1, an expert agentic execution model.
-Your task is to take a TaskSpec, analyze target files/goals, and produce execution tool calls or code patches to fulfill all acceptance criteria.
-Available tool actions:
-- apply_patch(file_path, new_content)
-- shell(command)
-
-Output your execution steps as JSON:
-{
-  "summary": "<summary of actions>",
-  "actions": [
-    {"type": "apply_patch", "file_path": "...", "content": "..."},
-    {"type": "run_shell", "command": "..."}
-  ],
-  "verification_results": ["<how criteria were checked>"]
-}
-"""
+# Back-compat alias; canonical prompt lives in prompts/laguna/base.py
+EXECUTOR_SYSTEM_PROMPT = LAGUNA_SYSTEM_PROMPT
 
 class ExecutorAgent:
-    def __init__(self, model_name: str = config.executor_model, workspace_root: str = "."):
+    def __init__(
+        self,
+        model_name: str = config.executor_model,
+        workspace_root: str = ".",
+        system_prompt: Optional[str] = None,
+    ):
         self.model_name = model_name
         self.workspace_root = workspace_root
+        self.system_prompt = system_prompt or EXECUTOR_SYSTEM_PROMPT
 
     def execute(
         self,
@@ -61,7 +54,7 @@ class ExecutorAgent:
             prompt_tokens, completion_tokens = 100, 50
         else:
             messages = [
-                {"role": "system", "content": EXECUTOR_SYSTEM_PROMPT},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt_payload},
             ]
             response = completion(

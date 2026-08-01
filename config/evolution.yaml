@@ -1,0 +1,58 @@
+# config/evolution.yaml
+evolution:
+  enabled: true
+  check_interval_runs: 50           # evaluate every 50 runs
+  max_generations: 20               # max generations of mutation
+
+  hermes:
+    mutation_rate: 0.3              # 30% chance of mutation per generation
+    max_mutations_per_run: 2
+    mutation_operators:
+      - prompt_verbosity
+      - few_shot_count
+      - instruction_style
+      - persona_adjectives
+      - code_example_complexity
+
+  laguna:
+    mutation_rate: 0.4
+    max_mutations_per_run: 3
+    mutation_operators:
+      - instruction_style
+      - code_example_count
+      - retry_strategy
+      - output_format
+      - verbosity
+
+  scoring:
+    weights:
+      success_rate: 0.35
+      cost_efficiency: 0.30
+      quality_score: 0.25
+      time_efficiency: 0.10
+
+  selection:
+    strategy: "elitist"             # elitist, tournament, rank-based
+    elite_size: 2                   # top performers preserved
+    tournament_size: 3              # for tournament selection
+
+  ab_testing:
+    enabled: true
+    min_samples_per_variant: 20
+    confidence_interval: 0.95
+    significance_level: 0.05
+
+  lineage:
+    max_depth: 5                    # how deep to track ancestry
+    crossover_enabled: true         # combine features of two parents
+
+  alerting:
+    enabled: true
+    min_delta: 0.05                 # alert when composite fitness rises by >= 5pp
+    webhook_url: null               # or set EVOLUTION_ALERT_WEBHOOK env var
+
+  cron:
+    # Suggested crontab (hourly check):
+    # 0 * * * * cd /path/to/dual-llm-router && ./scripts/cron_evolve.sh >> .autoclaw/evals/cron.log 2>&1
+    schedule: "0 * * * *"
+    force_on_interval: false

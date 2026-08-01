@@ -6,3 +6,7 @@ __pycache__/
 *.pyc
 .env
 workspace/
+
+# Evolved prompt variants are generated locally
+prompts/**/evolved/*
+!prompts/**/evolved/.gitkeep

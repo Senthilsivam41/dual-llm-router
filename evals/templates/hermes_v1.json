@@ -1,0 +1,30 @@
+{
+  "variant_id": "hermes_v1",
+  "created": "2025-01-15T10:00:00Z",
+  "parent_id": null,
+  "mutation_source": "base",
+  "system_prompt_path": "prompts/hermes/base.py",
+  "few_shot_path": "prompts/hermes/few_shot/coding_examples.py",
+  "capability_vector": {
+    "code_generation": 0.92,
+    "code_understanding": 0.88,
+    "debugging": 0.85,
+    "refactoring": 0.80,
+    "testing": 0.78,
+    "architectural": 0.72
+  },
+  "trust_history": {
+    "total_runs": 0,
+    "success_rate": 0.0,
+    "avg_cost_per_run": 0.0,
+    "avg_time_per_run": 0.0,
+    "critical_failures": 0
+  },
+  "prompt_features": {
+    "persona": "Senior Python Engineer",
+    "tone": "direct",
+    "verbosity": "medium",
+    "few_shot_count": 5,
+    "instruction_style": "step-by-step"
+  }
+}

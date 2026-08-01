@@ -4,26 +4,15 @@ from typing import Dict, Any, Optional, Tuple
 from ..config import config
 from ..schemas.task_spec import TaskSpec
 from ..utils.metrics import MetricsLogger
+from prompts.hermes.base import HERMES_SYSTEM_PROMPT
 
 try:
     from litellm import completion
 except ImportError:
     completion = None
 
-PLANNER_SYSTEM_PROMPT = """You are Hermes 4, a high-precision planning and routing agent.
-Your job is to convert raw user prompts into a structured execution TaskSpec JSON object.
-
-Format output as valid JSON matching schema:
-{
-  "goal": "<high-level summary>",
-  "target_files": ["<file1>", "<file2>"],
-  "acceptance_criteria": ["<criterion 1>", "<criterion 2>"],
-  "step_by_step_plan": ["<step 1>", "<step 2>"],
-  "notes": "<optional hints>"
-}
-
-Do not include markdown code block syntax inside the JSON string itself. Respond with raw JSON object or JSON inside standard markdown json block.
-"""
+# Back-compat alias; canonical prompt lives in prompts/hermes/base.py
+PLANNER_SYSTEM_PROMPT = HERMES_SYSTEM_PROMPT
 
 class PlannerAgent:
     def __init__(
