@@ -1,0 +1,44 @@
+{
+  "timestamp": "20260801_073921Z",
+  "meta": {
+    "commit": "71aa23a",
+    "branch": "cursor/prompt-evolution-loop",
+    "subject": "Publish timestamped benchmark Markdown on major code changes."
+  },
+  "suite": "easy",
+  "variant": "hermes_v1,laguna_v1",
+  "simulate": true,
+  "trigger": "commit",
+  "report": {
+    "generated_at": "2026-08-01T07:39:21.934091Z",
+    "total_runs": 4,
+    "by_category": {
+      "easy": {
+        "count": 4,
+        "success_rate": 1.0,
+        "avg_cost": 0.048,
+        "avg_time": 0.0,
+        "avg_quality": 1.0,
+        "avg_iterations": 1.0
+      }
+    },
+    "by_variant": {
+      "hermes_v1+laguna_v1": {
+        "count": 4,
+        "success_rate": 1.0,
+        "avg_cost": 0.048,
+        "avg_time": 0.0,
+        "avg_quality": 1.0
+      }
+    },
+    "overall": {
+      "success_rate": 1.0,
+      "avg_cost": 0.048,
+      "avg_time_seconds": 0.0,
+      "avg_quality": 1.0,
+      "avg_iterations": 1.0,
+      "total_cost": 0.192,
+      "total_time_seconds": 0
+    }
+  }
+}
