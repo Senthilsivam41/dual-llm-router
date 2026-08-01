@@ -5,6 +5,7 @@ Compare different variant combinations on the same benchmark suite.
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -35,7 +36,7 @@ class ComparativeBenchmark:
 
         for combo in variant_combos:
             label = f"{combo[0]}+{combo[1]}"
-            print(f"\nRunning benchmark with {label}")
+            print(f"\nRunning benchmark with {label}", file=sys.stderr, flush=True)
             results = self.runner.run_benchmark_suite(
                 task_ids=task_ids,
                 variant_combo=combo,

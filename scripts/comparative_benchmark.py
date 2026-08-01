@@ -32,12 +32,27 @@ def main() -> None:
     )
     parser.add_argument("--suite", default="easy", choices=["easy", "medium", "hard", "extreme", "all"])
     parser.add_argument("--simulate", action="store_true")
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Write comparison JSON to this path (progress logs stay on stderr)",
+    )
     args = parser.parse_args()
+
+    def _emit(payload: dict) -> None:
+        text = json.dumps(payload, indent=2)
+        if args.output:
+            out = Path(args.output)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(text + "\n", encoding="utf-8")
+            print(f"Wrote {out}", file=sys.stderr)
+        print(text)
 
     if args.compare:
         a = load_results_file(Path(args.compare[0]))
         b = load_results_file(Path(args.compare[1]))
-        print(json.dumps(compare_results(a, b), indent=2))
+        _emit(compare_results(a, b))
         return
 
     if not args.variants:
@@ -57,7 +72,7 @@ def main() -> None:
         suite=None if args.suite == "all" else args.suite,
     )
     runner.save_results()
-    print(json.dumps(result, indent=2))
+    _emit(result)
 
 
 if __name__ == "__main__":

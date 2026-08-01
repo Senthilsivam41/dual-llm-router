@@ -1,0 +1,103 @@
+# Nightly (or manual) prompt co-evolution under .autoclaw/ (simulated runs).
+# Does not commit genomes; uploads artifacts for inspection.
+
+name: Nightly Evolution
+
+on:
+  schedule:
+    - cron: "0 4 * * *"  # 04:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: "Number of simulated runs before evolve"
+        required: false
+        default: "100"
+      force:
+        description: "Force evolution even if interval not due"
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Optional live API key
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          if [ -n "$OPENROUTER_API_KEY" ]; then
+            echo "OPENROUTER_API_KEY=$OPENROUTER_API_KEY" >> "$GITHUB_ENV"
+            echo "Live key present (evolution itself still uses simulated run injection)."
+          else
+            echo "No OPENROUTER_API_KEY; continuing with offline simulation."
+          fi
+
+      - name: Bootstrap evolution state
+        run: python scripts/reset.py
+
+      - name: Simulate runs + evolve
+        run: |
+          RUNS="${{ github.event.inputs.runs || '100' }}"
+          FORCE_FLAG=()
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.force }}" = "true" ]; then
+            FORCE_FLAG=(--force)
+          fi
+          python scripts/evolve.py --runs "$RUNS" "${FORCE_FLAG[@]}" | tee evolution_result.json
+
+      - name: Analyze fitness
+        run: python scripts/analyze.py | tee evolution_analysis.txt
+
+      - name: Step summary
+        run: |
+          {
+            echo "### Nightly evolution"
+            echo ""
+            echo '```'
+            head -n 80 evolution_analysis.txt || true
+            echo '```'
+            echo ""
+            if [ -f evolution_result.json ]; then
+              echo "<details><summary>evolve() JSON</summary>"
+              echo ""
+              echo '```json'
+              head -c 6000 evolution_result.json
+              echo ""
+              echo '```'
+              echo "</details>"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload evolution results
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolution-results
+          path: |
+            evolution_result.json
+            evolution_analysis.txt
+            .autoclaw/evals/evolution_log.json
+            .autoclaw/evals/best_configs.json
+            .autoclaw/agents/genomes/
+          if-no-files-found: ignore
+          retention-days: 30

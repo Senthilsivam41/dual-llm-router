@@ -1,0 +1,103 @@
+# Lightweight PR gate: smoke benchmark (simulate) + unit / P0 tests.
+
+name: CI Benchmark (PR)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "router/**"
+      - "evals/**"
+      - "prompts/**"
+      - "benchmark/easy/**"
+      - "benchmark/medium/**"
+      - "benchmark/hard/**"
+      - "benchmark/extreme/**"
+      - "benchmark/*.py"
+      - "scripts/**"
+      - "config/**"
+      - "requirements.txt"
+      - "tests/**"
+      - ".github/workflows/ci-benchmark.yml"
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  smoke_test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Bootstrap evolution state
+        run: python scripts/reset.py
+
+      - name: Run smoke benchmark (easy, simulate)
+        run: |
+          mkdir -p reports
+          python scripts/benchmark_runner.py \
+            --suite easy \
+            --variant hermes_v1,laguna_v1 \
+            --simulate
+          python scripts/benchmark_dashboard.py \
+            --report overall \
+            --output reports/pr_smoke.json
+          python scripts/ci_benchmark_summary.py \
+            --title "PR smoke (easy)" \
+            --report reports/pr_smoke.json
+
+      - name: Upload smoke results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-benchmark-smoke
+          path: |
+            reports/
+            .autoclaw/evals/benchmark/results.json
+          retention-days: 7
+
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Evolution / scoring / mutation / A/B tests
+        run: |
+          pytest tests/test_scoring.py \
+                tests/test_mutation.py \
+                tests/test_ab_test.py \
+                tests/test_evolution.py \
+                tests/test_benchmark.py \
+                tests/test_benchmark_publisher.py -q
+
+      - name: P0 security tests
+        run: pytest tests/test_p0_security.py -q

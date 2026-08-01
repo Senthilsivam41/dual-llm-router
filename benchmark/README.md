@@ -14,7 +14,8 @@ benchmark/
 └── *.md        # metric definitions + publishing guide
 ```
 
-Full metrics & publishing guide: [`benchmark_publishing_results.md`](benchmark_publishing_results.md).
+Full metrics & publishing guide: [`benchmark_publishing_results.md`](benchmark_publishing_results.md).  
+CI/CD feasibility & workflows: [`benchmark-cicd.md`](benchmark-cicd.md).
 
 ## Quick start
 

@@ -1,6 +1,5 @@
-# .github/workflows/benchmark.yml
-# Publishes benchmark_results_<timestamp>.md under benchmark/published/
-# whenever major code paths change (or on weekly schedule).
+# Full / scheduled benchmarking + publish Markdown under benchmark/published/.
+# PR smoke lives in ci-benchmark.yml to keep PR feedback fast.
 
 name: Benchmark
 
@@ -22,40 +21,71 @@ on:
       - "config/ab_tests.yaml"
       - "scripts/benchmark_*.py"
       - "scripts/publish_benchmark_results.py"
-      - "scripts/evolve.py"
-      - "scripts/reset.py"
-      - ".github/workflows/benchmark.yml"
-  pull_request:
-    branches: [main]
-    paths:
-      - "src/**"
-      - "router/**"
-      - "evals/**"
-      - "prompts/**"
-      - "benchmark/easy/**"
-      - "benchmark/medium/**"
-      - "benchmark/hard/**"
-      - "benchmark/extreme/**"
-      - "benchmark/*.py"
-      - "benchmark/*.sh"
-      - "config/evolution.yaml"
-      - "config/ab_tests.yaml"
-      - "scripts/benchmark_*.py"
-      - "scripts/publish_benchmark_results.py"
+      - "scripts/comparative_benchmark.py"
+      - "scripts/ci_benchmark_summary.py"
       - "scripts/evolve.py"
       - "scripts/reset.py"
       - ".github/workflows/benchmark.yml"
   schedule:
-    - cron: "0 0 * * 0"  # weekly Sunday midnight UTC
+    - cron: "0 2 * * 0"  # weekly Sunday 02:00 UTC
   workflow_dispatch:
+    inputs:
+      suite:
+        description: "Suite for publish job"
+        required: false
+        default: "all"
+      live:
+        description: "Use live OpenRouter (requires secret)"
+        required: false
+        default: "false"
+        type: boolean
 
 permissions:
   contents: write
 
-jobs:
-  benchmark:
-    runs-on: ubuntu-latest
+env:
+  PYTHON_VERSION: "3.11"
 
+jobs:
+  # ---------------------------------------------------------------------------
+  # Unit + P0 security (always on push path filter / schedule / dispatch)
+  # ---------------------------------------------------------------------------
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run benchmark / evolution unit tests
+        run: |
+          pytest tests/test_scoring.py \
+                tests/test_mutation.py \
+                tests/test_ab_test.py \
+                tests/test_evolution.py \
+                tests/test_benchmark.py \
+                tests/test_benchmark_publisher.py -q
+
+      - name: Run P0 security tests
+        run: pytest tests/test_p0_security.py -q
+
+  # ---------------------------------------------------------------------------
+  # Path-filtered publish (simulate by default; live optional on dispatch)
+  # ---------------------------------------------------------------------------
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
@@ -64,7 +94,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
         run: |
@@ -82,18 +114,13 @@ jobs:
             echo "trigger=${{ github.event_name }}" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          # Skip bot republish commits
           SUBJECT="$(git log -1 --pretty=%s)"
           if echo "$SUBJECT" | grep -q "chore(benchmark): publish results"; then
             echo "run=false" >> "$GITHUB_OUTPUT"
             echo "trigger=skip_bot" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_REF="${{ github.event.pull_request.base.sha }}"
-          else
-            BASE_REF="${{ github.event.before }}"
-          fi
+          BASE_REF="${{ github.event.before }}"
           if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
             BASE_REF="HEAD~1"
           fi
@@ -105,9 +132,7 @@ jobs:
           sys.path.insert(0, str(Path.cwd()))
           from evals.benchmark_publisher import changed_files, is_major_change
           base = os.environ.get("BASE_REF", "HEAD~1")
-          files = changed_files(base)
-          # Ignore published-output-only diffs
-          files = [f for f in files if not f.startswith("benchmark/published/")]
+          files = [f for f in changed_files(base) if not f.startswith("benchmark/published/")]
           major = is_major_change(files)
           print("Changed files:")
           for f in files:
@@ -124,31 +149,61 @@ jobs:
           fi
           echo "trigger=commit" >> "$GITHUB_OUTPUT"
 
+      - name: Configure live API key (optional)
+        if: >
+          steps.major.outputs.run == 'true' &&
+          (github.event_name == 'schedule' ||
+           (github.event_name == 'workflow_dispatch' && inputs.live == true))
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          if [ -n "$OPENROUTER_API_KEY" ]; then
+            echo "OPENROUTER_API_KEY=$OPENROUTER_API_KEY" >> "$GITHUB_ENV"
+            echo "USE_LIVE=1" >> "$GITHUB_ENV"
+          else
+            echo "USE_LIVE=0" >> "$GITHUB_ENV"
+            echo "No OPENROUTER_API_KEY secret; falling back to simulate."
+          fi
+
       - name: Run suite and publish Markdown results
         if: steps.major.outputs.run == 'true'
         env:
           BENCHMARK_SIMULATE: "1"
         run: |
+          SUITE="${{ github.event.inputs.suite || 'easy' }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            SUITE="all"
+          fi
+          EXTRA=(--simulate)
+          if [ "${USE_LIVE:-0}" = "1" ]; then
+            EXTRA=(--live)
+          fi
           python scripts/publish_benchmark_results.py \
             --force \
-            --suite easy \
+            --suite "$SUITE" \
             --variant hermes_v1,laguna_v1 \
-            --simulate \
+            "${EXTRA[@]}" \
             --trigger "${{ steps.major.outputs.trigger || github.event_name }}"
+
+      - name: Write step summary
+        if: steps.major.outputs.run == 'true'
+        run: python scripts/ci_benchmark_summary.py --title "Published benchmark"
 
       - name: Upload runtime artifacts
         if: steps.major.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results
+          name: benchmark-publish
           path: |
             .autoclaw/evals/benchmark/
             benchmark/published/
+            reports/
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: Commit published reports
         if: >
           steps.major.outputs.run == 'true' &&
-          github.event_name != 'pull_request' &&
           (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/'))
         run: |
           git config user.name "github-actions[bot]"
@@ -160,3 +215,183 @@ jobs:
           fi
           git commit -m "chore(benchmark): publish results for ${GITHUB_SHA::7} [skip ci]"
           git push
+
+  # ---------------------------------------------------------------------------
+  # Comparative: evolve mutants, then A/B on easy suite
+  # ---------------------------------------------------------------------------
+  comparative:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Bootstrap + evolve variants
+        run: |
+          python scripts/reset.py
+          # Creates hermes_v2/v3 (and laguna mutants) needed for comparison.
+          python scripts/evolve.py --runs 40 --force
+
+      - name: Run comparative benchmark
+        run: |
+          mkdir -p reports
+          python scripts/comparative_benchmark.py \
+            --suite easy \
+            --simulate \
+            --output reports/comparative.json \
+            --variants hermes_v1,laguna_v1 hermes_v2,laguna_v1 hermes_v3,laguna_v1
+          python scripts/benchmark_dashboard.py \
+            --report comparison \
+            --output reports/comparative_dashboard.json
+          python scripts/ci_benchmark_summary.py \
+            --title "Comparative variants" \
+            --report reports/comparative.json
+
+      - name: Upload comparison results
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparative-benchmark
+          path: |
+            reports/comparative.json
+            reports/comparative_dashboard.json
+            .autoclaw/evals/benchmark/comparison.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Full suite (incl. extreme) on schedule / dispatch
+  # ---------------------------------------------------------------------------
+  full_suite:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [easy, medium, hard, extreme]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Bootstrap evolution state
+        run: python scripts/reset.py
+
+      - name: Run full suite tier
+        run: |
+          mkdir -p reports
+          python scripts/benchmark_runner.py \
+            --suite ${{ matrix.suite }} \
+            --variant hermes_v1,laguna_v1 \
+            --simulate
+          python scripts/benchmark_dashboard.py \
+            --report overall \
+            --output "reports/full_${{ matrix.suite }}.json"
+
+      - name: Upload full results
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-benchmark-${{ matrix.suite }}
+          path: reports/full_${{ matrix.suite }}.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Aggregate summary (schedule / dispatch)
+  # ---------------------------------------------------------------------------
+  summary:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [tests, comparative, full_suite]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download comparative artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: comparative-benchmark
+          path: reports/
+        continue-on-error: true
+
+      - name: Download full-suite artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: full-benchmark-*
+          merge-multiple: true
+          path: reports/
+
+      - name: Build summary markdown
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path("reports")
+          files = sorted(root.rglob("*.json"))
+          lines = ["## Weekly benchmark summary", "", f"Artifact JSON files: **{len(files)}**", ""]
+          for path in files[:40]:
+              try:
+                  data = json.loads(path.read_text(encoding="utf-8"))
+              except Exception as exc:  # noqa: BLE001
+                  lines.append(f"- `{path}`: parse error ({exc})")
+                  continue
+              overall = data.get("overall") or data.get("variants") or data
+              if isinstance(overall, dict) and "success_rate" in overall:
+                  lines.append(
+                      f"- `{path.name}`: success={overall.get('success_rate')} "
+                      f"quality={overall.get('avg_quality', overall.get('quality_score', 'n/a'))}"
+                  )
+              elif isinstance(overall, dict) and data.get("winner"):
+                  lines.append(f"- `{path.name}`: winner=`{data.get('winner')}` ranking={data.get('ranking')}")
+              else:
+                  lines.append(f"- `{path.name}`: keys={list(data)[:8]}")
+          lines.append("")
+          text = "\n".join(lines)
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary:
+              Path(summary).write_text(text, encoding="utf-8")
+          Path("reports/summary.md").write_text(text, encoding="utf-8")
+          print(text)
+          PY
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-summary
+          path: |
+            reports/summary.md
+            reports/
+          retention-days: 90
