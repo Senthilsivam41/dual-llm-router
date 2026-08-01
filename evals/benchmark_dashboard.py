@@ -1,0 +1,162 @@
+"""Generate benchmark reports and console dashboards."""
+
+from __future__ import annotations
+
+import json
+from collections import defaultdict
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Dict, List, Optional
+
+from evals.paths import AUTOCLAW_ROOT
+
+BENCHMARK_RESULTS = AUTOCLAW_ROOT / "evals" / "benchmark" / "results.json"
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+class BenchmarkDashboard:
+    """Generate benchmark reports and visualizations."""
+
+    def __init__(self, results_path: Optional[str] = None):
+        self.results_path = Path(results_path or BENCHMARK_RESULTS)
+        self.results = self._load_results()
+
+    def _load_results(self) -> List[Dict]:
+        if not self.results_path.exists():
+            return []
+        with open(self.results_path, encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return data.get("results", [])
+        return data
+
+    def generate_report(self) -> Dict:
+        if not self.results:
+            return {"error": "No results", "generated_at": _utc_now()}
+
+        by_category: Dict[str, List[Dict]] = defaultdict(list)
+        by_variant: Dict[str, List[Dict]] = defaultdict(list)
+        for r in self.results:
+            by_category[r.get("category", "unknown")].append(r)
+            combo = f"{r.get('variant_hermes', '?')}+{r.get('variant_laguna', '?')}"
+            by_variant[combo].append(r)
+
+        report = {
+            "generated_at": _utc_now(),
+            "total_runs": len(self.results),
+            "by_category": {},
+            "by_variant": {},
+            "overall": self._calculate_overall_metrics(),
+        }
+        for category, results in by_category.items():
+            report["by_category"][category] = {
+                "count": len(results),
+                "success_rate": self._calc_success_rate(results),
+                "avg_cost": self._calc_avg(results, "cost"),
+                "avg_time": self._calc_avg(results, "time_seconds"),
+                "avg_quality": self._calc_avg(results, "quality_score"),
+                "avg_iterations": self._calc_avg(results, "iterations"),
+            }
+        for combo, results in by_variant.items():
+            report["by_variant"][combo] = {
+                "count": len(results),
+                "success_rate": self._calc_success_rate(results),
+                "avg_cost": self._calc_avg(results, "cost"),
+                "avg_time": self._calc_avg(results, "time_seconds"),
+                "avg_quality": self._calc_avg(results, "quality_score"),
+            }
+        return report
+
+    def _calculate_overall_metrics(self) -> Dict:
+        if not self.results:
+            return {}
+        return {
+            "success_rate": self._calc_success_rate(self.results),
+            "avg_cost": self._calc_avg(self.results, "cost"),
+            "avg_time_seconds": self._calc_avg(self.results, "time_seconds"),
+            "avg_quality": self._calc_avg(self.results, "quality_score"),
+            "avg_iterations": self._calc_avg(self.results, "iterations"),
+            "total_cost": sum(r.get("cost", 0) or 0 for r in self.results),
+            "total_time_seconds": sum(r.get("time_seconds", 0) or 0 for r in self.results),
+        }
+
+    def _calc_success_rate(self, results: List[Dict]) -> float:
+        successful = sum(1 for r in results if r.get("status") == "success")
+        return round(successful / len(results), 4) if results else 0.0
+
+    def _calc_avg(self, results: List[Dict], field: str) -> float:
+        values = [float(r.get(field) or 0) for r in results if r.get(field) is not None]
+        return round(sum(values) / len(values), 4) if values else 0.0
+
+    def print_report(self) -> None:
+        report = self.generate_report()
+        print("\n" + "=" * 70)
+        print("BENCHMARK DASHBOARD")
+        print("=" * 70)
+        if report.get("error"):
+            print(f"\n{report['error']}")
+            print("=" * 70)
+            return
+
+        print(f"\nGenerated: {report.get('generated_at', 'N/A')}")
+        print(f"Total Runs: {report.get('total_runs', 0)}")
+
+        print("\nOVERALL METRICS:")
+        for metric, value in report.get("overall", {}).items():
+            if isinstance(value, float):
+                print(f"  {metric:20s}: {value:.4f}")
+            else:
+                print(f"  {metric:20s}: {value}")
+
+        print("\nBY CATEGORY:")
+        for category, metrics in report.get("by_category", {}).items():
+            print(f"\n  {category.upper()}:")
+            for metric, value in metrics.items():
+                if isinstance(value, float):
+                    print(f"    {metric:20s}: {value:.4f}")
+                else:
+                    print(f"    {metric:20s}: {value}")
+
+        print("\nBY VARIANT COMBO:")
+        for combo, metrics in report.get("by_variant", {}).items():
+            print(f"\n  {combo}:")
+            for metric, value in metrics.items():
+                if isinstance(value, float):
+                    print(f"    {metric:20s}: {value:.4f}")
+                else:
+                    print(f"    {metric:20s}: {value}")
+        print("\n" + "=" * 70)
+
+    def generate_comparison_report(self, results_path_1: str, results_path_2: str) -> Dict:
+        dashboard_1 = BenchmarkDashboard(results_path_1)
+        dashboard_2 = BenchmarkDashboard(results_path_2)
+        report_1 = dashboard_1.generate_report()
+        report_2 = dashboard_2.generate_report()
+
+        comparison = {}
+        for metric in ("success_rate", "avg_cost", "avg_time_seconds", "avg_quality"):
+            if metric in report_1.get("overall", {}) and metric in report_2.get("overall", {}):
+                val_1 = report_1["overall"][metric]
+                val_2 = report_2["overall"][metric]
+                if metric in ("avg_cost", "avg_time_seconds"):
+                    improvement = ((val_1 - val_2) / val_1 * 100) if val_1 else 0
+                else:
+                    improvement = ((val_2 - val_1) / val_1 * 100) if val_1 else 0
+                comparison[metric] = {
+                    "before": val_1,
+                    "after": val_2,
+                    "improvement": round(improvement, 2),
+                    "direction": "improved" if improvement > 0 else "degraded",
+                }
+        return comparison
+
+    def save_report(self, path: Optional[Path] = None) -> Path:
+        out = Path(path or self.results_path.parent / "report.json")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(self.generate_report(), f, indent=2)
+            f.write("\n")
+        return out
