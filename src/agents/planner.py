@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Optional, Tuple
 from ..config import config
 from ..schemas.task_spec import TaskSpec
 from ..utils.metrics import MetricsLogger
@@ -26,8 +26,13 @@ Do not include markdown code block syntax inside the JSON string itself. Respond
 """
 
 class PlannerAgent:
-    def __init__(self, model_name: str = config.planner_model):
+    def __init__(
+        self,
+        model_name: str = config.planner_model,
+        system_prompt: Optional[str] = None,
+    ):
         self.model_name = model_name
+        self.system_prompt = system_prompt or PLANNER_SYSTEM_PROMPT
 
     def plan(self, user_prompt: str, metrics_logger: MetricsLogger = None) -> Tuple[TaskSpec, Dict[str, Any]]:
         start_time = time.time()
@@ -45,7 +50,7 @@ class PlannerAgent:
             prompt_tokens, completion_tokens = 50, 50
         else:
             messages = [
-                {"role": "system", "content": PLANNER_SYSTEM_PROMPT},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": user_prompt},
             ]
             response = completion(
