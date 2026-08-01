@@ -3,6 +3,7 @@
 TASK = {
     "id": "medium_test_coverage",
     "category": "medium",
+    "domain": "testing",
     "spec": (
         "Given `string_utils.py` with `slugify` and `truncate`, write thorough pytest tests in "
         "`test_string_utils.py` covering unicode, empty strings, and boundary lengths. "

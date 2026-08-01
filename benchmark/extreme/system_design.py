@@ -3,6 +3,7 @@
 TASK = {
     "id": "extreme_system_design",
     "category": "extreme",
+    "domain": "architecture",
     "spec": (
         "Design and implement a local job queue with enqueue/dequeue, retries with backoff, "
         "dead-letter handling, and a small CLI. Persist jobs to disk so a process restart recovers "

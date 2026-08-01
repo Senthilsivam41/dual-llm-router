@@ -3,6 +3,7 @@
 TASK = {
     "id": "easy_simple_function",
     "category": "easy",
+    "domain": "basic",
     "spec": (
         "Create a Python module `math_ops.py` with a function `factorial(n: int) -> int` "
         "that returns n!. Handle n=0 and n=1 as 1, and raise ValueError for negative n. "

@@ -39,6 +39,7 @@ class BenchmarkTask:
     complexity_score: float
     expected_cost: float
     expected_time: float
+    domain: str = "general"
     seed_code: Optional[str] = None
     expected_code: Optional[str] = None
     tags: List[str] = field(default_factory=list)
@@ -52,6 +53,9 @@ class BenchmarkTask:
         known = {f.name for f in cls.__dataclass_fields__.values()}  # type: ignore[attr-defined]
         payload = {k: v for k, v in data.items() if k in known}
         payload.setdefault("tags", [])
+        if not payload.get("domain"):
+            tags = payload.get("tags") or []
+            payload["domain"] = tags[0] if tags else "general"
         return cls(**payload)
 
 
@@ -71,10 +75,14 @@ class BenchmarkResult:
     quality_score: float
     acceptance_criteria_passed: bool
     acceptance_criteria_details: Dict[str, bool]
+    domain: str = "general"
     failure_reason: Optional[str] = None
     code_diff: Optional[str] = None
+    code_quality: Optional[Dict[str, Any]] = None
     timestamp: Optional[str] = None
     expected_cost: float = 0.0
+    planning_failed: bool = False
+    handoff_failed: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -159,6 +167,17 @@ class BenchmarkRunner:
         if status == "success" and not acceptance_passed:
             status = "partial"
 
+        planning_failed = bool(
+            result.get("planning_failed")
+            or status in ("planning_failed", "rejected_spec")
+            or (result.get("failure_reason") or "").startswith("planning_")
+        )
+        handoff_failed = bool(
+            result.get("handoff_failed")
+            or status == "handoff_failed"
+            or (result.get("failure_reason") or "").startswith("handoff_")
+        )
+
         benchmark_result = BenchmarkResult(
             task_id=task.id,
             category=task.category,
@@ -172,10 +191,14 @@ class BenchmarkRunner:
             quality_score=quality_score,
             acceptance_criteria_passed=acceptance_passed,
             acceptance_criteria_details=details,
+            domain=task.domain,
             failure_reason=result.get("failure_reason"),
             code_diff=result.get("code_diff"),
+            code_quality=result.get("code_quality"),
             timestamp=_utc_now(),
             expected_cost=task.expected_cost,
+            planning_failed=planning_failed,
+            handoff_failed=handoff_failed,
         )
         self.results.append(benchmark_result)
 
@@ -191,7 +214,7 @@ class BenchmarkRunner:
                 "task": {
                     "spec_id": task.id,
                     "complexity": task.category,
-                    "domain": ",".join(task.tags),
+                    "domain": task.domain,
                     "expected_cost": task.expected_cost,
                 },
                 "result": {
@@ -288,6 +311,14 @@ class BenchmarkRunner:
             details.setdefault(criterion, bool(report.get("criteria_passed")))
 
         status = pipeline.get("status", "failure")
+        task_spec = pipeline.get("task_spec")
+        planning_failed = status in ("planning_failed", "rejected_spec") or not task_spec
+        handoff_failed = (
+            not planning_failed
+            and status not in ("completed", "success")
+            and bool(task_spec)
+            and not bool(executor.get("success"))
+        )
         return {
             "status": status,
             "iterations": 1,
@@ -300,11 +331,17 @@ class BenchmarkRunner:
             "failure_reason": pipeline.get("error"),
             "acceptance_criteria_details": details,
             "workspace": str(work),
-            "task_spec": pipeline.get("task_spec"),
+            "task_spec": task_spec,
             "syntax_valid": True,
             "tests_pass": bool(executor.get("success")),
             "imports_valid": True,
             "no_errors": status in ("completed", "success"),
+            "planning_failed": planning_failed and status not in ("completed", "success"),
+            "handoff_failed": handoff_failed,
+            "code_quality": {
+                "syntax_valid": True,
+                "tests_pass": bool(executor.get("success")),
+            },
         }
 
     def _simulate_execution(self, task: BenchmarkTask) -> Dict[str, Any]:
@@ -316,17 +353,29 @@ class BenchmarkRunner:
         # Leave one criterion failing on partial-ish hard tasks.
         if not success and task.acceptance_criteria:
             details[task.acceptance_criteria[0]] = False
+        # Deterministic failure-mode split for system metrics.
+        planning_failed = (not success) and seed % 3 == 0
+        handoff_failed = (not success) and not planning_failed and seed % 3 == 1
         return {
             "status": "success" if success else "failure",
             "iterations": 1 + int(task.complexity_score * 3),
             "executor_calls": 1 + int(task.complexity_score * 4),
             "cost": round(task.expected_cost * (0.8 if success else 1.2), 4),
-            "failure_reason": None if success else "simulated_failure",
+            "failure_reason": None
+            if success
+            else ("planning_simulated" if planning_failed else "simulated_failure"),
             "acceptance_criteria_details": details,
             "syntax_valid": True,
             "tests_pass": success,
             "imports_valid": True,
             "no_errors": success,
+            "planning_failed": planning_failed,
+            "handoff_failed": handoff_failed,
+            "code_quality": {
+                "syntax_valid": True,
+                "tests_pass": success,
+                "complexity_score": task.complexity_score,
+            },
         }
 
     def _calculate_quality_score(self, task: BenchmarkTask, result: Dict[str, Any]) -> float:

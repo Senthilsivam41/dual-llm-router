@@ -3,6 +3,7 @@
 TASK = {
     "id": "easy_simple_fix",
     "category": "easy",
+    "domain": "debugging",
     "spec": (
         "Fix the off-by-one bug in `greeter.py` so `greet_many(names)` joins names with "
         "commas correctly (no trailing comma). Keep `test_greeter.py` green."

@@ -128,10 +128,20 @@ def render_markdown(
         "| --- | --- | --- |",
         f"| Success rate | {float(overall.get('success_rate', 0)):.4f} | >0.90 |",
         f"| Avg cost (USD) | {float(overall.get('avg_cost', 0)):.4f} | decreasing |",
+        f"| Cost efficiency (actual/expected) | {float(overall.get('cost_efficiency', 0)):.4f} | <1.0 |",
         f"| Avg time (s) | {float(overall.get('avg_time_seconds', 0)):.4f} | <60 |",
         f"| Avg quality | {float(overall.get('avg_quality', 0)):.4f} | >0.80 |",
         f"| Avg iterations | {float(overall.get('avg_iterations', 0)):.4f} | <5 |",
         f"| Total cost | {float(overall.get('total_cost', 0)):.4f} | — |",
+        f"| Throughput (tasks/hr) | {float(overall.get('throughput_tasks_per_hour', 0)):.4f} | higher |",
+        "",
+        "## System metrics",
+        "",
+        "| Metric | Value | Target |",
+        "| --- | --- | --- |",
+        f"| Spec rejection rate | {float(overall.get('spec_rejection_rate', 0)):.4f} | <0.20 |",
+        f"| Spec acceptance rate | {float(overall.get('spec_acceptance_rate', 0)):.4f} | >0.80 |",
+        f"| Handoff failure rate | {float(overall.get('handoff_failure_rate', 0)):.4f} | <0.15 |",
         "",
         "## By category",
         "",
@@ -168,16 +178,34 @@ def render_markdown(
     lines.extend(
         [
             "",
+            "## By domain",
+            "",
+            "| Domain | Count | Success | Avg cost | Avg quality |",
+            "| --- | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for domain, metrics in sorted((report.get("by_domain") or {}).items()):
+        lines.append(
+            f"| {domain} | {metrics.get('count', 0)} | "
+            f"{float(metrics.get('success_rate', 0)):.4f} | "
+            f"{float(metrics.get('avg_cost', 0)):.4f} | "
+            f"{float(metrics.get('avg_quality', 0)):.4f} |"
+        )
+
+    lines.extend(
+        [
+            "",
             "## Per-task results",
             "",
-            "| Task | Category | Status | Quality | Cost | Time (s) | Hermes | Laguna |",
-            "| --- | --- | --- | ---: | ---: | ---: | --- | --- |",
+            "| Task | Category | Domain | Status | Quality | Cost | Time (s) | Hermes | Laguna |",
+            "| --- | --- | --- | --- | ---: | ---: | ---: | --- | --- |",
         ]
     )
     for row in results:
         lines.append(
             f"| `{row.get('task_id', '')}` | {row.get('category', '')} | "
-            f"{row.get('status', '')} | {float(row.get('quality_score') or 0):.4f} | "
+            f"{row.get('domain', 'general')} | {row.get('status', '')} | "
+            f"{float(row.get('quality_score') or 0):.4f} | "
             f"{float(row.get('cost') or 0):.4f} | {float(row.get('time_seconds') or 0):.3f} | "
             f"`{row.get('variant_hermes', '')}` | `{row.get('variant_laguna', '')}` |"
         )

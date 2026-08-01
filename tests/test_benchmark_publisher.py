@@ -87,4 +87,7 @@ def test_publish_writes_timestamped_markdown(tmp_path: Path):
     assert (published / "index.json").exists()
     body = out.read_text(encoding="utf-8")
     assert "Overall metrics" in body
-    assert "easy_simple_function" in body or "easy_simple_class" in body
+    assert "System metrics" in body
+    assert "Spec rejection rate" in body
+    assert "By domain" in body
+    assert "easy_simple_function" in body or "easy_basic_function" in body

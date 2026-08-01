@@ -11,8 +11,10 @@ benchmark/
 ├── tasks_loader.py
 ├── minimal_setup.sh
 ├── full_benchmark.sh
-└── *.md        # metric definitions
+└── *.md        # metric definitions + publishing guide
 ```
+
+Full metrics & publishing guide: [`benchmark_publishing_results.md`](benchmark_publishing_results.md).
 
 ## Quick start
 

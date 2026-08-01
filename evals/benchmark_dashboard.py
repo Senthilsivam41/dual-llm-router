@@ -39,16 +39,19 @@ class BenchmarkDashboard:
 
         by_category: Dict[str, List[Dict]] = defaultdict(list)
         by_variant: Dict[str, List[Dict]] = defaultdict(list)
+        by_domain: Dict[str, List[Dict]] = defaultdict(list)
         for r in self.results:
             by_category[r.get("category", "unknown")].append(r)
             combo = f"{r.get('variant_hermes', '?')}+{r.get('variant_laguna', '?')}"
             by_variant[combo].append(r)
+            by_domain[r.get("domain") or "general"].append(r)
 
         report = {
             "generated_at": _utc_now(),
             "total_runs": len(self.results),
             "by_category": {},
             "by_variant": {},
+            "by_domain": {},
             "overall": self._calculate_overall_metrics(),
         }
         for category, results in by_category.items():
@@ -68,11 +71,36 @@ class BenchmarkDashboard:
                 "avg_time": self._calc_avg(results, "time_seconds"),
                 "avg_quality": self._calc_avg(results, "quality_score"),
             }
+        for domain, results in by_domain.items():
+            report["by_domain"][domain] = {
+                "count": len(results),
+                "success_rate": self._calc_success_rate(results),
+                "avg_cost": self._calc_avg(results, "cost"),
+                "avg_quality": self._calc_avg(results, "quality_score"),
+            }
         return report
 
     def _calculate_overall_metrics(self) -> Dict:
         if not self.results:
             return {}
+        total_time = sum(r.get("time_seconds", 0) or 0 for r in self.results)
+        expected_costs = [
+            float(r.get("expected_cost") or 0)
+            for r in self.results
+            if (r.get("expected_cost") or 0) > 0
+        ]
+        actual_costs = [
+            float(r.get("cost") or 0)
+            for r in self.results
+            if (r.get("expected_cost") or 0) > 0
+        ]
+        cost_efficiency = 0.0
+        if expected_costs and sum(actual_costs) > 0:
+            # Lower is better: actual / expected (<1 means under budget).
+            cost_efficiency = round(sum(actual_costs) / sum(expected_costs), 4)
+        planning_failed = sum(1 for r in self.results if r.get("planning_failed"))
+        handoff_failed = sum(1 for r in self.results if r.get("handoff_failed"))
+        n = len(self.results)
         return {
             "success_rate": self._calc_success_rate(self.results),
             "avg_cost": self._calc_avg(self.results, "cost"),
@@ -80,7 +108,14 @@ class BenchmarkDashboard:
             "avg_quality": self._calc_avg(self.results, "quality_score"),
             "avg_iterations": self._calc_avg(self.results, "iterations"),
             "total_cost": sum(r.get("cost", 0) or 0 for r in self.results),
-            "total_time_seconds": sum(r.get("time_seconds", 0) or 0 for r in self.results),
+            "total_time_seconds": total_time,
+            "cost_efficiency": cost_efficiency,
+            "spec_rejection_rate": round(planning_failed / n, 4) if n else 0.0,
+            "handoff_failure_rate": round(handoff_failed / n, 4) if n else 0.0,
+            "spec_acceptance_rate": round(1 - (planning_failed / n), 4) if n else 0.0,
+            "throughput_tasks_per_hour": round(n / (total_time / 3600), 4)
+            if total_time > 0
+            else 0.0,
         }
 
     def _calc_success_rate(self, results: List[Dict]) -> float:
@@ -123,6 +158,15 @@ class BenchmarkDashboard:
         print("\nBY VARIANT COMBO:")
         for combo, metrics in report.get("by_variant", {}).items():
             print(f"\n  {combo}:")
+            for metric, value in metrics.items():
+                if isinstance(value, float):
+                    print(f"    {metric:20s}: {value:.4f}")
+                else:
+                    print(f"    {metric:20s}: {value}")
+
+        print("\nBY DOMAIN:")
+        for domain, metrics in report.get("by_domain", {}).items():
+            print(f"\n  {domain}:")
             for metric, value in metrics.items():
                 if isinstance(value, float):
                     print(f"    {metric:20s}: {value:.4f}")

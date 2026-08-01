@@ -3,6 +3,7 @@
 TASK = {
     "id": "easy_simple_refactor",
     "category": "easy",
+    "domain": "refactor",
     "spec": (
         "Refactor the duplicated add logic in `legacy_calc.py` into a shared helper "
         "`add(a, b)` in `calc_utils.py`, update call sites, and keep behavior identical. "

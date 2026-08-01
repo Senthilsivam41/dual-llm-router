@@ -3,6 +3,7 @@
 TASK = {
     "id": "hard_performance_optimization",
     "category": "hard",
+    "domain": "performance",
     "spec": (
         "Optimize `slow_search.py` naive substring search over a large corpus. Provide a faster "
         "implementation (e.g. Aho-Corasick / rolling hash / index) with the same public API and "

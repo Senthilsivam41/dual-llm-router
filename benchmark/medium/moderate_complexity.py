@@ -3,6 +3,7 @@
 TASK = {
     "id": "medium_moderate_complexity",
     "category": "medium",
+    "domain": "backend",
     "spec": (
         "Implement `scheduler.py` with `merge_intervals(intervals)` that merges overlapping "
         "[start, end] intervals and returns them sorted. Cover adjacent, nested, and empty cases "
