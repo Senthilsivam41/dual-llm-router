@@ -193,10 +193,25 @@ Evolution triggers every `check_interval_runs` (default **50**). Challengers are
 
 ---
 
+## Benchmarks
+
+Difficulty-tiered tasks live under `benchmark/{easy,medium,hard,extreme}/`.
+
+```bash
+./benchmark/minimal_setup.sh
+python scripts/benchmark_runner.py --suite easy --simulate --list
+python scripts/benchmark_runner.py --suite all --variant hermes_v1,laguna_v1 --simulate
+python scripts/benchmark_dashboard.py --report overall
+python scripts/comparative_benchmark.py --variants hermes_v1,laguna_v1 --suite easy --simulate
+```
+
+Metrics definitions: [`benchmark/Key_Metrics_Summary.md`](benchmark/Key_Metrics_Summary.md)  
+Suite details: [`benchmark/README.md`](benchmark/README.md)
+
 ## Testing
 
 ```bash
-pytest tests/test_scoring.py tests/test_mutation.py tests/test_ab_test.py tests/test_evolution.py -q
+pytest tests/test_scoring.py tests/test_mutation.py tests/test_ab_test.py tests/test_evolution.py tests/test_benchmark.py -q
 pytest tests/test_end_to_end.py tests/test_p0_security.py -q
 ```
 

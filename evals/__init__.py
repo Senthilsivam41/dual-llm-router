@@ -2,6 +2,9 @@
 
 from .ab_test import ABTestManager
 from .alerts import detect_significant_improvement, emit_alerts
+from .benchmark_dashboard import BenchmarkDashboard
+from .benchmark_runner import BenchmarkRunner, BenchmarkResult, BenchmarkTask
+from .comparative_benchmark import ComparativeBenchmark, compare_results
 from .evolution_engine import EvolutionEngine
 from .mutation import (
     HERMES_MUTATION_OPERATORS,
@@ -12,11 +15,17 @@ from .scoring import calculate_fitness, get_top_variants, load_run_results, save
 
 __all__ = [
     "ABTestManager",
+    "BenchmarkDashboard",
+    "BenchmarkResult",
+    "BenchmarkRunner",
+    "BenchmarkTask",
+    "ComparativeBenchmark",
     "EvolutionEngine",
     "HERMES_MUTATION_OPERATORS",
     "LAGUNA_MUTATION_OPERATORS",
     "apply_prompt_mutation",
     "calculate_fitness",
+    "compare_results",
     "detect_significant_improvement",
     "emit_alerts",
     "get_top_variants",
