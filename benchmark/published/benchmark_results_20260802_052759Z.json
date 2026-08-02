@@ -1,0 +1,141 @@
+{
+  "timestamp": "20260802_052759Z",
+  "meta": {
+    "commit": "3fa303b",
+    "branch": "main",
+    "subject": "chore(benchmark): publish results for 3359211 [skip ci]"
+  },
+  "suite": "all",
+  "variant": "hermes_v1,laguna_v1",
+  "simulate": true,
+  "trigger": "schedule",
+  "report": {
+    "generated_at": "2026-08-02T05:27:59.464453Z",
+    "total_runs": 20,
+    "by_category": {
+      "easy": {
+        "count": 6,
+        "success_rate": 0.8333,
+        "avg_cost": 0.0407,
+        "avg_time": 0.0,
+        "avg_quality": 0.875,
+        "avg_iterations": 1.0
+      },
+      "medium": {
+        "count": 6,
+        "success_rate": 0.3333,
+        "avg_cost": 0.216,
+        "avg_time": 0.0,
+        "avg_quality": 0.5,
+        "avg_iterations": 2.0
+      },
+      "hard": {
+        "count": 4,
+        "success_rate": 0.25,
+        "avg_cost": 0.59,
+        "avg_time": 0.0,
+        "avg_quality": 0.4375,
+        "avg_iterations": 3.0
+      },
+      "extreme": {
+        "count": 4,
+        "success_rate": 0.0,
+        "avg_cost": 1.32,
+        "avg_time": 0.0,
+        "avg_quality": 0.25,
+        "avg_iterations": 3.0
+      }
+    },
+    "by_variant": {
+      "hermes_v1+laguna_v1": {
+        "count": 20,
+        "success_rate": 0.4,
+        "avg_cost": 0.459,
+        "avg_time": 0.0,
+        "avg_quality": 0.55
+      }
+    },
+    "by_domain": {
+      "basic": {
+        "count": 3,
+        "success_rate": 0.6667,
+        "avg_cost": 0.0307,
+        "avg_quality": 0.75
+      },
+      "oop": {
+        "count": 2,
+        "success_rate": 0.5,
+        "avg_cost": 0.114,
+        "avg_quality": 0.625
+      },
+      "debugging": {
+        "count": 3,
+        "success_rate": 0.3333,
+        "avg_cost": 0.2933,
+        "avg_quality": 0.5
+      },
+      "refactor": {
+        "count": 1,
+        "success_rate": 1.0,
+        "avg_cost": 0.064,
+        "avg_quality": 1.0
+      },
+      "backend": {
+        "count": 3,
+        "success_rate": 0.3333,
+        "avg_cost": 0.252,
+        "avg_quality": 0.5
+      },
+      "testing": {
+        "count": 1,
+        "success_rate": 1.0,
+        "avg_cost": 0.12,
+        "avg_quality": 1.0
+      },
+      "architecture": {
+        "count": 2,
+        "success_rate": 0.5,
+        "avg_cost": 1.0,
+        "avg_quality": 0.625
+      },
+      "feature": {
+        "count": 1,
+        "success_rate": 0.0,
+        "avg_cost": 0.54,
+        "avg_quality": 0.25
+      },
+      "performance": {
+        "count": 2,
+        "success_rate": 0.0,
+        "avg_cost": 0.87,
+        "avg_quality": 0.25
+      },
+      "systems": {
+        "count": 1,
+        "success_rate": 0.0,
+        "avg_cost": 1.56,
+        "avg_quality": 0.25
+      },
+      "security": {
+        "count": 1,
+        "success_rate": 0.0,
+        "avg_cost": 1.2,
+        "avg_quality": 0.25
+      }
+    },
+    "overall": {
+      "success_rate": 0.4,
+      "avg_cost": 0.459,
+      "avg_time_seconds": 0.0,
+      "avg_quality": 0.55,
+      "avg_iterations": 2.1,
+      "total_cost": 9.180000000000001,
+      "total_time_seconds": 0,
+      "cost_efficiency": 1.1305,
+      "spec_rejection_rate": 0.3,
+      "handoff_failure_rate": 0.25,
+      "spec_acceptance_rate": 0.7,
+      "throughput_tasks_per_hour": 0.0
+    }
+  }
+}
