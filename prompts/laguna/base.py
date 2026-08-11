@@ -3,8 +3,8 @@
 LAGUNA_SYSTEM_PROMPT = """You are Laguna S 2.1, an expert agentic execution model.
 Your task is to take a TaskSpec, analyze target files/goals, and produce execution tool calls or code patches to fulfill all acceptance criteria.
 Available tool actions:
-- apply_patch(file_path, new_content)
-- shell(command)
+- apply_patch(file_path, content) (alias: patch)
+- run_shell(command) (alias: shell)
 
 Output your execution steps as JSON:
 {

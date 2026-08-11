@@ -10,29 +10,12 @@ class ActionType(str, Enum):
     RUN_SHELL = "run_shell"
     PATCH = "patch"
     APPLY_PATCH = "apply_patch"
-    READ = "read"
-    WRITE = "write"
-    LIST = "list"
-    GLOB = "glob"
-    GREP = "grep"
-    TASK = "task"
 
 
 class ShellAction(BaseModel):
     type: str = Field(default=ActionType.SHELL, pattern=f"^({ActionType.SHELL.value}|{ActionType.RUN_SHELL.value})$")
     command: str = Field(min_length=1, max_length=10000)
-    cwd: Optional[str] = None
     timeout: Optional[int] = Field(default=120, ge=1, le=300)
-
-    @field_validator("cwd")
-    @classmethod
-    def validate_cwd(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            if os.path.isabs(v):
-                raise ValueError("cwd must be relative path")
-            if ".." in Path(v).parts:
-                raise ValueError("cwd cannot contain parent directory references")
-        return v
 
 
 class PatchAction(BaseModel):
@@ -62,101 +45,7 @@ class PatchAction(BaseModel):
             self.patch = self.content
 
 
-class ReadAction(BaseModel):
-    type: str = Field(default=ActionType.READ, pattern=f"^{ActionType.READ.value}$")
-    file_path: str = Field(min_length=1)
-    offset: Optional[int] = Field(default=None, ge=0)
-    limit: Optional[int] = Field(default=None, ge=1, le=10000)
-
-    @field_validator("file_path")
-    @classmethod
-    def validate_file_path(cls, v: str) -> str:
-        if os.path.isabs(v):
-            raise ValueError("file_path must be relative path")
-        if ".." in Path(v).parts:
-            raise ValueError("file_path cannot contain parent directory references")
-        return v
-
-
-class WriteAction(BaseModel):
-    type: str = Field(default=ActionType.WRITE, pattern=f"^{ActionType.WRITE.value}$")
-    file_path: str = Field(min_length=1)
-    content: str
-
-    @field_validator("file_path")
-    @classmethod
-    def validate_file_path(cls, v: str) -> str:
-        if os.path.isabs(v):
-            raise ValueError("file_path must be relative path")
-        if ".." in Path(v).parts:
-            raise ValueError("file_path cannot contain parent directory references")
-        return v
-
-
-class ListAction(BaseModel):
-    type: str = Field(default=ActionType.LIST, pattern=f"^{ActionType.LIST.value}$")
-    path: str = Field(default=".")
-    recursive: bool = False
-
-    @field_validator("path")
-    @classmethod
-    def validate_path(cls, v: str) -> str:
-        if os.path.isabs(v):
-            raise ValueError("path must be relative path")
-        if ".." in Path(v).parts:
-            raise ValueError("path cannot contain parent directory references")
-        return v
-
-
-class GlobAction(BaseModel):
-    type: str = Field(default=ActionType.GLOB, pattern=f"^{ActionType.GLOB.value}$")
-    pattern: str = Field(min_length=1)
-    path: Optional[str] = None
-
-    @field_validator("path")
-    @classmethod
-    def validate_path(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            if os.path.isabs(v):
-                raise ValueError("path must be relative path")
-            if ".." in Path(v).parts:
-                raise ValueError("path cannot contain parent directory references")
-        return v
-
-
-class GrepAction(BaseModel):
-    type: str = Field(default=ActionType.GREP, pattern=f"^{ActionType.GREP.value}$")
-    pattern: str = Field(min_length=1)
-    path: Optional[str] = None
-    include: Optional[str] = None
-
-    @field_validator("path")
-    @classmethod
-    def validate_path(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            if os.path.isabs(v):
-                raise ValueError("path must be relative path")
-            if ".." in Path(v).parts:
-                raise ValueError("path cannot contain parent directory references")
-        return v
-
-
-class TaskAction(BaseModel):
-    type: str = Field(default=ActionType.TASK, pattern=f"^{ActionType.TASK.value}$")
-    description: str = Field(min_length=1, max_length=500)
-    prompt: str = Field(min_length=1, max_length=10000)
-
-
-ActionModel = Union[
-    ShellAction,
-    PatchAction,
-    ReadAction,
-    WriteAction,
-    ListAction,
-    GlobAction,
-    GrepAction,
-    TaskAction,
-]
+ActionModel = Union[ShellAction, PatchAction]
 
 
 def validate_action(action: Dict[str, Any]) -> ActionModel:
@@ -167,19 +56,13 @@ def validate_action(action: Dict[str, Any]) -> ActionModel:
     try:
         action_enum = ActionType(action_type)
     except ValueError:
-        raise ValueError(f"Unknown action type: {action_type}")
+        raise ValueError(f"Unsupported action type: {action_type}")
 
     model_map = {
         ActionType.SHELL: ShellAction,
         ActionType.RUN_SHELL: ShellAction,
         ActionType.PATCH: PatchAction,
         ActionType.APPLY_PATCH: PatchAction,
-        ActionType.READ: ReadAction,
-        ActionType.WRITE: WriteAction,
-        ActionType.LIST: ListAction,
-        ActionType.GLOB: GlobAction,
-        ActionType.GREP: GrepAction,
-        ActionType.TASK: TaskAction,
     }
 
     model = model_map.get(action_enum)

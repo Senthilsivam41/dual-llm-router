@@ -131,6 +131,34 @@ def test_executor_dispatches_a_valid_shell_action(tmp_path):
     assert result["tool_results"][0]["result"]["success"] is True
 
 
+def test_executor_dispatches_run_shell_alias(tmp_path):
+    response = completion_response(
+        {"actions": [{"type": "run_shell", "command": "touch alias-marker.txt"}]}
+    )
+
+    with patch("src.agents.executor.completion", Mock(return_value=response)):
+        result = ExecutorAgent(workspace_root=str(tmp_path)).execute(task_spec())
+
+    assert result["success"] is True
+    assert (tmp_path / "alias-marker.txt").exists()
+
+
+def test_executor_dispatches_patch_alias(tmp_path):
+    response = completion_response(
+        {
+            "actions": [
+                {"type": "patch", "file_path": "alias.txt", "content": "written"}
+            ]
+        }
+    )
+
+    with patch("src.agents.executor.completion", Mock(return_value=response)):
+        result = ExecutorAgent(workspace_root=str(tmp_path)).execute(task_spec())
+
+    assert result["success"] is True
+    assert (tmp_path / "alias.txt").read_text(encoding="utf-8") == "written"
+
+
 def test_executor_fails_closed_for_valid_but_unimplemented_action(tmp_path):
     response = completion_response(
         {"actions": [{"type": "read", "file_path": "source.txt"}]}

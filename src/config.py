@@ -12,5 +12,7 @@ class Config:
     executor_model: str = os.getenv("EXECUTOR_MODEL", "openrouter/poolside/laguna-s-2.1")
     max_tokens: int = int(os.getenv("MAX_TOKENS", "4096"))
     temperature: float = float(os.getenv("TEMPERATURE", "0.2"))
+    provider_timeout_seconds: float = float(os.getenv("PROVIDER_TIMEOUT_SECONDS", "120"))
+    provider_max_retries: int = int(os.getenv("PROVIDER_MAX_RETRIES", "2"))
 
 config = Config()

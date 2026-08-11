@@ -69,6 +69,7 @@ class EvolvingRouter(DualLLMRouter):
         *,
         execute_tools: bool = True,
         task: Optional[Dict[str, Any]] = None,
+        max_iterations: int = 1,
     ) -> Dict[str, Any]:
         """Route a task with evolution awareness and run logging."""
         if self.evolution_engine.should_evolve():
@@ -83,7 +84,11 @@ class EvolvingRouter(DualLLMRouter):
         self.planner.system_prompt = hermes_prompt.text or self.planner.system_prompt
         self.executor.system_prompt = laguna_prompt.text or self.executor.system_prompt
 
-        pipeline = super().run(user_prompt, execute_tools=execute_tools)
+        pipeline = super().run(
+            user_prompt,
+            execute_tools=execute_tools,
+            max_iterations=max_iterations,
+        )
 
         metrics = pipeline.get("metrics") or {}
         executor_result = pipeline.get("executor_result") or {}
@@ -107,7 +112,7 @@ class EvolvingRouter(DualLLMRouter):
                     "status": status,
                     "cost": float(metrics.get("total_cost_usd") or 0.0),
                     "time_seconds": float(metrics.get("total_latency_seconds") or 0.0),
-                    "iterations": 1,
+                    "iterations": int(pipeline.get("iterations") or 1),
                     "executor_calls": sum(
                         1
                         for m in metrics.get("breakdown") or []
@@ -140,4 +145,8 @@ class EvolvingRouter(DualLLMRouter):
         execute_tools: bool = True,
         max_iterations: int = 1,
     ) -> Dict[str, Any]:
-        return self.route_task(user_prompt, execute_tools=execute_tools)
+        return self.route_task(
+            user_prompt,
+            execute_tools=execute_tools,
+            max_iterations=max_iterations,
+        )
