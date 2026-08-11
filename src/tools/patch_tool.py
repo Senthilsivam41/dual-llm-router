@@ -1,57 +1,77 @@
 import os
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 
-def _is_within_workspace(target_path: str, workspace_root: str) -> bool:
-    """Check if target_path is within workspace_root using resolved paths.
-    
-    Uses Path.resolve() to handle symlinks and os.path.commonpath for
-    proper containment checking. Rejects any path that escapes via symlinks.
-    """
-    try:
-        resolved_target = Path(target_path).resolve()
-        resolved_root = Path(workspace_root).resolve()
-        
-        common = os.path.commonpath([str(resolved_target), str(resolved_root)])
-        return common == str(resolved_root)
-    except Exception:
-        return False
+def _secure_open_flags() -> int | None:
+    if (
+        os.open not in os.supports_dir_fd
+        or os.mkdir not in os.supports_dir_fd
+        or not hasattr(os, "O_DIRECTORY")
+        or not hasattr(os, "O_NOFOLLOW")
+    ):
+        return None
+    return os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 
 
-def apply_patch(file_path: str, new_content: str, workspace_root: str = ".") -> Dict[str, Any]:
-    """Applies patch or writes updated content to target file safely within workspace.
-    
-    Security features:
-    - Uses resolved paths (Path.resolve()) to defeat symlink attacks
-    - Uses os.path.commonpath for proper containment (not string prefix)
-    - Rejects absolute paths and parent directory traversal
-    - Validates workspace_root itself is contained
-    """
-    abs_root = os.path.abspath(workspace_root)
-    
+def apply_patch(
+    file_path: str,
+    new_content: str,
+    workspace_root: str = ".",
+) -> Dict[str, Any]:
+    """Write a file through pinned directory descriptors without following symlinks."""
     if os.path.isabs(file_path):
         return {"success": False, "error": f"Absolute paths not allowed: '{file_path}'"}
-    
-    if ".." in Path(file_path).parts:
-        return {"success": False, "error": f"Parent directory traversal not allowed: '{file_path}'"}
-    
-    target_path = os.path.abspath(os.path.join(abs_root, file_path))
-    
-    if not _is_within_workspace(target_path, abs_root):
-        return {"success": False, "error": f"Path '{file_path}' escapes workspace (symlink or traversal detected)"}
-    
-    if not _is_within_workspace(abs_root, abs_root):
-        return {"success": False, "error": "Workspace root validation failed"}
 
+    relative_path = Path(file_path)
+    if ".." in relative_path.parts:
+        return {
+            "success": False,
+            "error": f"Parent directory traversal not allowed: '{file_path}'",
+        }
+    parts = [part for part in relative_path.parts if part not in ("", ".")]
+    if not parts:
+        return {"success": False, "error": "file_path must name a file"}
+
+    directory_flags = _secure_open_flags()
+    if directory_flags is None:
+        return {
+            "success": False,
+            "error": "Secure descriptor-relative writes are unsupported on this platform",
+        }
+
+    workspace = Path(workspace_root).resolve()
+    directory_fds = []
+    file_fd = None
     try:
-        parent_dir = os.path.dirname(target_path)
-        if parent_dir and not _is_within_workspace(parent_dir, abs_root):
-            return {"success": False, "error": f"Parent directory escapes workspace"}
-        
-        os.makedirs(parent_dir, exist_ok=True)
-        with open(target_path, "w", encoding="utf-8") as f:
+        root_fd = os.open(workspace, directory_flags)
+        directory_fds.append(root_fd)
+        parent_fd = root_fd
+
+        for component in parts[:-1]:
+            try:
+                os.mkdir(component, mode=0o777, dir_fd=parent_fd)
+            except FileExistsError:
+                pass
+            parent_fd = os.open(component, directory_flags, dir_fd=parent_fd)
+            directory_fds.append(parent_fd)
+
+        file_flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW
+        file_fd = os.open(parts[-1], file_flags, 0o666, dir_fd=parent_fd)
+        with os.fdopen(file_fd, "w", encoding="utf-8") as f:
+            file_fd = None
             f.write(new_content)
-        return {"success": True, "file_path": file_path, "bytes_written": len(new_content)}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+            f.flush()
+            os.fsync(f.fileno())
+        return {
+            "success": True,
+            "file_path": file_path,
+            "bytes_written": len(new_content.encode("utf-8")),
+        }
+    except (OSError, ValueError) as exc:
+        return {"success": False, "error": str(exc)}
+    finally:
+        if file_fd is not None:
+            os.close(file_fd)
+        for directory_fd in reversed(directory_fds):
+            os.close(directory_fd)

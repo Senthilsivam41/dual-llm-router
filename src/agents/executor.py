@@ -63,14 +63,9 @@ class ExecutorAgent:
         )
         
         if completion is None:
-            raw_json = json.dumps({
-                "summary": "Mock execution completed",
-                "actions": [],
-                "verification_results": ["Executed in fallback mode"],
-            })
-            elapsed = time.time() - start_time
-            prompt_tokens, completion_tokens = 100, 50
-            provider_cost = None
+            raise RuntimeError(
+                "litellm is required for executor execution; install project dependencies"
+            )
         else:
             validate_provider_credentials(self.model_name, config.openrouter_api_key)
             messages = [

@@ -28,17 +28,9 @@ class PlannerAgent:
         start_time = time.time()
         
         if completion is None:
-            # Fallback mock for testing environment when litellm is not installed
-            raw_json = json.dumps({
-                "goal": f"Plan for: {user_prompt}",
-                "target_files": ["main.py"],
-                "acceptance_criteria": ["Implementation meets requirements"],
-                "step_by_step_plan": ["Execute task"],
-                "notes": "Generated in fallback mode (litellm package missing)",
-            })
-            elapsed = time.time() - start_time
-            prompt_tokens, completion_tokens = 50, 50
-            provider_cost = None
+            raise RuntimeError(
+                "litellm is required for planner execution; install project dependencies"
+            )
         else:
             validate_provider_credentials(self.model_name, config.openrouter_api_key)
             messages = [

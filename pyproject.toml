@@ -9,19 +9,14 @@ description = "Dual-LLM Agentic Framework — Planner/Executor Split (Hermes 4 +
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "litellm>=1.0.0",
-    "pydantic>=2.0.0",
-    "python-dotenv>=1.0.0",
-    "pyyaml>=6.0.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
+    "litellm>=1.0.0,<2",
+    "pydantic>=2.0.0,<3",
+    "python-dotenv>=1.0.0,<2",
+    "pyyaml>=6.0.0,<7",
 ]
 
 [dependency-groups]
-dev = ["pytest>=7.0.0"]
+dev = ["pytest>=7.0.0,<10"]
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
@@ -29,4 +24,3 @@ norecursedirs = ["workspace", ".autoclaw", ".venv"]
 
 [tool.pyright]
 extraPaths = ["."]
-

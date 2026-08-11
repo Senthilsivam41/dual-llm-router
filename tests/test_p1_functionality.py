@@ -136,6 +136,25 @@ def test_openrouter_planner_fails_fast_without_api_key(monkeypatch):
     provider.assert_not_called()
 
 
+def test_planner_fails_when_litellm_is_unavailable():
+    with (
+        patch("src.agents.planner.completion", None),
+        pytest.raises(RuntimeError, match="litellm is required"),
+    ):
+        PlannerAgent(model_name="test-model").plan("Plan this change")
+
+
+def test_executor_fails_when_litellm_is_unavailable(tmp_path):
+    with (
+        patch("src.agents.executor.completion", None),
+        pytest.raises(RuntimeError, match="litellm is required"),
+    ):
+        ExecutorAgent(
+            model_name="test-model",
+            workspace_root=str(tmp_path),
+        ).execute(task_spec())
+
+
 def test_planner_passes_configured_max_tokens_to_provider(monkeypatch):
     provider = Mock(return_value=planner_response())
     monkeypatch.setattr(config, "openrouter_api_key", "test-key")
@@ -319,3 +338,17 @@ def test_pytest_configuration_excludes_generated_workspace():
     pytest_options = pyproject["tool"]["pytest"]["ini_options"]
 
     assert "workspace" in pytest_options.get("norecursedirs", [])
+
+
+def test_dependency_metadata_has_one_locked_source_of_truth():
+    pyproject = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
+    gitignore = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
+    ci = (PROJECT_ROOT / ".github/workflows/ci-benchmark.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert not (PROJECT_ROOT / "requirements.txt").exists()
+    assert "optional-dependencies" not in pyproject.get("project", {})
+    assert "*.egg-info/" in gitignore
+    assert "uv sync --locked --dev" in ci
+    assert "uv run pytest -q" in ci

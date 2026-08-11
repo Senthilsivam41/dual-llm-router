@@ -68,6 +68,19 @@ def test_apply_patch_rejects_symlink_escape(tmp_path):
     assert not (outside / "escaped.txt").exists()
 
 
+def test_apply_patch_never_follows_final_symlink_inside_workspace(tmp_path):
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    target = workspace / "target.txt"
+    target.write_text("original", encoding="utf-8")
+    (workspace / "alias.txt").symlink_to(target)
+
+    result = apply_patch("alias.txt", "overwritten", str(workspace))
+
+    assert result["success"] is False
+    assert target.read_text(encoding="utf-8") == "original"
+
+
 def test_run_shell_cannot_write_above_workspace(tmp_path):
     workspace = tmp_path / "workspace"
     workspace.mkdir()

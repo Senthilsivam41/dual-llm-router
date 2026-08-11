@@ -340,11 +340,7 @@ dependencies = [
     { name = "litellm" },
     { name = "pydantic" },
     { name = "python-dotenv" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
+    { name = "pyyaml" },
 ]
 
 [package.dev-dependencies]
@@ -354,15 +350,14 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "litellm", specifier = ">=1.0.0" },
-    { name = "pydantic", specifier = ">=2.0.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "litellm", specifier = ">=1.0.0,<2" },
+    { name = "pydantic", specifier = ">=2.0.0,<3" },
+    { name = "python-dotenv", specifier = ">=1.0.0,<2" },
+    { name = "pyyaml", specifier = ">=6.0.0,<7" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=7.0.0" }]
+dev = [{ name = "pytest", specifier = ">=7.0.0,<10" }]
 
 [[package]]
 name = "exceptiongroup"

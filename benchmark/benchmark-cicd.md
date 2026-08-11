@@ -15,7 +15,7 @@ Adapted from the research-labs design for this repo’s real CLIs, genomes, and 
 | Publish Markdown to `benchmark/published/` | Yes | Already existed; kept on push + schedule |
 | Live OpenRouter in CI | Conditional | Only when `OPENROUTER_API_KEY` secret is set; default remains simulate |
 | Slack notifications | Deferred | No Slack secret required; use Actions step summaries + artifacts instead |
-| Literal `requirements.txt` cache | Yes | File exists |
+| Locked dependency cache | Yes | `uv.lock` is CI source of truth |
 | Dashboard `--output` path | Yes | Alias added for `--save` |
 | Semicolon `--variants a;b` | No | This repo uses space-separated: `--variants h1,l1 h2,l1` |
 | `evolve.py --force false` string | No | `--force` is a boolean flag; workflows use proper conditionals |
@@ -58,22 +58,22 @@ Without secrets, all workflows stay on `--simulate` and still produce useful reg
 ## CLI contracts (this repo)
 
 ```bash
-python scripts/reset.py
-python scripts/benchmark_runner.py --suite easy --variant hermes_v1,laguna_v1 --simulate
-python scripts/benchmark_dashboard.py --report overall --output reports/out.json
-python scripts/comparative_benchmark.py --suite easy --simulate \
+uv run python scripts/reset.py
+uv run python scripts/benchmark_runner.py --suite easy --variant hermes_v1,laguna_v1 --simulate
+uv run python scripts/benchmark_dashboard.py --report overall --output reports/out.json
+uv run python scripts/comparative_benchmark.py --suite easy --simulate \
   --variants hermes_v1,laguna_v1 hermes_v2,laguna_v1 hermes_v3,laguna_v1
-python scripts/publish_benchmark_results.py --force --suite easy --simulate
-python scripts/evolve.py --runs 100 --force
-python scripts/analyze.py
-python scripts/ci_benchmark_summary.py --title "Smoke" --report reports/pr_smoke.json
+uv run python scripts/publish_benchmark_results.py --force --suite easy --simulate
+uv run python scripts/evolve.py --runs 100 --force
+uv run python scripts/analyze.py
+uv run python scripts/ci_benchmark_summary.py --title "Smoke" --report reports/pr_smoke.json
 ```
 
 Comparative prerequisite:
 
 ```bash
-python scripts/reset.py
-python scripts/evolve.py --runs 40 --force   # creates hermes_v2/v3, laguna_v*
+uv run python scripts/reset.py
+uv run python scripts/evolve.py --runs 40 --force   # creates hermes_v2/v3, laguna_v*
 ```
 
 ---
@@ -81,21 +81,19 @@ python scripts/evolve.py --runs 40 --force   # creates hermes_v2/v3, laguna_v*
 ## Local dry-run (mirrors CI)
 
 ```bash
-pip install -r requirements.txt
-python scripts/reset.py
+uv sync --locked --dev
+uv run python scripts/reset.py
 
 # PR smoke
-python scripts/benchmark_runner.py --suite easy --variant hermes_v1,laguna_v1 --simulate
-python scripts/benchmark_dashboard.py --report overall --output reports/pr_smoke.json
+uv run python scripts/benchmark_runner.py --suite easy --variant hermes_v1,laguna_v1 --simulate
+uv run python scripts/benchmark_dashboard.py --report overall --output reports/pr_smoke.json
 
-# Unit gates
-pytest tests/test_scoring.py tests/test_mutation.py tests/test_ab_test.py \
-       tests/test_evolution.py tests/test_benchmark.py tests/test_benchmark_publisher.py \
-       tests/test_p0_security.py -q
+# Full regression gate
+uv run pytest -q
 
 # Weekly comparative slice
-python scripts/evolve.py --runs 40 --force
-python scripts/comparative_benchmark.py --suite easy --simulate \
+uv run python scripts/evolve.py --runs 40 --force
+uv run python scripts/comparative_benchmark.py --suite easy --simulate \
   --variants hermes_v1,laguna_v1 hermes_v2,laguna_v1 hermes_v3,laguna_v1
 ```
 
