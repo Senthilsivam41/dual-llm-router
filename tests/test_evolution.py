@@ -137,7 +137,8 @@ class TestEvolutionEngine:
             config={"check_interval_runs": 50, "hermes": {"max_mutations_per_run": 1, "mutation_rate": 1.0}, "laguna": {"max_mutations_per_run": 1, "mutation_rate": 1.0}, "scoring": {}, "selection": {"elite_size": 2}},
         )
         assert not engine.should_evolve()
-        engine.run_count = 50
+        for _ in range(50):
+            engine.record_run_result(_rich_run())
         assert engine.should_evolve()
 
     def test_evaluate_variants(self, tmp_path: Path):

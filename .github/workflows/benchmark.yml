@@ -68,17 +68,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run benchmark / evolution unit tests
-        run: |
-          pytest tests/test_scoring.py \
-                tests/test_mutation.py \
-                tests/test_ab_test.py \
-                tests/test_evolution.py \
-                tests/test_benchmark.py \
-                tests/test_benchmark_publisher.py -q
-
-      - name: Run P0 security tests
-        run: pytest tests/test_p0_security.py -q
+      - name: Run full test suite
+        run: pytest -q
 
   # ---------------------------------------------------------------------------
   # Path-filtered publish (simulate by default; live optional on dispatch)
