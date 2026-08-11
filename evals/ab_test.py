@@ -4,6 +4,7 @@ A/B testing framework for comparing variant combinations.
 
 from __future__ import annotations
 
+import math
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
@@ -93,16 +94,22 @@ class ABTestManager:
             if stats["total"] > 0
         }
 
-        n = sum(stats["total"] for stats in variant_stats.values()) or 1
-        overall_rate = (
-            sum(s["successes"] for s in variant_stats.values()) / n
-        )
         chi2 = 0.0
-        for stats in variant_stats.values():
-            expected = max(overall_rate * stats["total"], 1e-9)
-            chi2 += (stats["successes"] - expected) ** 2 / expected
-
-        p_value = max(0.0, 1.0 - (chi2 / max(n * max(len(variant_stats) - 1, 1), 1)))
+        p_value = 1.0
+        if len(variant_stats) == 2:
+            first, second = variant_stats.values()
+            pooled = (
+                first["successes"] + second["successes"]
+            ) / (first["total"] + second["total"])
+            variance = pooled * (1.0 - pooled) * (
+                (1.0 / first["total"]) + (1.0 / second["total"])
+            )
+            if variance > 0:
+                first_rate = first["successes"] / first["total"]
+                second_rate = second["successes"] / second["total"]
+                z_score = (first_rate - second_rate) / math.sqrt(variance)
+                chi2 = z_score * z_score
+                p_value = math.erfc(abs(z_score) / math.sqrt(2.0))
         significant = p_value < (1.0 - self.confidence)
 
         return {

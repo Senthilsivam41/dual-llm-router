@@ -12,6 +12,7 @@ from src.config import config
 from src.orchestrator import DualLLMRouterOrchestrator
 from src.schemas.task_spec import TaskSpec
 from src.utils.metrics import MetricsLogger
+from router.router import EvolvingRouter
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -118,6 +119,8 @@ def test_existing_target_file_does_not_satisfy_behavioral_acceptance_criteria(
 
     assert result["success"] is False
     assert result["verification_report"]["criteria_passed"] is False
+    assert result["verification_report"]["verified_criteria"] == 0
+    assert result["verification_report"]["criteria_pass_rate"] == 0.0
 
 
 def test_openrouter_planner_fails_fast_without_api_key(monkeypatch):
@@ -215,6 +218,47 @@ def test_provider_reported_cost_is_used_in_metrics(monkeypatch):
         )
 
     assert logger.summary()["total_cost_usd"] == pytest.approx(0.123456)
+
+
+def test_evolving_router_records_only_observed_quality_metrics(tmp_path):
+    engine = Mock()
+    engine.active_hermes = "hermes_v1"
+    engine.active_laguna = "laguna_v1"
+    engine.should_evolve.return_value = False
+    engine.variants_for_next_run.return_value = ("hermes_v1", "laguna_v1")
+    engine.get_prompt_for_variant.return_value = {
+        "path": "prompt.py",
+        "few_shot_path": "",
+        "text": "test prompt",
+    }
+    router = EvolvingRouter(evolution_engine=engine, workspace_root=str(tmp_path))
+    spec = task_spec()
+
+    with (
+        patch.object(router.planner, "plan", return_value=(spec, {})),
+        patch.object(
+            router.executor,
+            "execute",
+            return_value={
+                "success": True,
+                "verification_report": {
+                    "criteria_passed": True,
+                    "criteria_pass_rate": 0.75,
+                    "verified_criteria": 3,
+                    "total_criteria": 4,
+                },
+            },
+        ),
+    ):
+        router.route_task("Implement change")
+
+    recorded = engine.record_run_result.call_args.args[0]
+    quality = recorded["quality_metrics"]
+    assert quality["acceptance_criteria_score"] == 0.75
+    assert quality["verified_criteria"] == 3
+    assert "code_quality_score" not in quality
+    assert "test_coverage" not in quality
+    assert "quality_score" not in quality
 
 
 def test_pytest_configuration_excludes_generated_workspace():

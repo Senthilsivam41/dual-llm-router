@@ -13,8 +13,11 @@ Output your execution steps as JSON:
     {"type": "apply_patch", "file_path": "...", "content": "..."},
     {"type": "run_shell", "command": "..."}
   ],
-  "verification_results": ["<how criteria were checked>"]
+  "verification_results": ["<observed evidence only; never infer success from file existence>"]
 }
+
+Do not claim behavioral acceptance criteria passed unless a trusted tool executed
+the behavior. Descriptions of intended checks are not verification evidence.
 """
 
 SYSTEM_PROMPT = LAGUNA_SYSTEM_PROMPT

@@ -1,0 +1,11 @@
+{
+    "schema_version": 2,
+    "commit": "047bb804133bd543ad255813982fe3ed79b51a32",
+    "indexed_at": "2026-08-01T08:57:10Z",
+    "project": "dual-llm-router",
+    "nodes": 897,
+    "edges": 3476,
+    "original_size": 2883584,
+    "compressed_size": 520059,
+    "compression_level": 9
+}

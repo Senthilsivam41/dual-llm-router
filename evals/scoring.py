@@ -99,17 +99,6 @@ def calculate_fitness(
     for r in matching:
         qm = r.get("quality_metrics", {}) or {}
         score = qm.get("quality_score")
-        if score is None:
-            score = qm.get("code_quality_score")
-        if score is None and qm.get("task_spec_clarity") is not None:
-            # Blend available heuristics when quality_score is absent.
-            parts = [
-                qm.get("task_spec_clarity"),
-                qm.get("code_quality_score"),
-                qm.get("test_coverage"),
-            ]
-            parts = [float(p) for p in parts if p is not None]
-            score = sum(parts) / len(parts) if parts else None
         if score is not None:
             quality_scores.append(float(score))
     quality_score = sum(quality_scores) / len(quality_scores) if quality_scores else 0.0

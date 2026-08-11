@@ -1,22 +1,8 @@
 [
   {
-    "timestamp": "20260809_033956Z",
-    "file": "benchmark_results_20260809_033956Z.md",
-    "commit": "9502925",
-    "suite": "all",
-    "success_rate": "0.4000"
-  },
-  {
-    "timestamp": "20260802_052759Z",
-    "file": "benchmark_results_20260802_052759Z.md",
-    "commit": "3fa303b",
-    "suite": "all",
-    "success_rate": "0.4000"
-  },
-  {
-    "timestamp": "20260801_085251Z",
-    "file": "benchmark_results_20260801_085251Z.md",
-    "commit": "3359211",
+    "timestamp": "20260811_155703Z",
+    "file": "benchmark_results_20260811_155703Z.md",
+    "commit": "163ac4b",
     "suite": "easy",
     "success_rate": "0.8333"
   },

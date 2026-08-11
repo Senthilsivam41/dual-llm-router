@@ -212,6 +212,7 @@ Published reports: [`benchmark/published/`](benchmark/published/) (`benchmark_re
 Metrics definitions: [`benchmark/Key_Metrics_Summary.md`](benchmark/Key_Metrics_Summary.md)
 Suite details: [`benchmark/README.md`](benchmark/README.md)
 CI/CD workflows: [`benchmark/benchmark-cicd.md`](benchmark/benchmark-cicd.md) (PR smoke, weekly suite, nightly evolution)
+Agent memory / index status: [`memory/STATUS.md`](memory/STATUS.md)
 
 ## Testing
 
