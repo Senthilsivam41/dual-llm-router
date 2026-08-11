@@ -224,3 +224,67 @@ def test_lineage_tracks_parent_child_edges(tmp_path: Path):
         children
     )
     assert (root / ".autoclaw" / "evals" / "ab_tests.json").exists()
+
+
+def test_ab_test_uses_only_observed_assigned_runs(tmp_path: Path):
+    root = _seed_project(tmp_path)
+    engine = EvolutionEngine(
+        root=root,
+        config={
+            "check_interval_runs": 10,
+            "hermes": {"max_mutations_per_run": 1, "mutation_rate": 1.0},
+            "laguna": {"max_mutations_per_run": 1, "mutation_rate": 1.0},
+            "scoring": {},
+            "selection": {"elite_size": 2},
+            "ab_testing": {
+                "enabled": True,
+                "min_samples_per_variant": 5,
+                "confidence_interval": 0.95,
+            },
+            "alerting": {"enabled": False},
+        },
+    )
+    for _ in range(10):
+        engine.record_run_result(_rich_run())
+
+    evolution = engine.evolve()
+    test = engine.ab_manager.ab_tests[-1]
+    control = engine.active_hermes
+    challenger = evolution["new_hermes"][0]
+
+    assert test["evidence_policy"] == "observed_runs_only"
+    assert test["results"] == []
+    assert engine.active_hermes == control
+
+    for _ in range(10):
+        assigned_hermes, assigned_laguna = engine.variants_for_next_run()
+        status = "success" if assigned_hermes == challenger else "failure"
+        engine.record_run_result(
+            _rich_run(
+                hermes=assigned_hermes,
+                laguna=assigned_laguna,
+                status=status,
+            )
+        )
+
+    assert test["status"] == "completed"
+    assert all(
+        result["result"]["evidence_source"] == "observed_run"
+        for result in test["results"]
+    )
+    assert all(not result["result"].get("synthetic") for result in test["results"])
+    assert engine.active_hermes == challenger
+
+
+def test_fitness_does_not_invent_quality_from_proxy_metrics():
+    runs = [_rich_run() for _ in range(5)]
+    for run in runs:
+        run["quality_metrics"] = {
+            "task_spec_clarity": 1.0,
+            "code_quality_score": 1.0,
+            "test_coverage": 1.0,
+        }
+
+    score = calculate_fitness(runs, "hermes_v1", "laguna_v1")
+
+    assert score["quality_score"] == 0.0

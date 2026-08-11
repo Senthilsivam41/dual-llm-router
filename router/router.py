@@ -75,8 +75,7 @@ class EvolvingRouter(DualLLMRouter):
             result = self.evolution_engine.evolve()
             logger.info("Evolution complete: %s", result)
 
-        hermes_variant = self.evolution_engine.active_hermes
-        laguna_variant = self.evolution_engine.active_laguna
+        hermes_variant, laguna_variant = self.evolution_engine.variants_for_next_run()
         hermes_prompt = self._get_prompt(hermes_variant)
         laguna_prompt = self._get_prompt(laguna_variant)
 
@@ -89,12 +88,7 @@ class EvolvingRouter(DualLLMRouter):
         metrics = pipeline.get("metrics") or {}
         executor_result = pipeline.get("executor_result") or {}
         verification = executor_result.get("verification_report") or {}
-        details = verification.get("details") or []
-        pass_rate = (
-            sum(1 for d in details if d.get("passed")) / len(details) if details else float(
-                bool(verification.get("criteria_passed") or executor_result.get("success"))
-            )
-        )
+        criteria_score = float(verification.get("criteria_pass_rate") or 0.0)
 
         status = pipeline.get("status", "failure")
         if status == "completed":
@@ -122,13 +116,10 @@ class EvolvingRouter(DualLLMRouter):
                 },
                 "quality_metrics": {
                     "task_spec_clarity": 1.0 if pipeline.get("task_spec") else 0.0,
-                    "code_quality_score": pass_rate,
-                    "test_coverage": pass_rate,
-                    "acceptance_criteria_pass": bool(
-                        verification.get("criteria_passed") or executor_result.get("success")
-                    ),
-                    "quality_score": pass_rate,
-                    "cost_efficiency": 0.0,
+                    "acceptance_criteria_pass": bool(verification.get("criteria_passed")),
+                    "acceptance_criteria_score": criteria_score,
+                    "verified_criteria": int(verification.get("verified_criteria") or 0),
+                    "total_criteria": int(verification.get("total_criteria") or 0),
                 },
             }
         )

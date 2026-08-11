@@ -189,6 +189,11 @@ class EvolutionEngine:
         self.ab_tests_path = (
             self.autoclaw_dir / "evals" / "ab_tests.json" if root else AB_TESTS_PATH
         )
+        if self.ab_tests_path.exists():
+            with open(self.ab_tests_path, encoding="utf-8") as f:
+                stored_ab_tests = json.load(f)
+            if isinstance(stored_ab_tests, dict):
+                self.ab_manager.ab_tests = stored_ab_tests.get("tests", [])
         logger.info(
             "EvolutionEngine ready active_hermes=%s active_laguna=%s run_count=%s",
             self.active_hermes,
@@ -272,6 +277,7 @@ class EvolutionEngine:
                 indent=2,
             )
             f.write("\n")
+        self._record_ab_evidence(payload)
         logger.info(
             "Recorded run_id=%s status=%s hermes=%s laguna=%s total_runs=%s",
             payload.get("run_id"),
@@ -280,6 +286,105 @@ class EvolutionEngine:
             (payload.get("config") or {}).get("laguna_variant"),
             self.run_count,
         )
+
+    def variants_for_next_run(self) -> tuple[str, str]:
+        """Assign the least-sampled variant from an active observed-run test."""
+        for test in reversed(self.ab_manager.ab_tests):
+            if test.get("status") != "running":
+                continue
+            agent = test.get("agent", "hermes")
+            variants = [
+                v.get("variant_id", v) if isinstance(v, dict) else v
+                for v in test.get("variants", [])
+            ]
+            if not variants:
+                continue
+            counts = {
+                str(variant): sum(
+                    1 for result in test.get("results", [])
+                    if result.get("variant") == variant
+                )
+                for variant in variants
+            }
+            assigned = min(variants, key=lambda variant: counts[str(variant)])
+            if agent == "laguna":
+                return self.active_hermes, str(assigned)
+            return str(assigned), self.active_laguna
+        return self.active_hermes, self.active_laguna
+
+    def _save_ab_tests(self) -> None:
+        self.ab_tests_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.ab_tests_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {"updated_at": _utc_now(), "tests": self.ab_manager.ab_tests},
+                f,
+                indent=2,
+            )
+            f.write("\n")
+
+    def _record_ab_evidence(self, run_data: Dict) -> None:
+        """Record only observed run outcomes in active A/B tests."""
+        result = run_data.get("result") or {}
+        if (
+            run_data.get("synthetic")
+            or run_data.get("simulated")
+            or result.get("synthetic")
+            or result.get("simulated")
+        ):
+            return
+
+        config = run_data.get("config") or {}
+        changed = False
+        for test in self.ab_manager.ab_tests:
+            if test.get("status") != "running":
+                continue
+            agent = test.get("agent", "hermes")
+            variant = config.get(f"{agent}_variant")
+            variant_ids = {
+                str(v.get("variant_id", v) if isinstance(v, dict) else v)
+                for v in test.get("variants", [])
+            }
+            if variant not in variant_ids:
+                continue
+
+            self.ab_manager.record_result(
+                test["test_id"],
+                variant,
+                {**result, "evidence_source": "observed_run"},
+            )
+            changed = True
+            significance = self.ab_manager.check_significance(test["test_id"])
+            if significance and significance.get("significant"):
+                self._promote_ab_winner(agent, significance)
+
+        if changed:
+            self._save_ab_tests()
+
+    def _promote_ab_winner(self, agent: str, significance: Dict) -> None:
+        winner = significance.get("winner")
+        if not winner:
+            return
+        other_agent = "laguna" if agent == "hermes" else "hermes"
+        other_active = (
+            self.active_laguna if other_agent == "laguna" else self.active_hermes
+        )
+        best = {
+            agent: {
+                "variant_id": winner,
+                "score": float(significance.get("success_rates", {}).get(winner, 0.0)),
+            },
+            other_agent: {
+                "variant_id": other_active,
+                "score": float(
+                    (self.best_configs.get(other_agent) or {}).get("score", 0.0)
+                ),
+            },
+        }
+        if agent == "hermes":
+            self.active_hermes = winner
+        else:
+            self.active_laguna = winner
+        self._update_best_configs(best)
 
     def should_evolve(self) -> bool:
         """Check if it's time to evolve."""
@@ -353,7 +458,7 @@ class EvolutionEngine:
             new_laguna=new_laguna_genomes,
             best=best,
         )
-        if ab_result and ab_result.get("winner"):
+        if ab_result and ab_result.get("significant") and ab_result.get("winner"):
             winner = ab_result["winner"]
             if winner.startswith("hermes_"):
                 best["hermes"] = {
@@ -430,50 +535,28 @@ class EvolutionEngine:
         if not ab_cfg.get("enabled", True):
             return None
 
+        if any(
+            test.get("status") == "running" for test in self.ab_manager.ab_tests
+        ):
+            self._save_ab_tests()
+            return None
+
         variants = [
             {"variant_id": self.active_hermes, "role": "control"},
             *[
                 {"variant_id": g["variant_id"], "role": "challenger"}
-                for g in new_hermes[:2]
+                for g in new_hermes[:1]
             ],
         ]
+        if len(variants) < 2:
+            return None
+
         test_id = f"ab_{self.run_count}_{_utc_now()}"
-        self.ab_manager.start_test(test_id, variants)
-
-        # Replay historical run outcomes as proxy samples for significance checks.
-        runs = self._load_run_results()
-        for run in runs[-max(int(ab_cfg.get("min_samples_per_variant", 20)) * 2, 20) :]:
-            vid = (run.get("config") or {}).get("hermes_variant", self.active_hermes)
-            self.ab_manager.record_result(
-                test_id,
-                vid if vid in {v["variant_id"] for v in variants} else self.active_hermes,
-                run.get("result") or {"status": "success"},
-            )
-
-        # Seed challengers with synthetic samples from current fitness so the test can close.
-        control_score = float((evaluation.get("current_hermes") or {}).get("composite", 0.0))
-        challenger = new_hermes[0]["variant_id"] if new_hermes else None
-        if challenger:
-            for i in range(int(ab_cfg.get("min_samples_per_variant", 20))):
-                status = "success" if (i / 20.0) < max(control_score, 0.5) else "failure"
-                self.ab_manager.record_result(
-                    test_id, challenger, {"status": status, "synthetic": True}
-                )
-
-        result = self.ab_manager.check_significance(test_id)
-        self.ab_tests_path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"updated_at": _utc_now(), "tests": self.ab_manager.ab_tests}
-        with open(self.ab_tests_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2)
-            f.write("\n")
-        if result:
-            logger.info(
-                "A/B test %s significant=%s winner=%s",
-                test_id,
-                result.get("significant"),
-                result.get("winner"),
-            )
-        return result
+        test = self.ab_manager.start_test(test_id, variants)
+        test["agent"] = "hermes"
+        test["evidence_policy"] = "observed_runs_only"
+        self._save_ab_tests()
+        return None
 
     def _emit_improvement_alerts(self, evaluation: Dict, best: Dict) -> None:
         alert_cfg = self.config.get("alerting", {}) or {}
