@@ -1,14 +1,14 @@
-# Benchmark Results — 2026-08-11T15:57:03.662076Z
+# Benchmark Results — 2026-08-02T05:27:59.464453Z
 
 ## Run metadata
 
 | Field | Value |
 | --- | --- |
-| Timestamp (UTC) | `2026-08-11T15:57:03.662076Z` |
-| Git commit | `163ac4b` |
-| Branch | `cursor/prompt-evolution-loop` |
-| Commit subject | Critical Tech Debts fixed |
-| Suite | `easy` |
+| Timestamp (UTC) | `2026-08-02T05:27:59.464453Z` |
+| Git commit | `3fa303b` |
+| Branch | `main` |
+| Commit subject | chore(benchmark): publish results for 3359211 [skip ci] |
+| Suite | `all` |
 | Variant combo | `hermes_v1,laguna_v1` |
 | Mode | `simulate` |
 | Trigger | `schedule` |
