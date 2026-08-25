@@ -8,6 +8,7 @@ from ..schemas.task_spec import TaskSpec
 from ..tools import apply_patch, run_shell
 from ..tools.action_schemas import validate_actions, ActionModel
 from ..utils.metrics import MetricsLogger
+from .provider import call_with_retry, response_cost, validate_provider_credentials
 from prompts.laguna.base import LAGUNA_SYSTEM_PROMPT
 
 try:
@@ -62,30 +63,35 @@ class ExecutorAgent:
         )
         
         if completion is None:
-            raw_json = json.dumps({
-                "summary": "Mock execution completed",
-                "actions": [],
-                "verification_results": ["Executed in fallback mode"],
-            })
-            elapsed = time.time() - start_time
-            prompt_tokens, completion_tokens = 100, 50
+            raise RuntimeError(
+                "litellm is required for executor execution; install project dependencies"
+            )
         else:
+            validate_provider_credentials(self.model_name, config.openrouter_api_key)
             messages = [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt_payload},
             ]
-            response = completion(
-                model=self.model_name,
-                messages=messages,
-                api_key=config.openrouter_api_key if config.openrouter_api_key else None,
-                temperature=0.2,
-                response_format={"type": "json_object"}
+            response = call_with_retry(
+                completion,
+                max_retries=config.provider_max_retries,
+                sleep=time.sleep,
+                kwargs={
+                    "model": self.model_name,
+                    "messages": messages,
+                    "api_key": config.openrouter_api_key or None,
+                    "temperature": 0.2,
+                    "response_format": {"type": "json_object"},
+                    "max_tokens": config.max_tokens,
+                    "timeout": config.provider_timeout_seconds,
+                },
             )
             elapsed = time.time() - start_time
             raw_json = response.choices[0].message.content
             usage = getattr(response, "usage", None)
             prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
             completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
+            provider_cost = response_cost(response)
         
         if metrics_logger:
             metrics_logger.log_call(
@@ -94,6 +100,7 @@ class ExecutorAgent:
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
                 latency_seconds=elapsed,
+                cost_estimate_usd=provider_cost,
             )
             
         cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
@@ -120,7 +127,7 @@ class ExecutorAgent:
             for action in validated_actions:
                 action_dict = action.model_dump()
                 action_type = action_dict.get("type")
-                if action_type == "apply_patch":
+                if action_type in ("apply_patch", "patch"):
                     res = apply_patch(
                         file_path=action_dict["file_path"],
                         new_content=action_dict.get("patch") or action_dict.get("content"),
@@ -129,10 +136,11 @@ class ExecutorAgent:
                     tool_results.append({"action": action_dict, "result": res})
                     if not res.get("success", False):
                         all_tools_succeeded = False
-                elif action_type == "shell":
+                elif action_type in ("shell", "run_shell"):
                     res = run_shell(
                         command=action_dict["command"],
                         workspace_root=self.workspace_root,
+                        timeout_seconds=action_dict.get("timeout") or 120,
                     )
                     tool_results.append({"action": action_dict, "result": res})
                     if not res.get("success", False):
@@ -243,4 +251,5 @@ class ExecutorAgent:
             },
             "latency": elapsed,
             "tokens": {"prompt": prompt_tokens, "completion": completion_tokens},
+            "cost_usd": provider_cost,
         }

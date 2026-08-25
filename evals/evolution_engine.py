@@ -30,7 +30,7 @@ from evals.paths import (
     PROJECT_ROOT,
     RUN_RESULTS_PATH,
 )
-from evals.scoring import calculate_fitness, load_run_results, save_run_result
+from evals.scoring import append_run_result, calculate_fitness, load_run_results
 
 logger = logging.getLogger("evals.evolution_engine")
 
@@ -245,9 +245,7 @@ class EvolutionEngine:
 
     def record_run_result(self, run_data: Dict) -> None:
         """Record a run result after execution. Called after every dual-llm-router run."""
-        self.run_count += 1
         payload = dict(run_data)
-        payload.setdefault("run_id", f"run_{self.run_count:06d}")
         payload.setdefault("timestamp", _utc_now())
         # Normalize flat status/cost into nested schema when needed.
         if "result" not in payload and ("status" in payload or "cost" in payload):
@@ -263,20 +261,7 @@ class EvolutionEngine:
                 "laguna_variant": self.active_laguna,
             },
         )
-        save_run_result(payload, self.run_results_path)
-
-        runs = self._load_run_results()
-        with open(self.run_results_path, "w", encoding="utf-8") as f:
-            json.dump(
-                {
-                    "total_runs": self.run_count,
-                    "last_evolution_check": self.run_count,
-                    "runs": runs,
-                },
-                f,
-                indent=2,
-            )
-            f.write("\n")
+        payload, self.run_count = append_run_result(payload, self.run_results_path)
         self._record_ab_evidence(payload)
         logger.info(
             "Recorded run_id=%s status=%s hermes=%s laguna=%s total_runs=%s",
@@ -388,6 +373,7 @@ class EvolutionEngine:
 
     def should_evolve(self) -> bool:
         """Check if it's time to evolve."""
+        self.run_count = len(self._load_run_results())
         interval = int(self.config.get("check_interval_runs", 50))
         if interval <= 0:
             return False

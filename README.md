@@ -9,7 +9,8 @@ Role-specialized agent pipeline: **Hermes 4** plans, **Laguna S 2.1** executes â
 | Evolution | Local loop | Mutate prompts, A/B test, promote winners |
 
 Detailed evolution docs: [`docs/Evolution.md`](docs/Evolution.md)  
-Original proposal: [`docs/Project_Proposal.md`](docs/Project_Proposal.md)
+Original proposal: [`docs/Project_Proposal.md`](docs/Project_Proposal.md)  
+Portfolio manifest: [`portfolio.yaml`](portfolio.yaml) Â· Quickstart: [`docs/quickstart.md`](docs/quickstart.md)
 
 ---
 
@@ -132,24 +133,24 @@ dual-llm-router/
 
 ## Quick start
 
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then:
+
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+uv sync --locked --dev
 
 # Optional live models
 cp .env.example .env   # set OPENROUTER_API_KEY
 
 # Bootstrap evolution state
-python scripts/reset.py
+uv run python scripts/reset.py
 
 # One-shot pipeline (no evolution wrapper)
-python example_run.py -p "Create math_utils.py with add(a, b) and a unit test"
+uv run python example_run.py -p "Create math_utils.py with add(a, b) and a unit test"
 
 # Evolution CLI (simulate runs, evolve when due)
-python scripts/evolve.py --runs 50
-python scripts/evolve.py --force
-python scripts/analyze.py
+uv run python scripts/evolve.py --runs 50
+uv run python scripts/evolve.py --force
+uv run python scripts/analyze.py
 ```
 
 ### Use the evolving router in code
@@ -199,13 +200,13 @@ Difficulty-tiered tasks live under `benchmark/{easy,medium,hard,extreme}/`.
 
 ```bash
 ./benchmark/minimal_setup.sh
-python scripts/benchmark_runner.py --suite easy --simulate --list
-python scripts/benchmark_runner.py --suite all --variant hermes_v1,laguna_v1 --simulate
-python scripts/benchmark_dashboard.py --report overall
-python scripts/comparative_benchmark.py --variants hermes_v1,laguna_v1 --suite easy --simulate
+uv run python scripts/benchmark_runner.py --suite easy --simulate --list
+uv run python scripts/benchmark_runner.py --suite all --variant hermes_v1,laguna_v1 --simulate
+uv run python scripts/benchmark_dashboard.py --report overall
+uv run python scripts/comparative_benchmark.py --variants hermes_v1,laguna_v1 --suite easy --simulate
 
 # Publish versioned Markdown under benchmark/published/
-python scripts/publish_benchmark_results.py --if-major --suite easy --simulate
+uv run python scripts/publish_benchmark_results.py --if-major --suite easy --simulate
 ```
 
 Published reports: [`benchmark/published/`](benchmark/published/) (`benchmark_results_<timestamp>.md`)
@@ -217,8 +218,8 @@ Agent memory / index status: [`memory/STATUS.md`](memory/STATUS.md)
 ## Testing
 
 ```bash
-pytest tests/test_scoring.py tests/test_mutation.py tests/test_ab_test.py tests/test_evolution.py tests/test_benchmark.py -q
-pytest tests/test_end_to_end.py tests/test_p0_security.py -q
+uv run pytest tests/test_scoring.py tests/test_mutation.py tests/test_ab_test.py tests/test_evolution.py tests/test_benchmark.py -q
+uv run pytest tests/test_end_to_end.py tests/test_p0_security.py -q
 ```
 
 ---

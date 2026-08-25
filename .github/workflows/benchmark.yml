@@ -57,28 +57,21 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-          cache-dependency-path: requirements.txt
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.32"
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: uv sync --locked --dev
 
-      - name: Run benchmark / evolution unit tests
-        run: |
-          pytest tests/test_scoring.py \
-                tests/test_mutation.py \
-                tests/test_ab_test.py \
-                tests/test_evolution.py \
-                tests/test_benchmark.py \
-                tests/test_benchmark_publisher.py -q
-
-      - name: Run P0 security tests
-        run: pytest tests/test_p0_security.py -q
+      - name: Run full test suite
+        run: uv run pytest -q
 
   # ---------------------------------------------------------------------------
   # Path-filtered publish (simulate by default; live optional on dispatch)
@@ -92,19 +85,21 @@ jobs:
           fetch-depth: 2
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-          cache-dependency-path: requirements.txt
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.32"
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: uv sync --locked --dev
 
       - name: Bootstrap evolution state
-        run: python scripts/reset.py
+        run: uv run python scripts/reset.py
 
       - name: Detect major change
         id: major
@@ -126,7 +121,7 @@ jobs:
           fi
           export BASE_REF
           set +e
-          python - <<'PY'
+          uv run python - <<'PY'
           import os, sys
           from pathlib import Path
           sys.path.insert(0, str(Path.cwd()))
@@ -178,7 +173,7 @@ jobs:
           if [ "${USE_LIVE:-0}" = "1" ]; then
             EXTRA=(--live)
           fi
-          python scripts/publish_benchmark_results.py \
+          uv run python scripts/publish_benchmark_results.py \
             --force \
             --suite "$SUITE" \
             --variant hermes_v1,laguna_v1 \
@@ -187,7 +182,7 @@ jobs:
 
       - name: Write step summary
         if: steps.major.outputs.run == 'true'
-        run: python scripts/ci_benchmark_summary.py --title "Published benchmark"
+        run: uv run python scripts/ci_benchmark_summary.py --title "Published benchmark"
 
       - name: Upload runtime artifacts
         if: steps.major.outputs.run == 'true'
@@ -227,35 +222,37 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-          cache-dependency-path: requirements.txt
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.32"
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: uv sync --locked --dev
 
       - name: Bootstrap + evolve variants
         run: |
-          python scripts/reset.py
+          uv run python scripts/reset.py
           # Creates hermes_v2/v3 (and laguna mutants) needed for comparison.
-          python scripts/evolve.py --runs 40 --force
+          uv run python scripts/evolve.py --runs 40 --force
 
       - name: Run comparative benchmark
         run: |
           mkdir -p reports
-          python scripts/comparative_benchmark.py \
+          uv run python scripts/comparative_benchmark.py \
             --suite easy \
             --simulate \
             --output reports/comparative.json \
             --variants hermes_v1,laguna_v1 hermes_v2,laguna_v1 hermes_v3,laguna_v1
-          python scripts/benchmark_dashboard.py \
+          uv run python scripts/benchmark_dashboard.py \
             --report comparison \
             --output reports/comparative_dashboard.json
-          python scripts/ci_benchmark_summary.py \
+          uv run python scripts/ci_benchmark_summary.py \
             --title "Comparative variants" \
             --report reports/comparative.json
 
@@ -285,28 +282,30 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-          cache-dependency-path: requirements.txt
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.32"
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: uv sync --locked --dev
 
       - name: Bootstrap evolution state
-        run: python scripts/reset.py
+        run: uv run python scripts/reset.py
 
       - name: Run full suite tier
         run: |
           mkdir -p reports
-          python scripts/benchmark_runner.py \
+          uv run python scripts/benchmark_runner.py \
             --suite ${{ matrix.suite }} \
             --variant hermes_v1,laguna_v1 \
             --simulate
-          python scripts/benchmark_dashboard.py \
+          uv run python scripts/benchmark_dashboard.py \
             --report overall \
             --output "reports/full_${{ matrix.suite }}.json"
 
@@ -329,16 +328,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-          cache-dependency-path: requirements.txt
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.32"
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: uv sync --locked --dev
 
       - name: Download comparative artifact
         uses: actions/download-artifact@v4
@@ -356,7 +357,7 @@ jobs:
 
       - name: Build summary markdown
         run: |
-          python - <<'PY'
+          uv run python - <<'PY'
           import json, os
           from pathlib import Path
           root = Path("reports")

@@ -136,6 +136,25 @@ def test_openrouter_planner_fails_fast_without_api_key(monkeypatch):
     provider.assert_not_called()
 
 
+def test_planner_fails_when_litellm_is_unavailable():
+    with (
+        patch("src.agents.planner.completion", None),
+        pytest.raises(RuntimeError, match="litellm is required"),
+    ):
+        PlannerAgent(model_name="test-model").plan("Plan this change")
+
+
+def test_executor_fails_when_litellm_is_unavailable(tmp_path):
+    with (
+        patch("src.agents.executor.completion", None),
+        pytest.raises(RuntimeError, match="litellm is required"),
+    ):
+        ExecutorAgent(
+            model_name="test-model",
+            workspace_root=str(tmp_path),
+        ).execute(task_spec())
+
+
 def test_planner_passes_configured_max_tokens_to_provider(monkeypatch):
     provider = Mock(return_value=planner_response())
     monkeypatch.setattr(config, "openrouter_api_key", "test-key")
@@ -172,6 +191,59 @@ def test_planner_retries_transient_provider_timeout(monkeypatch):
 
     assert spec.goal == "Implement a verifiable change"
     assert provider.call_count == 2
+
+
+def test_executor_uses_provider_limits_and_retries(monkeypatch, tmp_path):
+    provider = Mock(
+        side_effect=[
+            TimeoutError("temporary"),
+            completion_response(
+                {
+                    "actions": [
+                        {"type": "shell", "command": "touch provider-marker.txt"}
+                    ]
+                }
+            ),
+        ]
+    )
+    monkeypatch.setattr(config, "openrouter_api_key", "test-key")
+    monkeypatch.setattr(config, "max_tokens", 777)
+    monkeypatch.setattr(config, "provider_timeout_seconds", 45)
+
+    with (
+        patch("src.agents.executor.completion", provider),
+        patch("src.agents.executor.time.sleep"),
+    ):
+        result = ExecutorAgent(
+            model_name="openrouter/test-model",
+            workspace_root=str(tmp_path),
+        ).execute(
+            TaskSpec(
+                goal="Run safe action",
+                target_files=[],
+                acceptance_criteria=["The requested action is executed safely"],
+                step_by_step_plan=["Execute"],
+            )
+        )
+
+    assert result["success"] is True
+    assert provider.call_count == 2
+    assert provider.call_args.kwargs["max_tokens"] == 777
+    assert provider.call_args.kwargs["timeout"] == 45
+
+
+def test_evolving_router_forwards_max_iterations():
+    router = object.__new__(EvolvingRouter)
+    router.route_task = Mock(return_value={"status": "completed"})
+
+    result = router.run("Implement", execute_tools=False, max_iterations=4)
+
+    assert result["status"] == "completed"
+    router.route_task.assert_called_once_with(
+        "Implement",
+        execute_tools=False,
+        max_iterations=4,
+    )
 
 
 def test_metrics_are_scoped_to_each_orchestrator_run(tmp_path):
@@ -266,3 +338,17 @@ def test_pytest_configuration_excludes_generated_workspace():
     pytest_options = pyproject["tool"]["pytest"]["ini_options"]
 
     assert "workspace" in pytest_options.get("norecursedirs", [])
+
+
+def test_dependency_metadata_has_one_locked_source_of_truth():
+    pyproject = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
+    gitignore = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
+    ci = (PROJECT_ROOT / ".github/workflows/ci-benchmark.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert not (PROJECT_ROOT / "requirements.txt").exists()
+    assert "optional-dependencies" not in pyproject.get("project", {})
+    assert "*.egg-info/" in gitignore
+    assert "uv sync --locked --dev" in ci
+    assert "uv run pytest -q" in ci

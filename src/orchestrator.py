@@ -27,11 +27,16 @@ class DualLLMRouterOrchestrator:
         max_iterations: int = 1
     ) -> Dict[str, Any]:
         """Runs Planner node -> Executor node pipeline sequentially."""
+        if max_iterations < 1:
+            raise ValueError("max_iterations must be at least 1")
+        metrics_logger = MetricsLogger()
+        self.metrics_logger = metrics_logger
+
         # Step 1: Planning Node (Hermes 4)
         try:
             task_spec, planner_meta = self.planner.plan(
                 user_prompt=user_prompt,
-                metrics_logger=self.metrics_logger
+                metrics_logger=metrics_logger
             )
         except Exception as e:
             return {
@@ -39,24 +44,30 @@ class DualLLMRouterOrchestrator:
                 "error": str(e),
                 "task_spec": None,
                 "executor_result": None,
-                "metrics": self.metrics_logger.summary(),
+                "metrics": metrics_logger.summary(),
             }
 
         # Step 2: Execution Node (Laguna S 2.1)
-        try:
-            executor_result = self.executor.execute(
-                task_spec=task_spec,
-                metrics_logger=self.metrics_logger,
-                execute_tools=execute_tools
-            )
-        except Exception as e:
-            return {
-                "status": "execution_failed",
-                "error": str(e),
-                "task_spec": task_spec.model_dump(),
-                "executor_result": None,
-                "metrics": self.metrics_logger.summary(),
-            }
+        executor_result: Dict[str, Any] = {}
+        iterations = 0
+        for iterations in range(1, max_iterations + 1):
+            try:
+                executor_result = self.executor.execute(
+                    task_spec=task_spec,
+                    metrics_logger=metrics_logger,
+                    execute_tools=execute_tools
+                )
+            except Exception as e:
+                return {
+                    "status": "execution_failed",
+                    "error": str(e),
+                    "task_spec": task_spec.model_dump(),
+                    "executor_result": None,
+                    "iterations": iterations,
+                    "metrics": metrics_logger.summary(),
+                }
+            if executor_result.get("success", False):
+                break
 
         status = "completed" if executor_result.get("success", False) else "failed"
 
@@ -64,5 +75,6 @@ class DualLLMRouterOrchestrator:
             "status": status,
             "task_spec": task_spec.model_dump(),
             "executor_result": executor_result,
-            "metrics": self.metrics_logger.summary(),
+            "iterations": iterations,
+            "metrics": metrics_logger.summary(),
         }

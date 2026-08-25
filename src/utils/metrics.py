@@ -24,9 +24,13 @@ class MetricsLogger:
         latency_seconds: float,
         cost_per_1k_input: float = 0.001,
         cost_per_1k_output: float = 0.002,
+        cost_estimate_usd: float | None = None,
     ) -> CallMetric:
-        cost = ((prompt_tokens / 1000.0) * cost_per_1k_input) + (
-            (completion_tokens / 1000.0) * cost_per_1k_output
+        cost = (
+            cost_estimate_usd
+            if cost_estimate_usd is not None
+            else ((prompt_tokens / 1000.0) * cost_per_1k_input)
+            + ((completion_tokens / 1000.0) * cost_per_1k_output)
         )
         metric = CallMetric(
             node=node,
