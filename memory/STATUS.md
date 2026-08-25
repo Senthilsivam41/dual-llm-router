@@ -1,8 +1,14 @@
 # Current status
 
-**Updated:** 2026-08-01  
+**Updated:** 2026-08-25  
 **Branch:** `cursor/prompt-evolution-loop`  
-**HEAD (local at update):** `047bb80` — Add feasible CI/CD workflows for PR smoke, weekly benchmarks, and nightly evolution.
+**HEAD (local at prior update):** `047bb80` — Add feasible CI/CD workflows for PR smoke, weekly benchmarks, and nightly evolution.
+
+## Portfolio productization (2026-08-25)
+
+- Root [`portfolio.yaml`](../portfolio.yaml) follows `portfolio.dev/v1` (Labbys template)
+- `make setup|bootstrap|doctor|demo|dev|check` via [`Makefile`](../Makefile)
+- Docs: [`docs/quickstart.md`](../docs/quickstart.md), [`docs/architecture.md`](../docs/architecture.md), [`docs/configuration.md`](../docs/configuration.md)
 
 ## Product shape
 

@@ -9,7 +9,8 @@ Role-specialized agent pipeline: **Hermes 4** plans, **Laguna S 2.1** executes â
 | Evolution | Local loop | Mutate prompts, A/B test, promote winners |
 
 Detailed evolution docs: [`docs/Evolution.md`](docs/Evolution.md)  
-Original proposal: [`docs/Project_Proposal.md`](docs/Project_Proposal.md)
+Original proposal: [`docs/Project_Proposal.md`](docs/Project_Proposal.md)  
+Portfolio manifest: [`portfolio.yaml`](portfolio.yaml) Â· Quickstart: [`docs/quickstart.md`](docs/quickstart.md)
 
 ---
 
