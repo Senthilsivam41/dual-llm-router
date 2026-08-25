@@ -1,0 +1,75 @@
+{
+  "timestamp": "20260825_021700Z",
+  "meta": {
+    "commit": "1588f73",
+    "branch": "main",
+    "subject": "Merge pull request #7 from Senthilsivam41/cursor/prompt-evolution-loop"
+  },
+  "suite": "easy",
+  "variant": "hermes_v1,laguna_v1",
+  "simulate": true,
+  "trigger": "commit",
+  "report": {
+    "generated_at": "2026-08-25T02:17:00.773187Z",
+    "total_runs": 6,
+    "by_category": {
+      "easy": {
+        "count": 6,
+        "success_rate": 0.8333,
+        "avg_cost": 0.0407,
+        "avg_time": 0.0,
+        "avg_quality": 0.875,
+        "avg_iterations": 1.0
+      }
+    },
+    "by_variant": {
+      "hermes_v1+laguna_v1": {
+        "count": 6,
+        "success_rate": 0.8333,
+        "avg_cost": 0.0407,
+        "avg_time": 0.0,
+        "avg_quality": 0.875
+      }
+    },
+    "by_domain": {
+      "basic": {
+        "count": 3,
+        "success_rate": 0.6667,
+        "avg_cost": 0.0307,
+        "avg_quality": 0.75
+      },
+      "oop": {
+        "count": 1,
+        "success_rate": 1.0,
+        "avg_cost": 0.048,
+        "avg_quality": 1.0
+      },
+      "debugging": {
+        "count": 1,
+        "success_rate": 1.0,
+        "avg_cost": 0.04,
+        "avg_quality": 1.0
+      },
+      "refactor": {
+        "count": 1,
+        "success_rate": 1.0,
+        "avg_cost": 0.064,
+        "avg_quality": 1.0
+      }
+    },
+    "overall": {
+      "success_rate": 0.8333,
+      "avg_cost": 0.0407,
+      "avg_time_seconds": 0.0,
+      "avg_quality": 0.875,
+      "avg_iterations": 1.0,
+      "total_cost": 0.24400000000000002,
+      "total_time_seconds": 0,
+      "cost_efficiency": 0.8414,
+      "spec_rejection_rate": 0.1667,
+      "handoff_failure_rate": 0.0,
+      "spec_acceptance_rate": 0.8333,
+      "throughput_tasks_per_hour": 0.0
+    }
+  }
+}

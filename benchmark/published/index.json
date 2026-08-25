@@ -1,5 +1,12 @@
 [
   {
+    "timestamp": "20260825_021700Z",
+    "file": "benchmark_results_20260825_021700Z.md",
+    "commit": "1588f73",
+    "suite": "easy",
+    "success_rate": "0.8333"
+  },
+  {
     "timestamp": "20260823_030000Z",
     "file": "benchmark_results_20260823_030000Z.md",
     "commit": "ec28644",
