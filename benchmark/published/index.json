@@ -1,5 +1,12 @@
 [
   {
+    "timestamp": "20260830_075109Z",
+    "file": "benchmark_results_20260830_075109Z.md",
+    "commit": "ac82f32",
+    "suite": "all",
+    "success_rate": "0.4000"
+  },
+  {
     "timestamp": "20260825_021700Z",
     "file": "benchmark_results_20260825_021700Z.md",
     "commit": "1588f73",
