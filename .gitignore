@@ -10,6 +10,12 @@ workspace/
 reports/
 .codegraph/
 
+# Graphify local build. Keep the query graph and the report so another
+# machine can run `graphify query` without rebuilding the cache.
+graphify-out/*
+!graphify-out/graph.json
+!graphify-out/GRAPH_REPORT.md
+
 # Evolved prompt variants are generated locally
 prompts/**/evolved/*
 !prompts/**/evolved/.gitkeep
