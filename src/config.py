@@ -8,6 +8,7 @@ load_dotenv()
 @dataclass
 class Config:
     openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "")
+    fireworks_api_key: str = os.getenv("FIREWORKS_API_KEY") or os.getenv("FIREWORKS_APIKEY") or ""
     planner_model: str = os.getenv("PLANNER_MODEL", "openrouter/nousresearch/hermes-4-70b")
     executor_model: str = os.getenv("EXECUTOR_MODEL", "openrouter/poolside/laguna-s-2.1")
     max_tokens: int = int(os.getenv("MAX_TOKENS", "4096"))
