@@ -8,7 +8,13 @@ from ..schemas.task_spec import TaskSpec
 from ..tools import apply_patch, run_shell
 from ..tools.action_schemas import validate_actions, ActionModel
 from ..utils.metrics import MetricsLogger
-from .provider import call_with_retry, response_cost, validate_provider_credentials
+from .provider import (
+    call_with_retry,
+    resolve_api_key,
+    response_cost,
+    response_format_for,
+    validate_provider_credentials,
+)
 from prompts.laguna.base import LAGUNA_SYSTEM_PROMPT
 
 try:
@@ -67,7 +73,8 @@ class ExecutorAgent:
                 "litellm is required for executor execution; install project dependencies"
             )
         else:
-            validate_provider_credentials(self.model_name, config.openrouter_api_key)
+            api_key = resolve_api_key(self.model_name)
+            validate_provider_credentials(self.model_name, api_key)
             messages = [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt_payload},
@@ -79,9 +86,9 @@ class ExecutorAgent:
                 kwargs={
                     "model": self.model_name,
                     "messages": messages,
-                    "api_key": config.openrouter_api_key or None,
+                    "api_key": api_key or None,
                     "temperature": 0.2,
-                    "response_format": {"type": "json_object"},
+                    "response_format": response_format_for(self.model_name),
                     "max_tokens": config.max_tokens,
                     "timeout": config.provider_timeout_seconds,
                 },

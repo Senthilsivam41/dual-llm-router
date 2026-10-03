@@ -4,7 +4,13 @@ from typing import Dict, Any, Optional, Tuple
 from ..config import config
 from ..schemas.task_spec import TaskSpec
 from ..utils.metrics import MetricsLogger
-from .provider import call_with_retry, response_cost, validate_provider_credentials
+from .provider import (
+    call_with_retry,
+    resolve_api_key,
+    response_cost,
+    response_format_for,
+    validate_provider_credentials,
+)
 from prompts.hermes.base import HERMES_SYSTEM_PROMPT
 
 try:
@@ -32,7 +38,8 @@ class PlannerAgent:
                 "litellm is required for planner execution; install project dependencies"
             )
         else:
-            validate_provider_credentials(self.model_name, config.openrouter_api_key)
+            api_key = resolve_api_key(self.model_name)
+            validate_provider_credentials(self.model_name, api_key)
             messages = [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -44,9 +51,9 @@ class PlannerAgent:
                 kwargs={
                     "model": self.model_name,
                     "messages": messages,
-                    "api_key": config.openrouter_api_key or None,
+                    "api_key": api_key or None,
                     "temperature": 0.1,
-                    "response_format": {"type": "json_object"},
+                    "response_format": response_format_for(self.model_name),
                     "max_tokens": config.max_tokens,
                     "timeout": config.provider_timeout_seconds,
                 },
