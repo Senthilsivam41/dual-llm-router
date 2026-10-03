@@ -1,8 +1,8 @@
 # Current status
 
-**Updated:** 2026-08-25  
-**Branch:** `cursor/prompt-evolution-loop`  
-**HEAD (local at prior update):** `047bb80` — Add feasible CI/CD workflows for PR smoke, weekly benchmarks, and nightly evolution.
+**Updated:** 2026-10-03  
+**Branch:** `fix/p0-ci-green`  
+**Base:** `origin/main` after PR #8 merged the evolution loop.
 
 ## Portfolio productization (2026-08-25)
 
@@ -70,12 +70,11 @@ Docs: [`benchmark/benchmark-cicd.md`](../benchmark/benchmark-cicd.md), [`benchma
 
 - Unit gates (local): evolution / scoring / mutation / A/B / benchmark / publisher / P0 — passing
 - Comparative after `evolve --runs 40 --force` produces parseable `reports/comparative.json`
-- Pre-existing: `tests/test_p1_functionality.py` still fails (P1 features not implemented)
+- CI pytest includes `tests/test_p1_functionality.py`. Provider calls in tests use dummy credentials from `tests/conftest.py`.
 
 ## Known gaps
 
-1. Optional `OPENROUTER_API_KEY` not required for CI; live weekly runs need the secret
+1. Optional `OPENROUTER_API_KEY` is not required for CI. Live weekly runs use the secret when it is set and otherwise stay on `--simulate`.
 2. Slack notifications deferred (step summaries used instead)
-3. P1 functionality tests unfinished
-4. Human-intervention rate not yet instrumented in simulate path
-5. Branch may be behind remote bot publish commits — ff-pull before push
+3. Human-intervention rate not yet instrumented in simulate path
+4. P1 live-evaluation work (stricter acceptance checks, comparative matrix) is still open. See [FUTURE.md](./FUTURE.md).

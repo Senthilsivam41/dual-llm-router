@@ -1,13 +1,15 @@
 # Future changes
 
-**Updated:** 2026-08-01  
+**Updated:** 2026-10-03  
 Prioritized backlog after evolution + benchmark + CI/CD slice.
 
 ## P0 — Merge & CI hygiene
 
-1. Open / refresh PR `cursor/prompt-evolution-loop` → `main` when ready
-2. Confirm Actions green: `ci-benchmark` on PR, `Benchmark` publish on push
-3. Optionally set repo secret `OPENROUTER_API_KEY` for scheduled live runs
+Done on `fix/p0-ci-green`:
+
+1. `cursor/prompt-evolution-loop` merged to `main` (PR #8). Follow-up branch fixes the red test job.
+2. The full pytest suite no longer requires `OPENROUTER_API_KEY`. CI Benchmark (PR) and Benchmark (push) both run that suite. Push path filters include `tests/**`.
+3. `OPENROUTER_API_KEY` stays optional. Scheduled live runs use it when the secret exists and fall back to `--simulate` when it does not.
 
 ## P1 — Live evaluation quality
 
