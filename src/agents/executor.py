@@ -44,11 +44,11 @@ def _is_safe_action_criterion(criterion: str) -> bool:
 class ExecutorAgent:
     def __init__(
         self,
-        model_name: str = config.executor_model,
+        model_name: Optional[str] = None,
         workspace_root: str = ".",
         system_prompt: Optional[str] = None,
     ):
-        self.model_name = model_name
+        self.model_name = model_name or config.executor_model
         self.workspace_root = workspace_root
         self.system_prompt = system_prompt or EXECUTOR_SYSTEM_PROMPT
 
