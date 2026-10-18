@@ -1,13 +1,13 @@
-# Benchmark Results — 2026-10-11T08:16:39.722209Z
+# Benchmark Results — 2026-10-18T06:57:01.050795Z
 
 ## Run metadata
 
 | Field | Value |
 | --- | --- |
-| Timestamp (UTC) | `2026-10-11T08:16:39.722209Z` |
-| Git commit | `87dd79f` |
+| Timestamp (UTC) | `2026-10-18T06:57:01.050795Z` |
+| Git commit | `ee679aa` |
 | Branch | `main` |
-| Commit subject | Merge pull request #9 from Senthilsivam41/fix/p0-ci-green |
+| Commit subject | chore(benchmark): publish results for 87dd79f [skip ci] |
 | Suite | `all` |
 | Variant combo | `hermes_v1,laguna_v1` |
 | Mode | `simulate` |
