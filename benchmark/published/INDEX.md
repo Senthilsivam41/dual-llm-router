@@ -6,6 +6,7 @@ Naming standard: `benchmark_results_<YYYYMMDD_HHMMSSZ>.md`
 
 | Timestamp (UTC) | Report | Commit | Suite | Success rate |
 | --- | --- | --- | --- | ---: |
+| `20261025_071543Z` | [benchmark_results_20261025_071543Z.md](benchmark_results_20261025_071543Z.md) | `c7d85ef` | `all` | 0.4000 |
 | `20261018_065701Z` | [benchmark_results_20261018_065701Z.md](benchmark_results_20261018_065701Z.md) | `ee679aa` | `all` | 0.4000 |
 | `20261011_081639Z` | [benchmark_results_20261011_081639Z.md](benchmark_results_20261011_081639Z.md) | `87dd79f` | `all` | 0.4000 |
 | `20261004_074503Z` | [benchmark_results_20261004_074503Z.md](benchmark_results_20261004_074503Z.md) | `3c971bb` | `all` | 0.4000 |
