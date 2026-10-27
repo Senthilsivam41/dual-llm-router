@@ -24,10 +24,10 @@ PLANNER_SYSTEM_PROMPT = HERMES_SYSTEM_PROMPT
 class PlannerAgent:
     def __init__(
         self,
-        model_name: str = config.planner_model,
+        model_name: Optional[str] = None,
         system_prompt: Optional[str] = None,
     ):
-        self.model_name = model_name
+        self.model_name = model_name or config.planner_model
         self.system_prompt = system_prompt or PLANNER_SYSTEM_PROMPT
 
     def plan(self, user_prompt: str, metrics_logger: MetricsLogger = None) -> Tuple[TaskSpec, Dict[str, Any]]:

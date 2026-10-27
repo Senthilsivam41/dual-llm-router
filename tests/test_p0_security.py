@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from src.agents.executor import ExecutorAgent
+from src.config import config
 from src.schemas.task_spec import TaskSpec
 from src.tools.action_schemas import validate_action
 from src.tools.patch_tool import apply_patch
@@ -115,6 +116,20 @@ def test_run_shell_cannot_read_above_workspace(tmp_path):
 def test_action_validation_rejects_malformed_or_unsafe_actions(action):
     with pytest.raises(ValueError):
         validate_action(action)
+
+
+def test_default_agents_use_fireworks_credentials():
+    from src.agents.executor import ExecutorAgent
+    from src.agents.planner import PlannerAgent
+    from src.agents.provider import resolve_api_key
+
+    planner = PlannerAgent()
+    executor = ExecutorAgent()
+
+    assert planner.model_name.startswith("fireworks_ai/")
+    assert executor.model_name.startswith("fireworks_ai/")
+    assert resolve_api_key(planner.model_name) == config.fireworks_api_key
+    assert resolve_api_key(executor.model_name) == config.fireworks_api_key
 
 
 def test_action_batch_is_validated_before_any_action_executes(tmp_path):
