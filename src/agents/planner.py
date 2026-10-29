@@ -1,14 +1,17 @@
 import json
 import time
+from pathlib import Path
 from typing import Dict, Any, Optional, Tuple
 from ..config import config
 from ..schemas.task_spec import TaskSpec
 from ..utils.metrics import MetricsLogger
 from .provider import (
     call_with_retry,
+    message_text,
     resolve_api_key,
     response_cost,
     response_format_for,
+    reasoning_effort_for,
     validate_provider_credentials,
 )
 from prompts.hermes.base import HERMES_SYSTEM_PROMPT
@@ -54,12 +57,13 @@ class PlannerAgent:
                     "api_key": api_key or None,
                     "temperature": 0.1,
                     "response_format": response_format_for(self.model_name),
+                    "reasoning_effort": reasoning_effort_for(self.model_name),
                     "max_tokens": config.max_tokens,
                     "timeout": config.provider_timeout_seconds,
                 },
             )
             elapsed = time.time() - start_time
-            raw_json = response.choices[0].message.content
+            raw_json = message_text(response.choices[0].message)
             usage = getattr(response, "usage", None)
             prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
             completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
@@ -75,6 +79,10 @@ class PlannerAgent:
                 cost_estimate_usd=provider_cost,
             )
             
+        if not raw_json.strip():
+            finish = getattr(response.choices[0], "finish_reason", None)
+            raise ValueError(f"Model returned no content (finish_reason={finish}).")
+
         cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         try:
             data = json.loads(cleaned_json)
@@ -88,3 +96,37 @@ class PlannerAgent:
             "tokens": {"prompt": prompt_tokens, "completion": completion_tokens},
             "cost_usd": provider_cost,
         }
+
+
+def workspace_listing(workspace: str) -> str:
+    root = Path(workspace)
+    if not root.exists():
+        return "(no files)"
+    names = [
+        str(path.relative_to(root))
+        for path in sorted(root.rglob("*"))
+        if path.is_file() and "__pycache__" not in path.parts
+    ]
+    return "\n".join(f"- {name}" for name in names) or "(no files)"
+
+
+def build_planner_user_message(
+    user_prompt: str,
+    workspace: str,
+    issue_text: Optional[str] = None,
+    rejection: Optional[str] = None,
+) -> str:
+    """Give the planner the bug report, the file list, and a prior validation error."""
+    parts = [
+        user_prompt.strip(),
+        "Workspace files:\n" + workspace_listing(workspace),
+    ]
+    if issue_text:
+        parts.append("Bug report (issue.md):\n" + issue_text.strip())
+    if rejection:
+        parts.append(
+            "The previous TaskSpec was rejected:\n"
+            + rejection
+            + "\nReturn a corrected TaskSpec JSON object."
+        )
+    return "\n\n".join(parts)

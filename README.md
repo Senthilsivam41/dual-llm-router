@@ -147,6 +147,10 @@ uv run python scripts/reset.py
 # One-shot pipeline (no evolution wrapper)
 uv run python example_run.py -p "Create math_utils.py with add(a, b) and a unit test"
 
+# Issue-to-fix showcase. Without FIREWORKS_API_KEY this replays the committed recording.
+make showcase
+make showcase-compare
+
 # Evolution CLI (simulate runs, evolve when due)
 uv run python scripts/evolve.py --runs 50
 uv run python scripts/evolve.py --force
@@ -193,6 +197,18 @@ Composite fitness for a `(hermes_variant, laguna_variant)` pair (see `config/evo
 Evolution triggers every `check_interval_runs` (default **50**). Challengers are created with hermes/laguna mutation operators, A/B tested, and winners written to `best_configs.json`.
 
 ---
+
+## Showcase
+
+`make showcase` runs one bundled bug. `examples/issue_to_fix/billing.py` applies a $10 coupon after tax and rounds each line before summing. `issue.md` states the charged and expected amounts.
+
+The planner turns that report into a `TaskSpec` with structured `checks`. The executor writes the fix and the pytest tests. The router runs those tests in a restricted subprocess, or in Docker when that image can import pytest, and counts a check only when its expected amount appears as a number inside an `assert` of a passing test. Report amounts are copied from `issue.md`. The planner also computes them. A disagreement is scored as planner accuracy and does not replace the report value. Edge cases are labeled required or optional, and at least one edge case must be required. Required checks decide the verdict. The executor gets up to three attempts with the pytest output and the unmatched checks. The plan stays fixed.
+
+The pinned models are Fireworks `deepseek-v4p1-flash` (planner) and `glm-5p3-flash` (executor). Override them with `SHOWCASE_PLANNER_MODEL` and `SHOWCASE_EXECUTOR_MODEL`, or with `PLANNER_MODEL` and `EXECUTOR_MODEL` when those are not the repo's OpenRouter defaults. A preflight call checks both models. There is no fallback.
+
+Without `FIREWORKS_API_KEY`, the command explains what is missing and opens the recorded sample in `examples/issue_to_fix/recorded/`. That sample is one of five live runs: verified in 5 of 5, median 1 attempt, median cost $0.002041. `make showcase-compare` runs the same fixture with the executor model in both roles.
+
+The benchmark task `medium_billing_coupon` uses the same fixture, so evolution can score planner accuracy. A non-blocking GitHub Action runs the showcase when a pull request touches the agents, prompts, or fixture, and on the weekly schedule. It writes a job summary from `run.json`, uploads `report.html`, and refreshes `benchmark/published/showcase_success_rate.json` without replacing the committed sample.
 
 ## Benchmarks
 

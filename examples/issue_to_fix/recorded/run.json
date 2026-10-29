@@ -1,0 +1,179 @@
+{
+  "kind": "recorded",
+  "recorded_label": "Recorded run from 2026-10-29T00:54:49Z, not live",
+  "finished_at": "2026-10-29T00:54:49Z",
+  "verdict": "verified",
+  "status": "completed",
+  "error": null,
+  "models": {
+    "planner": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+    "executor": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash"
+  },
+  "sandbox": {
+    "mode": "subprocess",
+    "warning": "Sandbox: restricted subprocess. Generated tests can still reach the network and read files this user can read."
+  },
+  "planner_accuracy": 1.0,
+  "planner_disagreements": [],
+  "planner_attempts": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "success": true,
+      "cost_usd": 0.0004687,
+      "unmatched": [],
+      "pytest_output": "....                                                                     [100%]\n4 passed in 0.01s"
+    }
+  ],
+  "checks": [
+    {
+      "id": "AC1",
+      "source": "report",
+      "description": "Coupon applied to pre-tax subtotal: items 100.00, coupon 10.00, tax 0.08.",
+      "expected_value": "97.20",
+      "planner_value": "97.20",
+      "required": true,
+      "reason": "",
+      "passed": true,
+      "criterion": "Coupon applied to pre-tax subtotal: items 100.00, coupon 10.00, tax 0.08.",
+      "details": "tests/test_billing.py:7 assert Decimal(invoice_total([\"100.00\"], coupon=\"10.00\", tax_rate=\"0.08\")) == Decimal(\"97.20\")",
+      "assertion": {
+        "path": "tests/test_billing.py",
+        "line": 7,
+        "text": "assert Decimal(invoice_total([\"100.00\"], coupon=\"10.00\", tax_rate=\"0.08\")) == Decimal(\"97.20\")"
+      },
+      "verification_method": "pytest_assert",
+      "kind": "check"
+    },
+    {
+      "id": "AC2",
+      "source": "report",
+      "description": "Per-line rounding avoided: items 1.235 + 1.235, coupon 0, tax 0, rounded half up once.",
+      "expected_value": "2.47",
+      "planner_value": "2.47",
+      "required": true,
+      "reason": "",
+      "passed": true,
+      "criterion": "Per-line rounding avoided: items 1.235 + 1.235, coupon 0, tax 0, rounded half up once.",
+      "details": "tests/test_billing.py:11 assert Decimal(invoice_total([\"1.235\", \"1.235\"], coupon=\"0\", tax_rate=\"0\")) == Decimal(\"2.47\")",
+      "assertion": {
+        "path": "tests/test_billing.py",
+        "line": 11,
+        "text": "assert Decimal(invoice_total([\"1.235\", \"1.235\"], coupon=\"0\", tax_rate=\"0\")) == Decimal(\"2.47\")"
+      },
+      "verification_method": "pytest_assert",
+      "kind": "check"
+    },
+    {
+      "id": "AC3",
+      "source": "edge",
+      "description": "Exact half-cent rounding: single item 1.005, coupon 0, tax 0 should round half up to 1.01.",
+      "expected_value": "1.01",
+      "planner_value": "1.01",
+      "required": true,
+      "reason": "Verifies ROUND_HALF_UP is applied at the exact half-cent boundary, which is the core rounding rule.",
+      "passed": true,
+      "criterion": "Exact half-cent rounding: single item 1.005, coupon 0, tax 0 should round half up to 1.01.",
+      "details": "tests/test_billing.py:15 assert Decimal(invoice_total([\"1.005\"], coupon=\"0\", tax_rate=\"0\")) == Decimal(\"1.01\")",
+      "assertion": {
+        "path": "tests/test_billing.py",
+        "line": 15,
+        "text": "assert Decimal(invoice_total([\"1.005\"], coupon=\"0\", tax_rate=\"0\")) == Decimal(\"1.01\")"
+      },
+      "verification_method": "pytest_assert",
+      "kind": "check"
+    },
+    {
+      "id": "AC4",
+      "source": "edge",
+      "description": "Coupon larger than subtotal: items 5.00, coupon 10.00, tax 0.08 produces a negative total.",
+      "expected_value": "-5.40",
+      "planner_value": "-5.40",
+      "required": false,
+      "reason": "Behavior for coupons exceeding the subtotal is unspecified in the report; included to document the arithmetic but not mandated.",
+      "passed": true,
+      "criterion": "Coupon larger than subtotal: items 5.00, coupon 10.00, tax 0.08 produces a negative total.",
+      "details": "tests/test_billing.py:19 assert Decimal(invoice_total([\"5.00\"], coupon=\"10.00\", tax_rate=\"0.08\")) == Decimal(\"-5.40\")",
+      "assertion": {
+        "path": "tests/test_billing.py",
+        "line": 19,
+        "text": "assert Decimal(invoice_total([\"5.00\"], coupon=\"10.00\", tax_rate=\"0.08\")) == Decimal(\"-5.40\")"
+      },
+      "verification_method": "pytest_assert",
+      "kind": "check"
+    }
+  ],
+  "costs": {
+    "planner": 0.001572,
+    "executor": 0.000469,
+    "total": 0.002041
+  },
+  "task_spec": {
+    "goal": "Fix the invoice_total bug in billing.py so the coupon is applied to the pre-tax subtotal, line items are summed exactly without per-line rounding, and the final charge is rounded half up to cents once at the end; add pytest tests asserting each check's expected value.",
+    "target_files": [
+      "billing.py",
+      "tests/test_billing.py"
+    ],
+    "acceptance_criteria": [
+      "Coupon is subtracted from the pre-tax subtotal before tax is computed.",
+      "Line items are summed exactly (no per-line rounding to cents before summing).",
+      "The final charge is rounded half up to cents exactly once at the end.",
+      "Case 1 (items 100.00, coupon 10.00, tax 0.08) yields 97.20.",
+      "Case 2 (items 1.235, 1.235, coupon 0, tax 0) yields 2.47.",
+      "pytest tests assert each check's expected value and pass."
+    ],
+    "step_by_step_plan": [
+      "Read billing.py and issue.md to understand the current invoice_total implementation.",
+      "Refactor invoice_total to sum line items exactly (use Decimal or exact arithmetic, no intermediate rounding).",
+      "Apply the coupon to the pre-tax subtotal, then compute tax on the reduced subtotal.",
+      "Round the final total half up to cents exactly once using Decimal quantize with ROUND_HALF_UP.",
+      "Create tests/test_billing.py with pytest cases asserting the expected values for Case 1, Case 2, and the edge cases.",
+      "Run pytest and confirm all checks pass."
+    ],
+    "notes": "Use decimal.Decimal throughout to avoid binary float rounding errors. Rounding must be ROUND_HALF_UP applied only to the final total, not to individual line items or intermediate values.",
+    "checks": [
+      {
+        "id": "AC1",
+        "source": "report",
+        "description": "Coupon applied to pre-tax subtotal: items 100.00, coupon 10.00, tax 0.08.",
+        "expected_value": "97.20",
+        "planner_value": "97.20",
+        "required": true,
+        "reason": ""
+      },
+      {
+        "id": "AC2",
+        "source": "report",
+        "description": "Per-line rounding avoided: items 1.235 + 1.235, coupon 0, tax 0, rounded half up once.",
+        "expected_value": "2.47",
+        "planner_value": "2.47",
+        "required": true,
+        "reason": ""
+      },
+      {
+        "id": "AC3",
+        "source": "edge",
+        "description": "Exact half-cent rounding: single item 1.005, coupon 0, tax 0 should round half up to 1.01.",
+        "expected_value": "1.01",
+        "planner_value": "1.01",
+        "required": true,
+        "reason": "Verifies ROUND_HALF_UP is applied at the exact half-cent boundary, which is the core rounding rule."
+      },
+      {
+        "id": "AC4",
+        "source": "edge",
+        "description": "Coupon larger than subtotal: items 5.00, coupon 10.00, tax 0.08 produces a negative total.",
+        "expected_value": "-5.40",
+        "planner_value": "-5.40",
+        "required": false,
+        "reason": "Behavior for coupons exceeding the subtotal is unspecified in the report; included to document the arithmetic but not mandated."
+      }
+    ]
+  },
+  "success_rate": {
+    "verified": 5,
+    "total": 5,
+    "median_attempts": 1,
+    "median_cost_usd": 0.002041
+  }
+}

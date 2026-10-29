@@ -44,6 +44,17 @@ def response_format_for(model_name: str) -> dict[str, str] | None:
     return {"type": "json_object"}
 
 
+def reasoning_effort_for(model_name: str) -> str | None:
+    """Keep thinking models from spending the whole token budget before the answer.
+
+    GLM on Fireworks is thinking-only, so thinking cannot be turned off. Low effort
+    leaves room for the JSON answer inside max_tokens.
+    """
+    if _is_fireworks_model(model_name):
+        return "low"
+    return None
+
+
 def validate_provider_credentials(model_name: str, api_key: str) -> None:
     if model_name.startswith("openrouter/") and not api_key:
         raise RuntimeError("OPENROUTER_API_KEY is required for OpenRouter models")
@@ -68,6 +79,26 @@ def call_with_retry(
                 raise
             sleep(min(0.25 * (2**attempt), 2.0))
     raise RuntimeError("Provider retry loop exited unexpectedly")
+
+
+def message_text(message: Any) -> str:
+    """Return the assistant text, including list-shaped content blocks.
+
+    Reasoning models sometimes leave `content` as None when the token budget
+    is spent before the answer. Callers treat an empty string as no answer.
+    """
+    content = getattr(message, "content", None)
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict) and block.get("text"):
+                parts.append(str(block["text"]))
+        return "\n".join(parts)
+    return ""
 
 
 def response_cost(response: Any) -> float | None:
