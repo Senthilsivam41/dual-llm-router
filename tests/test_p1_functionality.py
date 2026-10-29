@@ -243,6 +243,8 @@ def test_evolving_router_forwards_max_iterations():
         "Implement",
         execute_tools=False,
         max_iterations=4,
+        issue_text=None,
+        seed_files=None,
     )
 
 

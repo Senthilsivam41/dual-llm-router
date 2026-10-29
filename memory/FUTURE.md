@@ -13,7 +13,8 @@ Done on `fix/p0-ci-green`:
 
 ## P1 — Live evaluation quality
 
-- Wire stricter acceptance checks against generated workspaces (beyond simulate heuristics)
+- Issue-to-fix showcase is in tree (`make showcase`, `examples/issue_to_fix/`). The committed sample is a representative live run: verified in 5 of 5, median 1 attempt, median cost $0.002041.
+- Wire stricter acceptance checks against generated workspaces (beyond simulate heuristics) — done for the billing fixture via assertion matching; other benchmark tasks still use the older verifier
 - Track human-intervention rate when tools / HITL are involved
 - Expand comparative matrix to evolved Laguna mutants (not only Hermes × laguna_v1)
 - Keep published Markdown diffs meaningful (avoid noise-only republishes)

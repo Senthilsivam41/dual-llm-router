@@ -8,11 +8,15 @@ from ..schemas.task_spec import TaskSpec
 from ..tools import apply_patch, run_shell
 from ..tools.action_schemas import validate_actions, ActionModel
 from ..utils.metrics import MetricsLogger
+from ..verification.checks import verify_checks
+from ..verification.feedback import target_file_context
 from .provider import (
     call_with_retry,
+    message_text,
     resolve_api_key,
     response_cost,
     response_format_for,
+    reasoning_effort_for,
     validate_provider_credentials,
 )
 from prompts.laguna.base import LAGUNA_SYSTEM_PROMPT
@@ -44,11 +48,11 @@ def _is_safe_action_criterion(criterion: str) -> bool:
 class ExecutorAgent:
     def __init__(
         self,
-        model_name: str = config.executor_model,
+        model_name: Optional[str] = None,
         workspace_root: str = ".",
         system_prompt: Optional[str] = None,
     ):
-        self.model_name = model_name
+        self.model_name = model_name or config.executor_model
         self.workspace_root = workspace_root
         self.system_prompt = system_prompt or EXECUTOR_SYSTEM_PROMPT
 
@@ -56,16 +60,29 @@ class ExecutorAgent:
         self,
         task_spec: TaskSpec,
         metrics_logger: MetricsLogger = None,
-        execute_tools: bool = True
+        execute_tools: bool = True,
+        feedback: Optional[str] = None,
     ) -> Dict[str, Any]:
         start_time = time.time()
-        
+
+        file_context = target_file_context(self.workspace_root, task_spec.target_files)
+        checks_block = ""
+        if task_spec.checks:
+            checks_block = (
+                "Checks (assert each expected_value as a number inside an assert):\n"
+                + json.dumps([check.model_dump() for check in task_spec.checks], indent=2)
+                + "\n"
+            )
+        feedback_block = f"Previous attempt failed:\n{feedback}\n" if feedback else ""
         prompt_payload = (
             f"Goal: {task_spec.goal}\n"
             f"Target Files: {task_spec.target_files}\n"
             f"Acceptance Criteria: {task_spec.acceptance_criteria}\n"
             f"Plan: {task_spec.step_by_step_plan}\n"
-            f"Notes: {task_spec.notes or ''}"
+            f"Notes: {task_spec.notes or ''}\n"
+            f"{checks_block}"
+            f"{file_context}\n"
+            f"{feedback_block}"
         )
         
         if completion is None:
@@ -89,12 +106,13 @@ class ExecutorAgent:
                     "api_key": api_key or None,
                     "temperature": 0.2,
                     "response_format": response_format_for(self.model_name),
+                    "reasoning_effort": reasoning_effort_for(self.model_name),
                     "max_tokens": config.max_tokens,
                     "timeout": config.provider_timeout_seconds,
                 },
             )
             elapsed = time.time() - start_time
-            raw_json = response.choices[0].message.content
+            raw_json = message_text(response.choices[0].message)
             usage = getattr(response, "usage", None)
             prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
             completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
@@ -110,11 +128,20 @@ class ExecutorAgent:
                 cost_estimate_usd=provider_cost,
             )
             
-        cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        try:
-            execution_plan = json.loads(cleaned_json)
-        except Exception as e:
-            execution_plan = {"error": f"Failed to parse execution plan JSON: {e}", "raw_response": raw_json}
+        if not raw_json.strip():
+            finish = getattr(response.choices[0], "finish_reason", None)
+            execution_plan = {
+                "error": f"Model returned no content (finish_reason={finish}).",
+            }
+        else:
+            cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+            try:
+                execution_plan = json.loads(cleaned_json)
+            except Exception as exc:
+                execution_plan = {
+                    "error": f"Failed to parse execution plan JSON: {exc}",
+                    "raw_response": raw_json,
+                }
 
         tool_results = []
         all_tools_succeeded = True
@@ -164,6 +191,27 @@ class ExecutorAgent:
 
         # Verify only facts this process can observe. LLM-authored
         # verification_results are claims, not trusted evidence.
+        if task_spec.checks:
+            check_report = verify_checks(self.workspace_root, task_spec.checks)
+            check_report["tools_succeeded"] = all_tools_succeeded
+            check_report["target_files_passed"] = all(
+                os.path.exists(os.path.join(self.workspace_root, target_file))
+                for target_file in task_spec.target_files
+            ) if task_spec.target_files else True
+            check_report["reported_verification_results"] = execution_plan.get(
+                "verification_results", []
+            )
+            overall_success = bool(check_report["criteria_passed"]) and "error" not in execution_plan
+            return {
+                "success": overall_success,
+                "execution_plan": execution_plan,
+                "tool_results": tool_results,
+                "verification_report": check_report,
+                "latency": elapsed,
+                "tokens": {"prompt": prompt_tokens, "completion": completion_tokens},
+                "cost_usd": provider_cost,
+            }
+
         criteria_verification = []
         target_file_status = {}
         for target_file in task_spec.target_files:
