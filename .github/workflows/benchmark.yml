@@ -72,6 +72,8 @@ jobs:
         run: uv sync --locked --dev
 
       - name: Run full test suite
+        env:
+          FIREWORKS_API_KEY: ${{ secrets.FIREWORKS_API_KEY }}
         run: uv run pytest -q
 
   # ---------------------------------------------------------------------------

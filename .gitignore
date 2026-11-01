@@ -7,6 +7,8 @@ __pycache__/
 *.egg-info/
 .env
 workspace/
+!examples/issue_to_fix/recorded/workspace/
+!examples/issue_to_fix/recorded/workspace/**
 reports/
 .codegraph/
 

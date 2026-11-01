@@ -1,0 +1,36 @@
+{
+  "runs": [
+    {
+      "at": "2026-10-29T00:53:59Z",
+      "verified": true,
+      "attempts": 2,
+      "cost_usd": 0.003383
+    },
+    {
+      "at": "2026-10-29T00:54:49Z",
+      "verified": true,
+      "attempts": 1,
+      "cost_usd": 0.002041
+    },
+    {
+      "at": "2026-10-29T00:55:00Z",
+      "verified": true,
+      "attempts": 1,
+      "cost_usd": 0.001787
+    },
+    {
+      "at": "2026-10-29T00:55:17Z",
+      "verified": true,
+      "attempts": 1,
+      "cost_usd": 0.002197
+    },
+    {
+      "at": "2026-10-29T00:55:28Z",
+      "verified": true,
+      "attempts": 1,
+      "cost_usd": 0.001956
+    }
+  ],
+  "verified": 5,
+  "total": 5
+}

@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-03  
+**Updated:** 2026-10-29  
 **Branch:** `fix/p0-ci-green`  
 **Base:** `origin/main` after PR #8 merged the evolution loop.
 
@@ -65,6 +65,7 @@ Docs: [`benchmark/benchmark-cicd.md`](../benchmark/benchmark-cicd.md), [`benchma
 3. Published results: `benchmark_results_<YYYYMMDD_HHMMSSZ>.md` (+ system metrics, domains)
 4. Guide tasks: `easy_basic_function`, `easy_file_creation`, `medium_class_with_methods`, `medium_api_endpoint`
 5. Feasible CI/CD (PR smoke, weekly suite/comparative, nightly evolution)
+6. Issue-to-fix showcase: `examples/issue_to_fix/`, structured `checks`, pytest assertion verifier, `make showcase`
 
 ## Verification snapshot
 

@@ -70,6 +70,8 @@ class EvolvingRouter(DualLLMRouter):
         execute_tools: bool = True,
         task: Optional[Dict[str, Any]] = None,
         max_iterations: int = 1,
+        issue_text: Optional[str] = None,
+        seed_files: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """Route a task with evolution awareness and run logging."""
         if self.evolution_engine.should_evolve():
@@ -88,6 +90,8 @@ class EvolvingRouter(DualLLMRouter):
             user_prompt,
             execute_tools=execute_tools,
             max_iterations=max_iterations,
+            issue_text=issue_text,
+            seed_files=seed_files,
         )
 
         metrics = pipeline.get("metrics") or {}
@@ -119,13 +123,7 @@ class EvolvingRouter(DualLLMRouter):
                         if "executor" in str(m.get("node", "")).lower()
                     ),
                 },
-                "quality_metrics": {
-                    "task_spec_clarity": 1.0 if pipeline.get("task_spec") else 0.0,
-                    "acceptance_criteria_pass": bool(verification.get("criteria_passed")),
-                    "acceptance_criteria_score": criteria_score,
-                    "verified_criteria": int(verification.get("verified_criteria") or 0),
-                    "total_criteria": int(verification.get("total_criteria") or 0),
-                },
+                "quality_metrics": _quality_metrics(pipeline, criteria_score, verification),
             }
         )
         return pipeline
@@ -144,9 +142,31 @@ class EvolvingRouter(DualLLMRouter):
         user_prompt: str,
         execute_tools: bool = True,
         max_iterations: int = 1,
+        issue_text: Optional[str] = None,
+        seed_files: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         return self.route_task(
             user_prompt,
             execute_tools=execute_tools,
             max_iterations=max_iterations,
+            issue_text=issue_text,
+            seed_files=seed_files,
         )
+
+
+def _quality_metrics(
+    pipeline: Dict[str, Any],
+    criteria_score: float,
+    verification: Dict[str, Any],
+) -> Dict[str, Any]:
+    quality: Dict[str, Any] = {
+        "task_spec_clarity": 1.0 if pipeline.get("task_spec") else 0.0,
+        "acceptance_criteria_pass": bool(verification.get("criteria_passed")),
+        "acceptance_criteria_score": criteria_score,
+        "verified_criteria": int(verification.get("verified_criteria") or 0),
+        "total_criteria": int(verification.get("total_criteria") or 0),
+    }
+    accuracy = pipeline.get("planner_accuracy")
+    if accuracy is not None:
+        quality["planner_accuracy"] = float(accuracy)
+    return quality
