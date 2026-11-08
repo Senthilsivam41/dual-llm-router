@@ -1,13 +1,13 @@
-# Benchmark Results — 2026-11-01T08:41:01.448578Z
+# Benchmark Results — 2026-11-08T08:35:02.062269Z
 
 ## Run metadata
 
 | Field | Value |
 | --- | --- |
-| Timestamp (UTC) | `2026-11-01T08:41:01.448578Z` |
-| Git commit | `7690fbe` |
+| Timestamp (UTC) | `2026-11-08T08:35:02.062269Z` |
+| Git commit | `2af3311` |
 | Branch | `main` |
-| Commit subject | chore(benchmark): publish results for c7d85ef [skip ci] |
+| Commit subject | chore(benchmark): publish results for 7690fbe [skip ci] |
 | Suite | `all` |
 | Variant combo | `hermes_v1,laguna_v1` |
 | Mode | `simulate` |
