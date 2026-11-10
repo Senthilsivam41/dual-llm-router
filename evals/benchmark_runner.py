@@ -17,7 +17,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from benchmark.tasks_loader import load_task_modules
 from evals.evolution_engine import EvolutionEngine
+from evals.intervention import intervention_from_pipeline
 from evals.paths import AUTOCLAW_ROOT, PROJECT_ROOT
+from evals.workspace_acceptance import verify_workspace_criteria
 from src.workspace_seed import write_legacy_seed, write_seed_files
 
 logger = logging.getLogger("evals.benchmark_runner")
@@ -96,6 +98,8 @@ class BenchmarkResult:
     expected_cost: float = 0.0
     planning_failed: bool = False
     handoff_failed: bool = False
+    human_intervened: bool = False
+    human_intervention_reason: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -212,6 +216,8 @@ class BenchmarkRunner:
             expected_cost=task.expected_cost,
             planning_failed=planning_failed,
             handoff_failed=handoff_failed,
+            human_intervened=bool(result.get("human_intervened")),
+            human_intervention_reason=result.get("human_intervention_reason"),
         )
         self.results.append(benchmark_result)
 
@@ -236,6 +242,8 @@ class BenchmarkRunner:
                     "time_seconds": benchmark_result.time_seconds,
                     "iterations": benchmark_result.iterations,
                     "executor_calls": benchmark_result.executor_calls,
+                    "human_intervened": benchmark_result.human_intervened,
+                    "human_intervention_reason": benchmark_result.human_intervention_reason,
                 },
                 "quality_metrics": {
                     "quality_score": quality_score,
@@ -315,6 +323,8 @@ class BenchmarkRunner:
                 "executor_calls": 0,
                 "cost": 0.0,
                 "acceptance_criteria_details": {c: False for c in task.acceptance_criteria},
+                "human_intervened": False,
+                "human_intervention_reason": None,
             }
         finally:
             self.engine.active_hermes = prev_h
@@ -322,14 +332,15 @@ class BenchmarkRunner:
 
         metrics = pipeline.get("metrics") or {}
         executor = pipeline.get("executor_result") or {}
-        report = executor.get("verification_report") or {}
-        details = {
-            d.get("criterion", f"check_{i}"): bool(d.get("passed"))
-            for i, d in enumerate(report.get("details") or [])
-        }
-        # Map planner criteria into details when verification only checked files.
-        for criterion in task.acceptance_criteria:
-            details.setdefault(criterion, bool(report.get("criteria_passed")))
+        verified = verify_workspace_criteria(str(work), task.acceptance_criteria)
+        details = dict(verified["details"])
+        tests_pass = bool(executor.get("success"))
+        if verified["collected_tests"]:
+            tests_pass = bool(verified["pytest_passed"])
+        intervened, intervention_reason = intervention_from_pipeline(pipeline)
+        failure_reason = pipeline.get("error")
+        if verified["misses"] and not failure_reason:
+            failure_reason = verified["misses"][0]
 
         status = pipeline.get("status", "failure")
         task_spec = pipeline.get("task_spec")
@@ -349,20 +360,22 @@ class BenchmarkRunner:
                 if "executor" in str(m.get("node", "")).lower()
             ),
             "cost": float(metrics.get("total_cost_usd") or 0.0),
-            "failure_reason": pipeline.get("error"),
+            "failure_reason": failure_reason,
             "acceptance_criteria_details": details,
             "workspace": str(work),
             "task_spec": task_spec,
             "syntax_valid": True,
-            "tests_pass": bool(executor.get("success")),
+            "tests_pass": tests_pass,
             "imports_valid": True,
-            "no_errors": status in ("completed", "success"),
+            "no_errors": status in ("completed", "success") and not verified["misses"],
             "planning_failed": planning_failed and status not in ("completed", "success"),
             "handoff_failed": handoff_failed,
             "planner_accuracy": pipeline.get("planner_accuracy"),
+            "human_intervened": intervened,
+            "human_intervention_reason": intervention_reason,
             "code_quality": {
                 "syntax_valid": True,
-                "tests_pass": bool(executor.get("success")),
+                "tests_pass": tests_pass,
             },
         }
 
@@ -393,6 +406,8 @@ class BenchmarkRunner:
             "no_errors": success,
             "planning_failed": planning_failed,
             "handoff_failed": handoff_failed,
+            "human_intervened": False,
+            "human_intervention_reason": None,
             "code_quality": {
                 "syntax_valid": True,
                 "tests_pass": success,

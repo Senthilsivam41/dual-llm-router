@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from evals.benchmark_publisher import is_major_change, publish_results
@@ -89,5 +90,84 @@ def test_publish_writes_timestamped_markdown(tmp_path: Path):
     assert "Overall metrics" in body
     assert "System metrics" in body
     assert "Spec rejection rate" in body
+    assert "Human intervention rate" in body
     assert "By domain" in body
     assert "easy_simple_function" in body or "easy_basic_function" in body
+
+
+def test_publish_skips_noise_only_republish(tmp_path: Path):
+    engine = _seed_engine(tmp_path)
+    state = tmp_path / ".autoclaw" / "evals" / "benchmark"
+    runner = BenchmarkRunner(
+        engine,
+        benchmark_dir=state,
+        simulate=True,
+        workspace_root=str(tmp_path / "workspace"),
+    )
+    runner.run_benchmark_suite(suite="easy")
+    results_path = runner.save_results()
+    published = tmp_path / "benchmark" / "published"
+    first = publish_results(
+        results_path=results_path,
+        published_dir=published,
+        suite="easy",
+        variant="hermes_v1,laguna_v1",
+        simulate=True,
+        trigger="test",
+        timestamp=datetime(2026, 11, 11, 1, 0, tzinfo=timezone.utc),
+    )
+    latest_before = (published / "LATEST.md").read_text(encoding="utf-8")
+    second = publish_results(
+        results_path=results_path,
+        published_dir=published,
+        suite="easy",
+        variant="hermes_v1,laguna_v1",
+        simulate=True,
+        trigger="schedule",
+        timestamp=datetime(2026, 11, 11, 2, 0, tzinfo=timezone.utc),
+    )
+    assert second == first
+    assert len(list(published.glob("benchmark_results_*.md"))) == 1
+    index = json.loads((published / "index.json").read_text(encoding="utf-8"))
+    assert len(index) == 1
+    assert (published / "LATEST.md").read_text(encoding="utf-8") == latest_before
+
+
+def test_publish_writes_when_a_task_result_changes(tmp_path: Path):
+    engine = _seed_engine(tmp_path)
+    state = tmp_path / ".autoclaw" / "evals" / "benchmark"
+    runner = BenchmarkRunner(
+        engine,
+        benchmark_dir=state,
+        simulate=True,
+        workspace_root=str(tmp_path / "workspace"),
+    )
+    runner.run_benchmark_suite(suite="easy")
+    results_path = runner.save_results()
+    published = tmp_path / "benchmark" / "published"
+    first = publish_results(
+        results_path=results_path,
+        published_dir=published,
+        suite="easy",
+        variant="hermes_v1,laguna_v1",
+        simulate=True,
+        timestamp=datetime(2026, 11, 11, 1, 0, tzinfo=timezone.utc),
+    )
+    payload = json.loads(results_path.read_text(encoding="utf-8"))
+    payload[0]["status"] = "failure" if payload[0]["status"] != "failure" else "success"
+    results_path.write_text(json.dumps(payload), encoding="utf-8")
+    second = publish_results(
+        results_path=results_path,
+        published_dir=published,
+        suite="easy",
+        variant="hermes_v1,laguna_v1",
+        simulate=True,
+        timestamp=datetime(2026, 11, 11, 3, 0, tzinfo=timezone.utc),
+    )
+    assert second != first
+    assert second.exists()
+    index = json.loads((published / "index.json").read_text(encoding="utf-8"))
+    assert index[0]["file"] == second.name
+    assert (published / "LATEST.md").read_text(encoding="utf-8") == second.read_text(
+        encoding="utf-8"
+    )

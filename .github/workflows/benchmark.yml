@@ -251,7 +251,8 @@ jobs:
             --suite easy \
             --simulate \
             --output reports/comparative.json \
-            --variants hermes_v1,laguna_v1 hermes_v2,laguna_v1 hermes_v3,laguna_v1
+            --variants hermes_v1,laguna_v1 hermes_v2,laguna_v1 hermes_v3,laguna_v1 \
+            --include-evolved-laguna
           uv run python scripts/benchmark_dashboard.py \
             --report comparison \
             --output reports/comparative_dashboard.json

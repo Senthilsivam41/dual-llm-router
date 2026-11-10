@@ -1,6 +1,6 @@
 # Future changes
 
-**Updated:** 2026-10-03  
+**Updated:** 2026-11-11  
 Prioritized backlog after evolution + benchmark + CI/CD slice.
 
 ## P0 — Merge & CI hygiene
@@ -13,11 +13,13 @@ Done on `fix/p0-ci-green`:
 
 ## P1 — Live evaluation quality
 
+Done:
+
 - Issue-to-fix showcase is in tree (`make showcase`, `examples/issue_to_fix/`). The committed sample is a representative live run: verified in 5 of 5, median 1 attempt, median cost $0.002041.
-- Wire stricter acceptance checks against generated workspaces (beyond simulate heuristics) — done for the billing fixture via assertion matching; other benchmark tasks still use the older verifier
-- Track human-intervention rate when tools / HITL are involved
-- Expand comparative matrix to evolved Laguna mutants (not only Hermes × laguna_v1)
-- Keep published Markdown diffs meaningful (avoid noise-only republishes)
+- Generated workspaces are checked with pytest assertion matching, including benchmark tasks beyond the billing fixture. A numeric expectation fails when no passing test asserts it. Simulate mode still does not call the provider.
+- Human-intervention rate is recorded on every run. A run with no human step contributes zero, including simulate.
+- Comparative runs name the genomes in the matrix and add evolved Laguna mutants beside Hermes × `laguna_v1`.
+- Publishing skips a new Markdown file when the metrics and per-task outcomes are unchanged. `LATEST` and `INDEX` stay on the last material report.
 
 ## P2 — Evolution productization
 

@@ -45,6 +45,13 @@ class ComparativeBenchmark:
             results_by_variant[label] = results
 
         comparison = self._calculate_comparison(results_by_variant)
+        comparison["genomes"] = [
+            {"combo": f"{hermes}+{laguna}", "hermes": hermes, "laguna": laguna}
+            for hermes, laguna in variant_combos
+        ]
+        comparison["genome_ids"] = sorted(
+            {name for hermes, laguna in variant_combos for name in (hermes, laguna)}
+        )
         out = BENCHMARK_STATE_DIR / "comparison.json"
         out.parent.mkdir(parents=True, exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
@@ -160,3 +167,34 @@ def load_results_file(path: Path) -> List[BenchmarkResult]:
     if isinstance(data, dict):
         data = data.get("results", [])
     return [BenchmarkResult.from_dict(r) for r in data]
+
+
+def evolved_laguna_ids(genomes: Dict[str, Dict]) -> List[str]:
+    """Laguna genomes other than the v1 baseline."""
+    found: List[str] = []
+    for variant_id, genome in genomes.items():
+        if genome.get("_agent") == "hermes":
+            continue
+        if not str(variant_id).startswith("laguna_"):
+            continue
+        if variant_id == "laguna_v1":
+            continue
+        found.append(str(variant_id))
+    return sorted(set(found))
+
+
+def matrix_with_evolved_laguna(
+    combos: List[Tuple[str, str]],
+    genomes: Dict[str, Dict],
+    *,
+    hermes_id: str = "hermes_v1",
+) -> List[Tuple[str, str]]:
+    """Keep the requested combos and add hermes_v1 crossed with each Laguna mutant."""
+    expanded = list(combos)
+    seen = set(expanded)
+    for laguna_id in evolved_laguna_ids(genomes):
+        combo = (hermes_id, laguna_id)
+        if combo not in seen:
+            expanded.append(combo)
+            seen.add(combo)
+    return expanded
