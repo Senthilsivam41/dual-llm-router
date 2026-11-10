@@ -24,3 +24,4 @@ def fireworks_test_credentials(monkeypatch):
         monkeypatch.setattr(config, "executor_model", FIREWORKS_EXECUTOR_MODEL)
     if not config.openrouter_api_key:
         monkeypatch.setattr(config, "openrouter_api_key", "test-key")
+    monkeypatch.setenv("SHOWCASE_SANDBOX", "subprocess")

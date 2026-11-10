@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Issue-to-fix verified</title>
+<style>
+body { font: 16px/1.45 "Iowan Old Style", Palatino, Georgia, serif; margin: 2rem auto; max-width: 52rem; color: #1c1915; background: #f7f3ea; }
+h1 { font-weight: 600; letter-spacing: -0.02em; }
+.banner { background: #1c1915; color: #f7f3ea; display: inline-block; padding: 0.2rem 0.6rem; }
+table { width: 100%; border-collapse: collapse; background: white; }
+th, td { text-align: left; padding: 0.45rem 0.5rem; border-bottom: 1px solid #e4dccb; font-family: ui-monospace, monospace; font-size: 13px; vertical-align: top; }
+.pass { color: #1f6b3a; }
+.fail { color: #8d2a2a; }
+pre { white-space: pre-wrap; background: white; padding: 1rem; }
+</style>
+</head>
+<body>
+<h1>Issue-to-fix</h1>
+<p class='banner'>Recorded run from 2026-10-29T00:54:49Z, not live</p>
+<pre>Issue-to-fix  verified
+Recorded run from 2026-10-29T00:54:49Z, not live
+Verified in 5 of 5 runs, median 1 attempt, median cost $0.002041
+Planner accuracy: 100% of report values
+Sandbox: restricted subprocess. Generated tests can still reach the network and read files this user can read.
+Attempts: 1
+Cost: planner $0.001572  executor $0.000469  total $0.002041
+
+Checks
+  AC1  report  required  97.20  pass  tests/test_billing.py:7  assert Decimal(invoice_total([&quot;100.00&quot;], coupon=&quot;10.00&quot;, tax_rate=&quot;0.08&quot;)) == Decimal(&quot;97.20&quot;)
+  AC2  report  required  2.47  pass  tests/test_billing.py:11  assert Decimal(invoice_total([&quot;1.235&quot;, &quot;1.235&quot;], coupon=&quot;0&quot;, tax_rate=&quot;0&quot;)) == Decimal(&quot;2.47&quot;)
+  AC3  edge  required  1.01  pass  tests/test_billing.py:15  assert Decimal(invoice_total([&quot;1.005&quot;], coupon=&quot;0&quot;, tax_rate=&quot;0&quot;)) == Decimal(&quot;1.01&quot;)
+    reason: Verifies ROUND_HALF_UP is applied at the exact half-cent boundary, which is the core rounding rule.
+  AC4  edge  optional  -5.40  pass  tests/test_billing.py:19  assert Decimal(invoice_total([&quot;5.00&quot;], coupon=&quot;10.00&quot;, tax_rate=&quot;0.08&quot;)) == Decimal(&quot;-5.40&quot;)
+    reason: Behavior for coupons exceeding the subtotal is unspecified in the report; included to document the arithmetic but not mandated.</pre>
+<table><thead><tr><th>Check</th><th>Source</th><th>Label</th><th>Expected</th><th>Result</th><th>Assertion</th><th>Reason</th></tr></thead><tbody><tr><td>AC1</td><td>report</td><td>required</td><td>97.20</td><td class='pass'>pass</td><td>tests/test_billing.py:7 assert Decimal(invoice_total([&quot;100.00&quot;], coupon=&quot;10.00&quot;, tax_rate=&quot;0.08&quot;)) == Decimal(&quot;97.20&quot;)</td><td></td></tr><tr><td>AC2</td><td>report</td><td>required</td><td>2.47</td><td class='pass'>pass</td><td>tests/test_billing.py:11 assert Decimal(invoice_total([&quot;1.235&quot;, &quot;1.235&quot;], coupon=&quot;0&quot;, tax_rate=&quot;0&quot;)) == Decimal(&quot;2.47&quot;)</td><td></td></tr><tr><td>AC3</td><td>edge</td><td>required</td><td>1.01</td><td class='pass'>pass</td><td>tests/test_billing.py:15 assert Decimal(invoice_total([&quot;1.005&quot;], coupon=&quot;0&quot;, tax_rate=&quot;0&quot;)) == Decimal(&quot;1.01&quot;)</td><td>Verifies ROUND_HALF_UP is applied at the exact half-cent boundary, which is the core rounding rule.</td></tr><tr><td>AC4</td><td>edge</td><td>optional</td><td>-5.40</td><td class='pass'>pass</td><td>tests/test_billing.py:19 assert Decimal(invoice_total([&quot;5.00&quot;], coupon=&quot;10.00&quot;, tax_rate=&quot;0.08&quot;)) == Decimal(&quot;-5.40&quot;)</td><td>Behavior for coupons exceeding the subtotal is unspecified in the report; included to document the arithmetic but not mandated.</td></tr></tbody></table>
+</body>
+</html>

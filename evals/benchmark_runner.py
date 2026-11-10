@@ -18,10 +18,21 @@ from typing import Any, Dict, List, Optional, Tuple
 from benchmark.tasks_loader import load_task_modules
 from evals.evolution_engine import EvolutionEngine
 from evals.paths import AUTOCLAW_ROOT, PROJECT_ROOT
+from src.workspace_seed import write_legacy_seed, write_seed_files
 
 logger = logging.getLogger("evals.benchmark_runner")
 
 BENCHMARK_STATE_DIR = AUTOCLAW_ROOT / "evals" / "benchmark"
+
+
+def materialize_task_seed(work: Path, task: "BenchmarkTask") -> Optional[str]:
+    """Write a task's seed into the workspace and return issue.md when present."""
+    if task.seed_files:
+        write_seed_files(work, task.seed_files)
+        return task.seed_files.get("issue.md")
+    if task.seed_code:
+        write_legacy_seed(work, task.seed_code)
+    return None
 
 
 def _utc_now() -> str:
@@ -41,6 +52,8 @@ class BenchmarkTask:
     expected_time: float
     domain: str = "general"
     seed_code: Optional[str] = None
+    seed_files: Optional[Dict[str, str]] = None
+    max_iterations: int = 1
     expected_code: Optional[str] = None
     tags: List[str] = field(default_factory=list)
     difficulty: int = 1
@@ -228,6 +241,11 @@ class BenchmarkRunner:
                     "quality_score": quality_score,
                     "code_quality_score": quality_score,
                     "acceptance_criteria_pass": acceptance_passed,
+                    **(
+                        {"planner_accuracy": result["planner_accuracy"]}
+                        if result.get("planner_accuracy") is not None
+                        else {}
+                    ),
                 },
             }
         )
@@ -272,9 +290,7 @@ class BenchmarkRunner:
 
         work = Path(self.workspace_root) / task.id / f"{variant_hermes}_{variant_laguna}"
         work.mkdir(parents=True, exist_ok=True)
-        if task.seed_code:
-            seed_name = "seed.py"
-            (work / seed_name).write_text(task.seed_code, encoding="utf-8")
+        issue_text = materialize_task_seed(work, task)
 
         # Temporarily pin active variants for prompt selection.
         prev_h, prev_l = self.engine.active_hermes, self.engine.active_laguna
@@ -285,7 +301,12 @@ class BenchmarkRunner:
                 evolution_engine=self.engine,
                 workspace_root=str(work),
             )
-            pipeline = router.route_task(task.spec, execute_tools=True)
+            pipeline = router.route_task(
+                task.spec,
+                execute_tools=True,
+                max_iterations=task.max_iterations,
+                issue_text=issue_text,
+            )
         except Exception as exc:  # noqa: BLE001
             return {
                 "status": "failure",
@@ -321,7 +342,7 @@ class BenchmarkRunner:
         )
         return {
             "status": status,
-            "iterations": 1,
+            "iterations": int(pipeline.get("iterations") or 1),
             "executor_calls": sum(
                 1
                 for m in metrics.get("breakdown") or []
@@ -338,6 +359,7 @@ class BenchmarkRunner:
             "no_errors": status in ("completed", "success"),
             "planning_failed": planning_failed and status not in ("completed", "success"),
             "handoff_failed": handoff_failed,
+            "planner_accuracy": pipeline.get("planner_accuracy"),
             "code_quality": {
                 "syntax_valid": True,
                 "tests_pass": bool(executor.get("success")),
@@ -389,8 +411,13 @@ class BenchmarkRunner:
         details = result.get("acceptance_criteria_details") or {}
         if details:
             pass_rate = sum(1 for v in details.values() if v) / len(details)
-            return round(0.5 * base + 0.5 * pass_rate, 4)
-        return round(base, 4)
+            base_score = round(0.5 * base + 0.5 * pass_rate, 4)
+        else:
+            base_score = round(base, 4)
+        accuracy = result.get("planner_accuracy")
+        if accuracy is None:
+            return base_score
+        return round((base_score + float(accuracy)) / 2, 4)
 
     def _check_syntax(self, task: BenchmarkTask, result: Dict[str, Any]) -> bool:
         workspace = result.get("workspace")
