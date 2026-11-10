@@ -1,13 +1,13 @@
-# Benchmark Results — 2026-11-10T17:04:37.316741Z
+# Benchmark Results — 2026-11-10T23:04:05.841522Z
 
 ## Run metadata
 
 | Field | Value |
 | --- | --- |
-| Timestamp (UTC) | `2026-11-10T17:04:37.316741Z` |
-| Git commit | `0bb1dd5` |
+| Timestamp (UTC) | `2026-11-10T23:04:05.841522Z` |
+| Git commit | `4f3b928` |
 | Branch | `main` |
-| Commit subject | Merge pull request #11 from Senthilsivam41/feature/plan-use-case |
+| Commit subject | Merge pull request #12 from Senthilsivam41/feature/plan-use-case |
 | Suite | `easy` |
 | Variant combo | `hermes_v1,laguna_v1` |
 | Mode | `simulate` |
@@ -34,6 +34,7 @@
 | Spec rejection rate | 0.1667 | <0.20 |
 | Spec acceptance rate | 0.8333 | >0.80 |
 | Handoff failure rate | 0.0000 | <0.15 |
+| Human intervention rate | 0.0000 | 0 |
 
 ## By category
 

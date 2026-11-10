@@ -1,0 +1,97 @@
+{
+  "file": "benchmark_results_20261110_230405Z.md",
+  "timestamp": "20261110_230405Z",
+  "fingerprint": {
+    "suite": "easy",
+    "variant": "hermes_v1,laguna_v1",
+    "simulate": true,
+    "overall": {
+      "success_rate": 0.8333,
+      "avg_cost": 0.0407,
+      "cost_efficiency": 0.8414,
+      "avg_time_seconds": 0.0,
+      "avg_quality": 0.875,
+      "avg_iterations": 1.0,
+      "total_cost": 0.24400000000000002,
+      "throughput_tasks_per_hour": 0.0,
+      "spec_rejection_rate": 0.1667,
+      "spec_acceptance_rate": 0.8333,
+      "handoff_failure_rate": 0.0,
+      "human_intervention_rate": 0.0
+    },
+    "tasks": [
+      {
+        "task_id": "easy_basic_function",
+        "category": "easy",
+        "domain": "basic",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.016,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_file_creation",
+        "category": "easy",
+        "domain": "basic",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.036,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_simple_class",
+        "category": "easy",
+        "domain": "oop",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.048,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_simple_fix",
+        "category": "easy",
+        "domain": "debugging",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.04,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_simple_function",
+        "category": "easy",
+        "domain": "basic",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.04,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_simple_refactor",
+        "category": "easy",
+        "domain": "refactor",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.064,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      }
+    ]
+  }
+}
