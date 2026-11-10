@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from evals.intervention import intervention_rate
 from evals.paths import AUTOCLAW_ROOT
 
 BENCHMARK_RESULTS = AUTOCLAW_ROOT / "evals" / "benchmark" / "results.json"
@@ -101,6 +102,7 @@ class BenchmarkDashboard:
         planning_failed = sum(1 for r in self.results if r.get("planning_failed"))
         handoff_failed = sum(1 for r in self.results if r.get("handoff_failed"))
         n = len(self.results)
+        human_rate = intervention_rate(self.results)
         return {
             "success_rate": self._calc_success_rate(self.results),
             "avg_cost": self._calc_avg(self.results, "cost"),
@@ -113,6 +115,7 @@ class BenchmarkDashboard:
             "spec_rejection_rate": round(planning_failed / n, 4) if n else 0.0,
             "handoff_failure_rate": round(handoff_failed / n, 4) if n else 0.0,
             "spec_acceptance_rate": round(1 - (planning_failed / n), 4) if n else 0.0,
+            "human_intervention_rate": human_rate,
             "throughput_tasks_per_hour": round(n / (total_time / 3600), 4)
             if total_time > 0
             else 0.0,
@@ -223,6 +226,7 @@ class BenchmarkDashboard:
                 f"- Avg cost: **{float(overall.get('avg_cost', 0)):.4f}**",
                 f"- Spec rejection: **{float(overall.get('spec_rejection_rate', 0)):.4f}**",
                 f"- Handoff failure: **{float(overall.get('handoff_failure_rate', 0)):.4f}**",
+                f"- Human intervention: **{float(overall.get('human_intervention_rate', 0)):.4f}**",
                 "",
                 "| Category | Count | Success | Quality |",
                 "| --- | ---: | ---: | ---: |",

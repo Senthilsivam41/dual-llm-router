@@ -142,6 +142,7 @@ def render_markdown(
         f"| Spec rejection rate | {float(overall.get('spec_rejection_rate', 0)):.4f} | <0.20 |",
         f"| Spec acceptance rate | {float(overall.get('spec_acceptance_rate', 0)):.4f} | >0.80 |",
         f"| Handoff failure rate | {float(overall.get('handoff_failure_rate', 0)):.4f} | <0.15 |",
+        f"| Human intervention rate | {float(overall.get('human_intervention_rate', 0)):.4f} | 0 |",
         "",
         "## By category",
         "",
@@ -266,6 +267,73 @@ def update_index(published_dir: Path, entry: Dict[str, str]) -> Path:
     return index_path
 
 
+def material_fingerprint(
+    report: Dict[str, Any],
+    results: List[Dict[str, Any]],
+    *,
+    suite: str,
+    variant: str,
+    simulate: bool,
+) -> Dict[str, Any]:
+    """Metrics that justify a new published report.
+
+    Timestamps, git metadata, and trigger names are omitted so a republish
+    with the same outcomes does not rewrite Markdown.
+    """
+    overall = report.get("overall") or {}
+    metric_keys = (
+        "success_rate",
+        "avg_cost",
+        "cost_efficiency",
+        "avg_time_seconds",
+        "avg_quality",
+        "avg_iterations",
+        "total_cost",
+        "throughput_tasks_per_hour",
+        "spec_rejection_rate",
+        "spec_acceptance_rate",
+        "handoff_failure_rate",
+        "human_intervention_rate",
+    )
+    tasks = [
+        {
+            "task_id": row.get("task_id"),
+            "category": row.get("category"),
+            "domain": row.get("domain") or "general",
+            "status": row.get("status"),
+            "quality_score": round(float(row.get("quality_score") or 0), 4),
+            "cost": round(float(row.get("cost") or 0), 4),
+            "time_seconds": round(float(row.get("time_seconds") or 0), 3),
+            "variant_hermes": row.get("variant_hermes"),
+            "variant_laguna": row.get("variant_laguna"),
+            "human_intervened": bool(row.get("human_intervened")),
+        }
+        for row in results
+    ]
+    return {
+        "suite": suite,
+        "variant": variant,
+        "simulate": simulate,
+        "overall": {key: overall.get(key) for key in metric_keys},
+        "tasks": tasks,
+    }
+
+
+def _material_path(published_dir: Path) -> Path:
+    return published_dir / "material.json"
+
+
+def load_material(published_dir: Path) -> Optional[Dict[str, Any]]:
+    path = _material_path(published_dir)
+    if not path.exists():
+        return None
+    try:
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    return loaded if isinstance(loaded, dict) else None
+
+
 def publish_results(
     *,
     results_path: Optional[Path] = None,
@@ -283,6 +351,21 @@ def publish_results(
     report = dash.generate_report()
     if report.get("error"):
         raise RuntimeError(f"Cannot publish benchmark results: {report['error']}")
+
+    fingerprint = material_fingerprint(
+        report,
+        dash.results,
+        suite=suite,
+        variant=variant,
+        simulate=simulate,
+    )
+    previous = load_material(published_dir)
+    if previous and previous.get("fingerprint") == fingerprint:
+        existing_name = str(previous.get("file") or "")
+        existing = published_dir / existing_name
+        if existing_name and existing.exists():
+            logger.info("Skipping noise-only republish; latest is %s", existing_name)
+            return existing
 
     moment = timestamp or _utc_now()
     stamp = _stamp(moment)
@@ -323,8 +406,17 @@ def publish_results(
                 "variant": variant,
                 "simulate": simulate,
                 "trigger": trigger,
+                "fingerprint": fingerprint,
                 "report": report,
             },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    _material_path(published_dir).write_text(
+        json.dumps(
+            {"file": filename, "timestamp": stamp, "fingerprint": fingerprint},
             indent=2,
         )
         + "\n",

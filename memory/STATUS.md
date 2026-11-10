@@ -1,6 +1,6 @@
 # Current status
 
-**Updated:** 2026-10-29  
+**Updated:** 2026-11-11  
 **Branch:** `fix/p0-ci-green`  
 **Base:** `origin/main` after PR #8 merged the evolution loop.
 
@@ -77,5 +77,5 @@ Docs: [`benchmark/benchmark-cicd.md`](../benchmark/benchmark-cicd.md), [`benchma
 
 1. Optional `OPENROUTER_API_KEY` is not required for CI. Live weekly runs use the secret when it is set and otherwise stay on `--simulate`.
 2. Slack notifications deferred (step summaries used instead)
-3. Human-intervention rate not yet instrumented in simulate path
-4. P1 live-evaluation work (stricter acceptance checks, comparative matrix) is still open. See [FUTURE.md](./FUTURE.md).
+3. Human-intervention rate is on each benchmark result and in the published system metrics. Simulate runs record `human_intervened=false`, so the rate is 0 rather than missing.
+4. P1 live-evaluation work is in tree: workspace assertion checks, evolved Laguna comparative coverage, and noise-only publish skips. See [FUTURE.md](./FUTURE.md).

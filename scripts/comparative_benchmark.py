@@ -13,7 +13,12 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from evals.benchmark_runner import BenchmarkRunner
-from evals.comparative_benchmark import ComparativeBenchmark, compare_results, load_results_file
+from evals.comparative_benchmark import (
+    ComparativeBenchmark,
+    compare_results,
+    load_results_file,
+    matrix_with_evolved_laguna,
+)
 from evals.evolution_engine import EvolutionEngine
 
 
@@ -32,6 +37,12 @@ def main() -> None:
     )
     parser.add_argument("--suite", default="easy", choices=["easy", "medium", "hard", "extreme", "all"])
     parser.add_argument("--simulate", action="store_true")
+    parser.add_argument(
+        "--include-evolved-laguna",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Also compare hermes_v1 with evolved Laguna genomes",
+    )
     parser.add_argument(
         "--output",
         type=str,
@@ -65,7 +76,10 @@ def main() -> None:
             parser.error(f"Invalid variant combo: {item}")
         combos.append((parts[0], parts[1]))
 
-    runner = BenchmarkRunner(EvolutionEngine(), simulate=args.simulate)
+    engine = EvolutionEngine()
+    if args.include_evolved_laguna:
+        combos = matrix_with_evolved_laguna(combos, engine.genomes)
+    runner = BenchmarkRunner(engine, simulate=args.simulate)
     comparative = ComparativeBenchmark(runner)
     result = comparative.compare_variants(
         combos,
