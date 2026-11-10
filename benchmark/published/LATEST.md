@@ -1,70 +1,60 @@
-# Benchmark Results — 2026-11-08T08:35:02.062269Z
+# Benchmark Results — 2026-11-10T17:03:35.434071Z
 
 ## Run metadata
 
 | Field | Value |
 | --- | --- |
-| Timestamp (UTC) | `2026-11-08T08:35:02.062269Z` |
-| Git commit | `2af3311` |
+| Timestamp (UTC) | `2026-11-10T17:03:35.434071Z` |
+| Git commit | `5c7c69b` |
 | Branch | `main` |
-| Commit subject | chore(benchmark): publish results for 7690fbe [skip ci] |
-| Suite | `all` |
+| Commit subject | Merge pull request #10 from Senthilsivam41/fix/fireworks-test-suite |
+| Suite | `easy` |
 | Variant combo | `hermes_v1,laguna_v1` |
 | Mode | `simulate` |
-| Trigger | `schedule` |
-| Total tasks | 20 |
+| Trigger | `commit` |
+| Total tasks | 6 |
 
 ## Overall metrics
 
 | Metric | Value | Target |
 | --- | --- | --- |
-| Success rate | 0.4000 | >0.90 |
-| Avg cost (USD) | 0.4590 | decreasing |
-| Cost efficiency (actual/expected) | 1.1305 | <1.0 |
+| Success rate | 0.8333 | >0.90 |
+| Avg cost (USD) | 0.0407 | decreasing |
+| Cost efficiency (actual/expected) | 0.8414 | <1.0 |
 | Avg time (s) | 0.0000 | <60 |
-| Avg quality | 0.5500 | >0.80 |
-| Avg iterations | 2.1000 | <5 |
-| Total cost | 9.1800 | — |
+| Avg quality | 0.8750 | >0.80 |
+| Avg iterations | 1.0000 | <5 |
+| Total cost | 0.2440 | — |
 | Throughput (tasks/hr) | 0.0000 | higher |
 
 ## System metrics
 
 | Metric | Value | Target |
 | --- | --- | --- |
-| Spec rejection rate | 0.3000 | <0.20 |
-| Spec acceptance rate | 0.7000 | >0.80 |
-| Handoff failure rate | 0.2500 | <0.15 |
+| Spec rejection rate | 0.1667 | <0.20 |
+| Spec acceptance rate | 0.8333 | >0.80 |
+| Handoff failure rate | 0.0000 | <0.15 |
 
 ## By category
 
 | Category | Count | Success | Avg cost | Avg time | Avg quality |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | easy | 6 | 0.8333 | 0.0407 | 0.0000 | 0.8750 |
-| extreme | 4 | 0.0000 | 1.3200 | 0.0000 | 0.2500 |
-| hard | 4 | 0.2500 | 0.5900 | 0.0000 | 0.4375 |
-| medium | 6 | 0.3333 | 0.2160 | 0.0000 | 0.5000 |
 
 ## By variant combo
 
 | Combo | Count | Success | Avg cost | Avg time | Avg quality |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `hermes_v1+laguna_v1` | 20 | 0.4000 | 0.4590 | 0.0000 | 0.5500 |
+| `hermes_v1+laguna_v1` | 6 | 0.8333 | 0.0407 | 0.0000 | 0.8750 |
 
 ## By domain
 
 | Domain | Count | Success | Avg cost | Avg quality |
 | --- | ---: | ---: | ---: | ---: |
-| architecture | 2 | 0.5000 | 1.0000 | 0.6250 |
-| backend | 3 | 0.3333 | 0.2520 | 0.5000 |
 | basic | 3 | 0.6667 | 0.0307 | 0.7500 |
-| debugging | 3 | 0.3333 | 0.2933 | 0.5000 |
-| feature | 1 | 0.0000 | 0.5400 | 0.2500 |
-| oop | 2 | 0.5000 | 0.1140 | 0.6250 |
-| performance | 2 | 0.0000 | 0.8700 | 0.2500 |
+| debugging | 1 | 1.0000 | 0.0400 | 1.0000 |
+| oop | 1 | 1.0000 | 0.0480 | 1.0000 |
 | refactor | 1 | 1.0000 | 0.0640 | 1.0000 |
-| security | 1 | 0.0000 | 1.2000 | 0.2500 |
-| systems | 1 | 0.0000 | 1.5600 | 0.2500 |
-| testing | 1 | 1.0000 | 0.1200 | 1.0000 |
 
 ## Per-task results
 
@@ -76,20 +66,6 @@
 | `easy_simple_fix` | easy | debugging | success | 1.0000 | 0.0400 | 0.000 | `hermes_v1` | `laguna_v1` |
 | `easy_simple_function` | easy | basic | success | 1.0000 | 0.0400 | 0.000 | `hermes_v1` | `laguna_v1` |
 | `easy_simple_refactor` | easy | refactor | success | 1.0000 | 0.0640 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `medium_api_endpoint` | medium | backend | success | 1.0000 | 0.2400 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `medium_class_with_methods` | medium | oop | failure | 0.2500 | 0.1800 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `medium_edge_case_bug` | medium | debugging | failure | 0.2500 | 0.2400 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `medium_moderate_complexity` | medium | backend | failure | 0.2500 | 0.2160 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `medium_multi_file_feature` | medium | backend | failure | 0.2500 | 0.3000 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `medium_test_coverage` | medium | testing | success | 1.0000 | 0.1200 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `hard_architecture_change` | hard | architecture | success | 1.0000 | 0.5600 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `hard_bug_hunt` | hard | debugging | failure | 0.2500 | 0.6000 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `hard_feature_from_scratch` | hard | feature | failure | 0.2500 | 0.5400 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `hard_performance_optimization` | hard | performance | failure | 0.2500 | 0.6600 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `extreme_multi_service` | extreme | systems | failure | 0.2500 | 1.5600 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `extreme_performance_critical` | extreme | performance | failure | 0.2500 | 1.0800 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `extreme_security_audit` | extreme | security | failure | 0.2500 | 1.2000 | 0.000 | `hermes_v1` | `laguna_v1` |
-| `extreme_system_design` | extreme | architecture | failure | 0.2500 | 1.4400 | 0.000 | `hermes_v1` | `laguna_v1` |
 
 ## Artifacts
 
