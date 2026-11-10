@@ -1,13 +1,13 @@
-# Benchmark Results — 2026-11-10T17:03:35.434071Z
+# Benchmark Results — 2026-11-10T17:04:37.316741Z
 
 ## Run metadata
 
 | Field | Value |
 | --- | --- |
-| Timestamp (UTC) | `2026-11-10T17:03:35.434071Z` |
-| Git commit | `5c7c69b` |
+| Timestamp (UTC) | `2026-11-10T17:04:37.316741Z` |
+| Git commit | `0bb1dd5` |
 | Branch | `main` |
-| Commit subject | Merge pull request #10 from Senthilsivam41/fix/fireworks-test-suite |
+| Commit subject | Merge pull request #11 from Senthilsivam41/feature/plan-use-case |
 | Suite | `easy` |
 | Variant combo | `hermes_v1,laguna_v1` |
 | Mode | `simulate` |
