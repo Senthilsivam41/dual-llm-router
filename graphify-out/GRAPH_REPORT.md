@@ -1,16 +1,16 @@
-# Graph Report - dual-llm-router  (2026-10-29)
+# Graph Report - dual-llm-router  (2026-11-11)
 
 ## Corpus Check
-- 183 files · ~59,343 words
+- 197 files · ~65,748 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1005 nodes · 1810 edges · 96 communities (67 shown, 29 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 41 edges (avg confidence: 0.65)
+- 1125 nodes · 2159 edges · 108 communities (78 shown, 30 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 43 edges (avg confidence: 0.65)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c89ebb0c`
+- Built from commit: `83254766`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -18,16 +18,17 @@
 - test_p1_functionality.py
 - BenchmarkRunner
 - EvolutionEngine
-- test_p0_security.py
+- ExecutorAgent
 - evolution_engine.py
-- orchestrator.py
-- BenchmarkDashboard
-- test_issue_to_fix.py
+- TaskSpec
+- benchmark_publisher.py
+- session.py
 - executor.py
 - add
 - EvolvingRouter
 - DualLLMRouterOrchestrator
 - Dual-LLM Router
+- STATUS.md
 - Metrics & Benchmarking Guide
 - Benchmark CI/CD — feasibility & implementation
 - Benchmark Results — 2026-08-01T07:52:36.396339Z
@@ -49,7 +50,7 @@
 - action_schemas.py
 - full_benchmark.sh
 - minimal_setup.sh
-- Benchmark Suite
+- test_issue_to_fix.py
 - system.py
 - hermes/few_shot/coding_examples.py
 - laguna/few_shot/coding_examples.py
@@ -74,7 +75,7 @@
 - src/__init__.py
 - dual-llm-router
 - runner.py
-- run_shell
+- test_p0_security.py
 - Benchmark Results — 2026-08-01T08:52:51.156392Z
 - Benchmark Results — 2026-08-02T05:27:59.464453Z
 - Benchmark Results — 2026-08-09T03:39:56.336385Z
@@ -91,27 +92,39 @@
 - Benchmark Results — 2026-10-11T08:16:39.722209Z
 - Benchmark Results — 2026-10-18T06:57:01.050795Z
 - Benchmark Results — 2026-10-25T07:15:43.118109Z
-- MetricsLogger
+- workspace_acceptance.py
 - Benchmark Results — 2026-08-30T07:51:09.169719Z
 - Benchmark Results — 2026-10-04T07:45:03.873959Z
-- conftest.py
+- config.py
 - Invoice total is wrong
 - billing.py
 - billing_coupon.py
 - showcase_success_rate.md
 - verification/__init__.py
+- evals/fitness_dashboard.py
+- evaluate_promotion
+- test_evolution.py
+- BenchmarkDashboard
+- reset.py
+- test_promotion.py
+- ._mutate_agent_genome
+- calculate_fitness
+- invoice_total
+- Invoice total is wrong
+- ADR 0001: Careful genome promotion
+- Benchmark Suite
 
 ## God Nodes (most connected - your core abstractions)
-1. `EvolutionEngine` - 68 edges
-2. `BenchmarkRunner` - 35 edges
+1. `EvolutionEngine` - 92 edges
+2. `BenchmarkRunner` - 38 edges
 3. `DualLLMRouterOrchestrator` - 27 edges
-4. `TaskSpec` - 25 edges
-5. `BenchmarkDashboard` - 21 edges
-6. `EvolvingRouter` - 20 edges
-7. `ExecutorAgent` - 20 edges
-8. `BenchmarkTask` - 19 edges
-9. `run_showcase()` - 19 edges
-10. `MetricsLogger` - 19 edges
+4. `evaluate_promotion()` - 25 edges
+5. `TaskSpec` - 25 edges
+6. `BenchmarkDashboard` - 21 edges
+7. `BenchmarkTask` - 21 edges
+8. `publish_results()` - 20 edges
+9. `EvolvingRouter` - 20 edges
+10. `ExecutorAgent` - 20 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `BenchmarkTask` --uses--> `EvolvingRouter`  [INFERRED]
@@ -128,43 +141,43 @@
 ## Import Cycles
 - None detected.
 
-## Communities (96 total, 29 thin omitted)
+## Communities (108 total, 30 thin omitted)
 
 ### Community 0 - "test_p1_functionality.py"
-Cohesion: 0.18
-Nodes (19): patch, PlannerAgent, completion_response(), planner_response(), SimpleNamespace, task_spec(), test_evolving_router_records_only_observed_quality_metrics(), test_executor_fails_when_litellm_is_unavailable() (+11 more)
+Cohesion: 0.17
+Nodes (17): PlannerAgent, test_default_agents_use_fireworks_credentials(), completion_response(), planner_response(), SimpleNamespace, task_spec(), test_evolving_router_records_only_observed_quality_metrics(), test_executor_fails_when_litellm_is_unavailable() (+9 more)
 
 ### Community 1 - "BenchmarkRunner"
-Cohesion: 0.09
-Nodes (28): load_task_modules(), Any, Load benchmark task definitions from benchmark/{easy,medium,hard,extreme}/., Import TASK dicts from category packages., task_to_jsonable(), BenchmarkResult, BenchmarkRunner, BenchmarkTask (+20 more)
+Cohesion: 0.06
+Nodes (48): load_task_modules(), Any, Load benchmark task definitions from benchmark/{easy,medium,hard,extreme}/., Import TASK dicts from category packages., task_to_jsonable(), Generate benchmark reports and console dashboards., BenchmarkResult, BenchmarkRunner (+40 more)
 
 ### Community 2 - "EvolutionEngine"
-Cohesion: 0.06
-Nodes (31): EvolutionEngine, _load_yaml_evolution_config(), Any, Path, Manages the full evolution loop for dual-llm-router. Flow: 1. After every run,…, Record a run result after execution. Called after every dual-llm-router run., Assign the least-sampled variant from an active observed-run test., Record only observed run outcomes in active A/B tests. (+23 more)
+Cohesion: 0.12
+Nodes (10): EvolutionEngine, Manages the full evolution loop for dual-llm-router. Flow: 1. After every run,…, Record a run result after execution. Called after every dual-llm-router run., Assign the least-sampled variant from an active observed-run test., Record only observed run outcomes in active A/B tests., Main evolution function., Get history of best configs over time., _utc_now() (+2 more)
 
-### Community 3 - "test_p0_security.py"
-Cohesion: 0.19
-Nodes (18): ExecutorAgent, apply_patch(), Any, Write a file through pinned directory descriptors without following symlinks., _secure_open_flags(), completion_response(), SimpleNamespace, task_spec() (+10 more)
+### Community 3 - "ExecutorAgent"
+Cohesion: 0.33
+Nodes (12): patch, ExecutorAgent, completion_response(), SimpleNamespace, task_spec(), test_action_batch_is_validated_before_any_action_executes(), test_executor_dispatches_a_valid_shell_action(), test_executor_dispatches_patch_alias() (+4 more)
 
 ### Community 4 - "evolution_engine.py"
 Cohesion: 0.05
-Nodes (61): ABTestManager, A/B testing framework for comparing variant combinations., Get status of all active tests., Manages A/B tests for dual-llm-router variants. Tracks: - Variant…, Start a new A/B test., Record a result for a variant in an A/B test., Check if an A/B test reached statistical significance., Simplified significance calculation. (+53 more)
+Nodes (55): ABTestManager, A/B testing framework for comparing variant combinations., Get status of all active tests., Manages A/B tests for dual-llm-router variants. Tracks: - Variant…, Start a new A/B test., Record a result for a variant in an A/B test., Check if an A/B test reached statistical significance., Simplified significance calculation. (+47 more)
 
-### Community 5 - "orchestrator.py"
-Cohesion: 0.06
-Nodes (46): AST, model_validator, build_planner_user_message(), Give the planner the bug report, the file list, and a prior validation error., workspace_listing(), Any, Runs Planner node -> Executor node pipeline sequentially., Check (+38 more)
+### Community 5 - "TaskSpec"
+Cohesion: 0.13
+Nodes (15): model_validator, Check, BaseModel, field_validator, One expected value the executor's tests must assert., TaskSpec, expected_amounts(), Decimal (+7 more)
 
-### Community 6 - "BenchmarkDashboard"
-Cohesion: 0.06
-Nodes (40): datetime, BenchmarkDashboard, Path, Generate benchmark reports and console dashboards., Generate benchmark reports and visualizations., Render a compact Markdown summary for GitHub Actions step summaries., _utc_now(), changed_files() (+32 more)
+### Community 6 - "benchmark_publisher.py"
+Cohesion: 0.15
+Nodes (28): datetime, changed_files(), _git(), git_metadata(), is_major_change(), load_material(), material_fingerprint(), _material_path() (+20 more)
 
-### Community 7 - "test_issue_to_fix.py"
-Cohesion: 0.09
-Nodes (49): materialize_task_seed(), Benchmark runner for dual-llm-router variant evaluation. Loads tasks from…, Write a task's seed into the workspace and return issue.md when present., _utc_now(), main(), Issue-to-fix showcase commands., build_run_record(), costs_by_role() (+41 more)
+### Community 7 - "session.py"
+Cohesion: 0.14
+Nodes (32): main(), Issue-to-fix showcase commands., build_run_record(), costs_by_role(), publish_success_rate(), Any, Path, Terminal, HTML, and Markdown reports for an issue-to-fix run. (+24 more)
 
 ### Community 8 - "executor.py"
-Cohesion: 0.17
-Nodes (21): _is_file_existence_criterion(), _is_safe_action_criterion(), Any, Return whether a criterion is an objective file-existence assertion., Recognize criteria directly proven by validated tool execution., Any, call_with_retry(), _is_fireworks_model() (+13 more)
+Cohesion: 0.16
+Nodes (23): _is_file_existence_criterion(), _is_safe_action_criterion(), Any, Return whether a criterion is an objective file-existence assertion., Recognize criteria directly proven by validated tool execution., build_planner_user_message(), Any, Give the planner the bug report, the file list, and a prior validation error. (+15 more)
 
 ### Community 9 - "add"
 Cohesion: 0.16
@@ -175,8 +188,8 @@ Cohesion: 0.12
 Nodes (16): CoEvolver, Any, Path, Co-evolution integration point for DualLLMRouter., Bridge between router runs and the evolution engine., Router package: Dual-LLM orchestration + co-evolution integration., DualLLMRouter, EvolvingRouter (+8 more)
 
 ### Community 11 - "DualLLMRouterOrchestrator"
-Cohesion: 0.15
-Nodes (13): main(), Example execution entrypoint for the Dual-LLM Router framework., DualLLMRouterOrchestrator, TaskSpec, TestDualLLMRouter, sample_spec(), test_empty_executor_content_fails_without_raising(), test_executor_is_verified_from_tests_not_its_own_claim() (+5 more)
+Cohesion: 0.12
+Nodes (15): main(), Example execution entrypoint for the Dual-LLM Router framework., DualLLMRouterOrchestrator, Any, Runs Planner node -> Executor node pipeline sequentially., CallMetric, MetricsLogger, Any (+7 more)
 
 ### Community 12 - "Dual-LLM Router"
 Cohesion: 0.15
@@ -235,7 +248,7 @@ Cohesion: 0.29
 Nodes (3): Key Metrics Summary, System-Level Metrics, Task-Level Metrics
 
 ### Community 27 - "INDEX.md"
-Cohesion: 0.22
+Cohesion: 0.29
 Nodes (5): Published Benchmark Results, Published Benchmark Results, Reading results, Standard, When results are published
 
 ### Community 28 - "Quickstart"
@@ -258,17 +271,17 @@ Nodes (5): Benchmarks, Configuration, Environment, Evolution, Portfolio commands
 Cohesion: 0.17
 Nodes (13): ActionModel, Enum, parametrize, ActionType, PatchAction, Any, BaseModel, field_validator (+5 more)
 
-### Community 35 - "Benchmark Suite"
-Cohesion: 0.67
-Nodes (3): Benchmark Suite, Published reports (standard), Quick start
+### Community 35 - "test_issue_to_fix.py"
+Cohesion: 0.14
+Nodes (23): planner_accuracy(), filename_from_seed_comment(), Path, Write benchmark and showcase seed files under their real paths., Use a leading `# module.py` comment as the filename. Older tasks stored that…, write_legacy_seed(), write_seed_files(), load_billing() (+15 more)
 
 ### Community 69 - "runner.py"
-Cohesion: 0.31
-Nodes (13): _copy_workspace(), _docker_can_import_pytest(), _docker_image(), Path, PytestOutcome, Run executor-written pytest in a restricted subprocess, or Docker when it can., Pick docker only when it is requested or the image can import pytest., _restricted_env() (+5 more)
+Cohesion: 0.35
+Nodes (12): _copy_workspace(), _docker_can_import_pytest(), _docker_image(), Path, PytestOutcome, Run executor-written pytest in a restricted subprocess, or Docker when it can., Pick docker only when it is requested or the image can import pytest., _restricted_env() (+4 more)
 
-### Community 70 - "run_shell"
-Cohesion: 0.23
-Nodes (9): _is_within_workspace(), Any, Check if a path is within the workspace root (resolves symlinks)., Return an error when a command argument can address outside the workspace., Execute a capability-limited command inside workspace root. Security features:…, run_shell(), _validate_command_paths(), test_run_shell_cannot_read_above_workspace() (+1 more)
+### Community 70 - "test_p0_security.py"
+Cohesion: 0.15
+Nodes (17): apply_patch(), Any, Write a file through pinned directory descriptors without following symlinks., _secure_open_flags(), _is_within_workspace(), Any, Check if a path is within the workspace root (resolves symlinks)., Return an error when a command argument can address outside the workspace. (+9 more)
 
 ### Community 71 - "Benchmark Results — 2026-08-01T08:52:51.156392Z"
 Cohesion: 0.20
@@ -334,40 +347,88 @@ Nodes (9): Artifacts, Benchmark Results — 2026-10-18T06:57:01.050795Z, By cate
 Cohesion: 0.20
 Nodes (9): Artifacts, Benchmark Results — 2026-10-25T07:15:43.118109Z, By category, By domain, By variant combo, Overall metrics, Per-task results, Run metadata (+1 more)
 
-### Community 87 - "MetricsLogger"
-Cohesion: 0.27
-Nodes (3): CallMetric, MetricsLogger, Any
+### Community 87 - "workspace_acceptance.py"
+Cohesion: 0.12
+Nodes (31): AST, _collected_tests(), expected_numbers(), _file_existence_target(), _is_pytest_criterion(), _judge_criterion(), Any, Decimal (+23 more)
 
 ### Community 88 - "Benchmark Results — 2026-08-30T07:51:09.169719Z"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (9): Artifacts, Benchmark Results — 2026-08-30T07:51:09.169719Z, By category, By domain, By variant combo, Overall metrics, Per-task results, Run metadata (+1 more)
 
 ### Community 89 - "Benchmark Results — 2026-10-04T07:45:03.873959Z"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (9): Artifacts, Benchmark Results — 2026-10-04T07:45:03.873959Z, By category, By domain, By variant combo, Overall metrics, Per-task results, Run metadata (+1 more)
 
-### Community 90 - "conftest.py"
-Cohesion: 0.40
-Nodes (4): fixture, fireworks_test_credentials(), Point the suite at Fireworks when that key is configured., Use FIREWORKS_API_KEY for default planner and executor models. A dummy key is…
+### Community 90 - "config.py"
+Cohesion: 0.29
+Nodes (5): fixture, Config, fireworks_test_credentials(), Point the suite at Fireworks when that key is configured., Use FIREWORKS_API_KEY for default planner and executor models. A dummy key is…
 
 ### Community 91 - "Invoice total is wrong"
 Cohesion: 0.50
 Nodes (3): Case 1 — coupon applied after tax, Case 2 — per-line rounding, Invoice total is wrong
 
+### Community 96 - "evals/fitness_dashboard.py"
+Cohesion: 0.15
+Nodes (26): build_fitness_report(), dashboard_dir_for(), _esc(), fitness_fingerprint(), _metric_table(), Any, Path, Durable fitness trend report. The console summary in scripts/analyze.py stays. (+18 more)
+
+### Community 97 - "evaluate_promotion"
+Cohesion: 0.23
+Nodes (20): _agent_row(), apply_promotion(), _challenger_block(), evaluate_promotion(), _load_latest(), _pair_fitness(), promotion_dir_for(), _prompt_sha256() (+12 more)
+
+### Community 98 - "test_evolution.py"
+Cohesion: 0.33
+Nodes (9): Path, Create an isolated project root with prompts + .autoclaw baselines., _rich_run(), _seed_project(), test_ab_test_uses_only_observed_assigned_runs(), test_calculate_fitness_requires_samples(), test_fitness_does_not_invent_quality_from_proxy_metrics(), test_lineage_tracks_parent_child_edges() (+1 more)
+
+### Community 99 - "BenchmarkDashboard"
+Cohesion: 0.18
+Nodes (8): BenchmarkDashboard, Path, Render a compact Markdown summary for GitHub Actions step summaries., Generate benchmark reports and visualizations., _utc_now(), main(), _append_summary(), main()
+
+### Community 100 - "reset.py"
+Cohesion: 0.22
+Nodes (8): Current Hermes 4 planner system prompt (v1 baseline)., Current Laguna S 2.1 executor system prompt (v1 baseline)., _genome(), main(), Path, reset_state(), _utc_now(), _write()
+
+### Community 101 - "test_promotion.py"
+Cohesion: 0.39
+Nodes (14): _engine(), _install_hermes(), Path, Gates for copying winning genomes out of .autoclaw/., _record_pair(), _run(), test_baseline_then_unchanged(), test_blocks_unresolved_challenger() (+6 more)
+
+### Community 102 - "._mutate_agent_genome"
+Cohesion: 0.25
+Nodes (7): _load_yaml_evolution_config(), Any, Path, Create a new mutated genome for hermes or laguna., Read prompt text from a .py module or plain text file., _read_prompt_text(), _write_prompt_module()
+
+### Community 103 - "calculate_fitness"
+Cohesion: 0.19
+Nodes (10): Check if it's time to evolve., Evaluate fitness of current active variants., Select best variants using elitist selection., calculate_fitness(), get_top_variants(), Calculate composite fitness score for a (hermes, laguna) pair. Returns weighted…, Get top N variant combinations by composite score., _run() (+2 more)
+
+### Community 104 - "invoice_total"
+Cohesion: 0.39
+Nodes (6): invoice_total(), Invoice totals. `invoice_total` charges a fixed coupon and an optional tax…, test_coupon_applied_before_tax(), test_coupon_exceeds_subtotal(), test_half_cent_rounds_up(), test_no_per_line_rounding()
+
+### Community 105 - "Invoice total is wrong"
+Cohesion: 0.50
+Nodes (3): Case 1 — coupon applied after tax, Case 2 — per-line rounding, Invoice total is wrong
+
+### Community 106 - "ADR 0001: Careful genome promotion"
+Cohesion: 0.40
+Nodes (5): ADR 0001: Careful genome promotion, Alternatives considered, Consequences, Context, Decision
+
+### Community 107 - "Benchmark Suite"
+Cohesion: 0.67
+Nodes (3): Benchmark Suite, Published reports (standard), Quick start
+
 ## Knowledge Gaps
-- **280 isolated node(s):** `full_benchmark.sh script`, `PYTHONPATH`, `minimal_setup.sh script`, `PYTHONPATH`, `dual-llm-router` (+275 more)
+- **288 isolated node(s):** `full_benchmark.sh script`, `PYTHONPATH`, `minimal_setup.sh script`, `PYTHONPATH`, `dual-llm-router` (+283 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `EvolutionEngine` connect `EvolutionEngine` to `BenchmarkRunner`, `evolution_engine.py`, `BenchmarkDashboard`, `test_issue_to_fix.py`, `EvolvingRouter`?**
-  _High betweenness centrality (0.060) - this node is a cross-community bridge._
-- **Why does `BenchmarkDashboard` connect `BenchmarkDashboard` to `BenchmarkRunner`, `evolution_engine.py`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
-- **Why does `EvolvingRouter` connect `EvolvingRouter` to `test_p1_functionality.py`, `BenchmarkRunner`, `EvolutionEngine`, `test_issue_to_fix.py`, `DualLLMRouterOrchestrator`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+- **Why does `EvolutionEngine` connect `EvolutionEngine` to `evals/fitness_dashboard.py`, `BenchmarkRunner`, `evaluate_promotion`, `test_evolution.py`, `evolution_engine.py`, `test_promotion.py`, `._mutate_agent_genome`, `calculate_fitness`, `benchmark_publisher.py`, `EvolvingRouter`?**
+  _High betweenness centrality (0.107) - this node is a cross-community bridge._
+- **Why does `BenchmarkTask` connect `BenchmarkRunner` to `test_issue_to_fix.py`, `EvolutionEngine`, `EvolvingRouter`, `evolution_engine.py`?**
+  _High betweenness centrality (0.038) - this node is a cross-community bridge._
+- **Why does `BenchmarkDashboard` connect `BenchmarkDashboard` to `BenchmarkRunner`, `evolution_engine.py`, `benchmark_publisher.py`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
 - **Are the 9 inferred relationships involving `EvolutionEngine` (e.g. with `BenchmarkResult` and `BenchmarkRunner`) actually correct?**
   _`EvolutionEngine` has 9 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 3 inferred relationships involving `BenchmarkRunner` (e.g. with `EvolutionEngine` and `EvolvingRouter`) actually correct?**
@@ -375,4 +436,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 4 inferred relationships involving `DualLLMRouterOrchestrator` (e.g. with `DualLLMRouter` and `EvolvingRouter`) actually correct?**
   _`DualLLMRouterOrchestrator` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `full_benchmark.sh script`, `PYTHONPATH`, `minimal_setup.sh script` to the rest of the system?**
-  _280 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _288 weakly-connected nodes found - possible documentation gaps or missing edges._

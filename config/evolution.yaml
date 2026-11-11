@@ -51,6 +51,12 @@ evolution:
     min_delta: 0.05                 # alert when composite fitness rises by >= 5pp
     webhook_url: null               # or set EVOLUTION_ALERT_WEBHOOK env var
 
+  # Durable snapshots under evolution/promoted/. Nightly CI does not commit them.
+  promotion:
+    min_delta: 0.05                 # pair composite must rise by at least this
+    min_samples: 5                  # calculate_fitness returns 0 below 5 runs
+    regression_tolerance: 0.0       # success rate may not fall past this margin
+
   cron:
     # Suggested crontab (hourly check):
     # 0 * * * * cd /path/to/dual-llm-router && ./scripts/cron_evolve.sh >> .autoclaw/evals/cron.log 2>&1
