@@ -1,6 +1,6 @@
 # Dual-LLM Router — developer commands (portfolio.dev contract)
 
-.PHONY: setup bootstrap doctor demo dev format lint typecheck test build check clean help showcase showcase-compare
+.PHONY: setup bootstrap doctor demo dev format lint typecheck test build check clean help showcase showcase-compare fitness promote
 
 PYTHON ?= python3
 UV ?= uv
@@ -13,6 +13,8 @@ help:
 	@echo "  make demo       Deterministic simulate benchmark (no API key)"
 	@echo "  make dev        Interactive smoke: list tasks + easy simulate"
 	@echo "  make check      Non-mutating quality gate (pytest subset)"
+	@echo "  make fitness    Write evolution/dashboard from local evolution state"
+	@echo "  make promote    Print the genome promotion decision (no snapshot)"
 	@echo "  make showcase  Issue-to-fix demo (replay without a Fireworks key)"
 	@echo "  make showcase-compare  Demo plus one model in both roles"
 	@echo "  make test       Full pytest suite"
@@ -72,6 +74,8 @@ check:
 		tests/test_mutation.py \
 		tests/test_ab_test.py \
 		tests/test_evolution.py \
+		tests/test_promotion.py \
+		tests/test_fitness_dashboard.py \
 		tests/test_benchmark.py \
 		tests/test_benchmark_publisher.py \
 		tests/test_p0_security.py -q
@@ -81,6 +85,12 @@ showcase:
 
 showcase-compare:
 	$(PYTHON) scripts/showcase.py --compare
+
+fitness:
+	$(PYTHON) scripts/fitness_dashboard.py
+
+promote:
+	$(PYTHON) scripts/promote_genomes.py
 
 clean:
 	rm -rf .pytest_cache reports/

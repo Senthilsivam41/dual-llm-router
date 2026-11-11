@@ -67,6 +67,11 @@ def _load_yaml_evolution_config(path: Path) -> Dict[str, Any]:
             "min_delta": 0.05,
             "webhook_url": None,
         },
+        "promotion": {
+            "min_delta": 0.05,
+            "min_samples": 5,
+            "regression_tolerance": 0.0,
+        },
     }
     if not path.exists():
         return defaults
@@ -80,7 +85,7 @@ def _load_yaml_evolution_config(path: Path) -> Dict[str, Any]:
     if not isinstance(evolution, dict):
         return defaults
     merged = {**defaults, **evolution}
-    for key in ("hermes", "laguna", "scoring", "selection", "ab_testing", "alerting"):
+    for key in ("hermes", "laguna", "scoring", "selection", "ab_testing", "alerting", "promotion"):
         if isinstance(evolution.get(key), dict):
             merged[key] = {**defaults.get(key, {}), **evolution[key]}
     return merged

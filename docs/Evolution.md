@@ -44,6 +44,8 @@ scripts/{evolve,analyze,reset,cron_evolve}.py|.sh
 6. **Select** — elitist selection keeps top variants; winners update `best_configs.json`.
 7. **Lineage** — parent→child edges are appended to `lineage.json`.
 8. **Alert** — if composite fitness rises by ≥ `alerting.min_delta`, write `alerts.jsonl` and optionally POST `EVOLUTION_ALERT_WEBHOOK`.
+9. **Dashboard** — `scripts/fitness_dashboard.py` writes `evolution/dashboard/` (`fitness.html`, `fitness.json`, `LATEST.md`). An unchanged fingerprint does not add another archive file.
+10. **Promote** — `scripts/promote_genomes.py` copies the active pair into `evolution/promoted/` only when the gates in [ADR 0001](adr/0001-careful-genome-promotion.md) pass. `--apply` is required. The nightly schedule does not commit that directory.
 
 ## CLI
 
@@ -55,8 +57,16 @@ python scripts/reset.py
 python scripts/evolve.py --runs 50
 python scripts/evolve.py --force
 
-# Dashboard-style summary
+# Dashboard-style summary (console)
 python scripts/analyze.py
+
+# Durable fitness page
+python scripts/fitness_dashboard.py
+python scripts/analyze.py --output evolution/dashboard
+
+# Gated genome snapshot (decision only, then write)
+python scripts/promote_genomes.py
+python scripts/promote_genomes.py --apply
 ```
 
 ## Cron (Phase 5)

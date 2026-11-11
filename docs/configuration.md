@@ -20,8 +20,18 @@ Copy `.env.example` → `.env` for live runs. Secrets stay local (`.env` is giti
 
 | File | Purpose |
 | --- | --- |
-| `config/evolution.yaml` | Check interval, mutation rates, fitness weights |
-| `config/ab_tests.yaml` | A/B sample thresholds and promotion rules |
+| `config/evolution.yaml` | Check interval, mutation rates, fitness weights, promotion gates |
+| `config/ab_tests.yaml` | A/B sample thresholds |
+
+Promotion and the fitness page:
+
+```bash
+python scripts/promote_genomes.py
+python scripts/promote_genomes.py --apply
+python scripts/fitness_dashboard.py
+```
+
+See [ADR 0001](adr/0001-careful-genome-promotion.md).
 
 Reset local state:
 

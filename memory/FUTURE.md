@@ -23,9 +23,11 @@ Done:
 
 ## P2 — Evolution productization
 
-- Persist / promote genomes carefully (today nightly uploads artifacts; no auto-commit of genomes)
-- Surface fitness trends in a durable dashboard (beyond `scripts/analyze.py` console)
-- ADR via codebase-memory `manage_adr` once architecture stabilizes
+Done:
+
+- Active genomes stay in gitignored `.autoclaw/`. `scripts/promote_genomes.py` copies a pair into `evolution/promoted/` only after sample, fitness, regression, A/B, and secret gates. Nightly CI records the decision and commits a snapshot only on manual `promote=true`.
+- `evolution/dashboard/` (`fitness.html`, `fitness.json`, `LATEST.md`) is the durable fitness trend. `scripts/analyze.py` still prints the console summary. Unchanged fingerprints do not add another archive file.
+- Architecture decision: [docs/adr/0001-careful-genome-promotion.md](../docs/adr/0001-careful-genome-promotion.md). The codebase-memory `manage_adr` store was unreachable, so this file is the record.
 
 ## P3 — Docs / polish
 

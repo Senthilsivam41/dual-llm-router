@@ -22,6 +22,8 @@ Dual-agent router (Hermes planner → Laguna executor) with prompt co-evolution:
 | Evolution | `evals/` | Engine, scoring, mutation, A/B, alerts, benchmarks |
 | Tasks | `benchmark/{easy,medium,hard,extreme}/` | Progressive suite (~21 tasks, domain-tagged) |
 | Publish | `benchmark/published/` | Timestamped Markdown + `LATEST` / `INDEX` |
+| Fitness | `evolution/dashboard/` | HTML + JSON fitness trend |
+| Promoted genomes | `evolution/promoted/` | Gated snapshots of the active pair |
 | Scripts | `scripts/` | evolve / reset / analyze / benchmark / publish / CI summary |
 | Config | `config/evolution.yaml`, `config/ab_tests.yaml` | Evolution + A/B knobs |
 | Runtime state | `.autoclaw/` (gitignored) | Genomes, logs, economy |
@@ -52,7 +54,7 @@ codegraph index         # full rebuild
 | --- | --- | --- | --- |
 | Benchmark | `.github/workflows/benchmark.yml` | Push (path), weekly Sun 02:00 UTC, dispatch | Tests, publish Markdown, full suite + comparative + summary |
 | CI Benchmark (PR) | `.github/workflows/ci-benchmark.yml` | PR → main (path) | Easy smoke (simulate) + unit/P0 |
-| Nightly Evolution | `.github/workflows/nightly-evolution.yml` | Daily 04:00 UTC, dispatch | Simulated evolve + analyze artifacts |
+| Nightly Evolution | `.github/workflows/nightly-evolution.yml` | Daily 04:00 UTC, dispatch | Simulated evolve, fitness dashboard, gated promotion decision |
 
 Default mode is **simulate**. Live OpenRouter only if `OPENROUTER_API_KEY` is set (schedule / dispatch `--live`).
 
@@ -66,6 +68,7 @@ Docs: [`benchmark/benchmark-cicd.md`](../benchmark/benchmark-cicd.md), [`benchma
 4. Guide tasks: `easy_basic_function`, `easy_file_creation`, `medium_class_with_methods`, `medium_api_endpoint`
 5. Feasible CI/CD (PR smoke, weekly suite/comparative, nightly evolution)
 6. Issue-to-fix showcase: `examples/issue_to_fix/`, structured `checks`, pytest assertion verifier, `make showcase`
+7. P2 evolution productization: gated genome snapshots, durable fitness dashboard, [ADR 0001](../docs/adr/0001-careful-genome-promotion.md)
 
 ## Verification snapshot
 
@@ -78,4 +81,3 @@ Docs: [`benchmark/benchmark-cicd.md`](../benchmark/benchmark-cicd.md), [`benchma
 1. Optional `OPENROUTER_API_KEY` is not required for CI. Live weekly runs use the secret when it is set and otherwise stay on `--simulate`.
 2. Slack notifications deferred (step summaries used instead)
 3. Human-intervention rate is on each benchmark result and in the published system metrics. Simulate runs record `human_intervened=false`, so the rate is 0 rather than missing.
-4. P1 live-evaluation work is in tree: workspace assertion checks, evolved Laguna comparative coverage, and noise-only publish skips. See [FUTURE.md](./FUTURE.md).

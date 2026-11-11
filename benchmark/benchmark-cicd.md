@@ -29,7 +29,7 @@ Adapted from the research-labs design for this repo’s real CLIs, genomes, and 
 | --- | --- | --- | --- |
 | Benchmark | [`.github/workflows/benchmark.yml`](../.github/workflows/benchmark.yml) | Push (path filter), weekly Sun 02:00 UTC, `workflow_dispatch` | Tests, publish Markdown, weekly full suite + comparative + summary |
 | CI Benchmark (PR) | [`.github/workflows/ci-benchmark.yml`](../.github/workflows/ci-benchmark.yml) | PR → `main` (path filter) | Easy smoke + regression / P0 |
-| Nightly Evolution | [`.github/workflows/nightly-evolution.yml`](../.github/workflows/nightly-evolution.yml) | Daily 04:00 UTC, `workflow_dispatch` | Simulated runs + `evolve` + analyze artifacts |
+| Nightly Evolution | [`.github/workflows/nightly-evolution.yml`](../.github/workflows/nightly-evolution.yml) | Daily 04:00 UTC, `workflow_dispatch` | Simulated runs, evolve, fitness dashboard. Genome commit only on dispatch with `promote=true` |
 
 ### Job map (`benchmark.yml`)
 
@@ -65,7 +65,8 @@ uv run python scripts/comparative_benchmark.py --suite easy --simulate \
   --variants hermes_v1,laguna_v1 hermes_v2,laguna_v1 hermes_v3,laguna_v1
 uv run python scripts/publish_benchmark_results.py --force --suite easy --simulate
 uv run python scripts/evolve.py --runs 100 --force
-uv run python scripts/analyze.py
+uv run python scripts/analyze.py --output evolution/dashboard
+uv run python scripts/promote_genomes.py
 uv run python scripts/ci_benchmark_summary.py --title "Smoke" --report reports/pr_smoke.json
 ```
 
@@ -106,7 +107,7 @@ uv run python scripts/comparative_benchmark.py --suite easy --simulate \
 | PR | `pr-benchmark-smoke` |
 | Push (major paths) | `benchmark-publish` + committed `benchmark/published/benchmark_results_*.md` |
 | Weekly / dispatch | `full-benchmark-*`, `comparative-benchmark`, `benchmark-summary` |
-| Nightly | `evolution-results` (genomes + evolution_log + analysis) |
+| Nightly | `evolution-results` (genomes, evolution log, fitness dashboard, promotion decision) |
 
 View under **Actions → run → Artifacts**, and step summaries on the run page.
 
