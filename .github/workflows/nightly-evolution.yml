@@ -1,5 +1,7 @@
 # Nightly (or manual) prompt co-evolution under .autoclaw/ (simulated runs).
-# Does not commit genomes; uploads artifacts for inspection.
+# Uploads runtime genomes as artifacts. Commits the fitness dashboard when it
+# changes. Commits evolution/promoted only on a manual run with promote=true
+# and only after the fitness gates pass.
 
 name: Nightly Evolution
 
@@ -17,9 +19,14 @@ on:
         type: boolean
         required: false
         default: true
+      promote:
+        description: "Commit a gated genome snapshot. The schedule never does this."
+        type: boolean
+        required: false
+        default: false
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   PYTHON_VERSION: "3.11"
@@ -69,7 +76,14 @@ jobs:
           uv run python scripts/evolve.py --runs "$RUNS" "${FORCE_FLAG[@]}" | tee evolution_result.json
 
       - name: Analyze fitness
-        run: uv run python scripts/analyze.py | tee evolution_analysis.txt
+        run: uv run python scripts/analyze.py --output evolution/dashboard | tee evolution_analysis.txt
+
+      - name: Evaluate genome promotion
+        run: uv run python scripts/promote_genomes.py | tee promotion_decision.json
+
+      - name: Apply genome promotion
+        if: github.event_name == 'workflow_dispatch' && inputs.promote == true
+        run: uv run python scripts/promote_genomes.py --apply --strict
 
       - name: Step summary
         run: |
@@ -80,6 +94,14 @@ jobs:
             head -n 80 evolution_analysis.txt || true
             echo '```'
             echo ""
+            if [ -f promotion_decision.json ]; then
+              echo ""
+              echo "### Promotion decision"
+              echo ""
+              echo '```json'
+              uv run python -c 'import json; d=json.load(open("promotion_decision.json")); print(json.dumps({"status": d.get("status"), "reasons": d.get("reasons")}, indent=2))'
+              echo '```'
+            fi
             if [ -f evolution_result.json ]; then
               echo "<details><summary>evolve() JSON</summary>"
               echo ""
@@ -92,14 +114,47 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload evolution results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: evolution-results
           path: |
             evolution_result.json
             evolution_analysis.txt
+            promotion_decision.json
+            evolution/dashboard/
+            evolution/promoted/
             .autoclaw/evals/evolution_log.json
             .autoclaw/evals/best_configs.json
             .autoclaw/agents/genomes/
           if-no-files-found: ignore
           retention-days: 30
+
+      - name: Commit fitness dashboard
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evolution/dashboard
+          if git diff --staged --quiet; then
+            echo "No fitness dashboard changes to commit"
+            exit 0
+          fi
+          git commit -m "chore(evolution): publish fitness dashboard for ${GITHUB_SHA::7} [skip ci]"
+          git push
+
+      - name: Commit promoted genomes
+        if: >
+          github.event_name == 'workflow_dispatch' &&
+          inputs.promote == true &&
+          (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/'))
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evolution/promoted
+          if git diff --staged --quiet; then
+            echo "No promoted genomes to commit"
+            exit 0
+          fi
+          git commit -m "chore(evolution): promote gated genomes for ${GITHUB_SHA::7} [skip ci]"
+          git push

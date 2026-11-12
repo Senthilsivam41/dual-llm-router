@@ -1,9 +1,10 @@
 # Dual-LLM Router — developer commands (portfolio.dev contract)
 
-.PHONY: setup bootstrap doctor demo dev format lint typecheck test build check clean help showcase showcase-compare fitness promote
+.PHONY: setup bootstrap doctor demo dev format lint typecheck test build check clean help showcase showcase-compare showcase-reconciliation fitness promote
 
 PYTHON ?= python3
 UV ?= uv
+RECONCILIATION_FLAGS ?= --replay
 
 help:
 	@echo "Portfolio commands:"
@@ -17,6 +18,7 @@ help:
 	@echo "  make promote    Print the genome promotion decision (no snapshot)"
 	@echo "  make showcase  Issue-to-fix demo (replay without a Fireworks key)"
 	@echo "  make showcase-compare  Demo plus one model in both roles"
+	@echo "  make showcase-reconciliation  Replay the reconciliation demo"
 	@echo "  make test       Full pytest suite"
 	@echo "  make clean      Remove documented generated output only"
 
@@ -85,6 +87,9 @@ showcase:
 
 showcase-compare:
 	$(PYTHON) scripts/showcase.py --compare
+
+showcase-reconciliation:
+	$(PYTHON) scripts/reconciliation_benchmark.py --demo $(RECONCILIATION_FLAGS)
 
 fitness:
 	$(PYTHON) scripts/fitness_dashboard.py

@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from src.agents.provider import resolve_api_key, validate_provider_credentials
+from src.agents.provider import completion_options, resolve_api_key, validate_provider_credentials
 from src.config import config
 from src.orchestrator import DualLLMRouterOrchestrator
 from src.showcase.report import (
@@ -63,11 +63,13 @@ def preflight_model(model: str) -> str | None:
     try:
         completion(
             model=model,
-            messages=[{"role": "user", "content": "ping"}],
+            messages=[{"role": "user", "content": 'Reply with a JSON object containing "ready": true.'}],
             api_key=api_key or None,
             max_tokens=1,
             temperature=0,
             timeout=30,
+            num_retries=0,
+            **{key: value for key, value in completion_options(model).items() if value is not None},
         )
     except Exception as exc:
         return (

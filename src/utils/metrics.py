@@ -10,10 +10,15 @@ class CallMetric:
     completion_tokens: int
     latency_seconds: float
     cost_estimate_usd: float
+    cost_source: str = "estimate"
 
 class MetricsLogger:
     def __init__(self):
         self.metrics: List[CallMetric] = []
+        self.attempted_calls = 0
+
+    def record_call_attempt(self) -> None:
+        self.attempted_calls += 1
 
     def log_call(
         self,
@@ -39,6 +44,7 @@ class MetricsLogger:
             completion_tokens=completion_tokens,
             latency_seconds=latency_seconds,
             cost_estimate_usd=cost,
+            cost_source="provider" if cost_estimate_usd is not None else "estimate",
         )
         self.metrics.append(metric)
         return metric
@@ -50,6 +56,7 @@ class MetricsLogger:
         total_cost = sum(m.cost_estimate_usd for m in self.metrics)
         return {
             "total_calls": len(self.metrics),
+            "attempted_calls": self.attempted_calls,
             "total_prompt_tokens": total_prompt,
             "total_completion_tokens": total_completion,
             "total_latency_seconds": round(total_latency, 3),

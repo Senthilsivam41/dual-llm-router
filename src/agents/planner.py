@@ -7,11 +7,10 @@ from ..schemas.task_spec import TaskSpec
 from ..utils.metrics import MetricsLogger
 from .provider import (
     call_with_retry,
+    completion_options,
     message_text,
     resolve_api_key,
     response_cost,
-    response_format_for,
-    reasoning_effort_for,
     validate_provider_credentials,
 )
 from prompts.hermes.base import HERMES_SYSTEM_PROMPT
@@ -47,6 +46,8 @@ class PlannerAgent:
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": user_prompt},
             ]
+            if metrics_logger:
+                metrics_logger.record_call_attempt()
             response = call_with_retry(
                 completion,
                 max_retries=config.provider_max_retries,
@@ -56,10 +57,10 @@ class PlannerAgent:
                     "messages": messages,
                     "api_key": api_key or None,
                     "temperature": 0.1,
-                    "response_format": response_format_for(self.model_name),
-                    "reasoning_effort": reasoning_effort_for(self.model_name),
+                    **completion_options(self.model_name),
                     "max_tokens": config.max_tokens,
                     "timeout": config.provider_timeout_seconds,
+                    "num_retries": 0 if config.provider_max_retries == 0 else None,
                 },
             )
             elapsed = time.time() - start_time
