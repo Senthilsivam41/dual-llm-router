@@ -69,9 +69,23 @@ python scripts/promote_genomes.py
 python scripts/promote_genomes.py --apply
 ```
 
+## CI schedules
+
+The cron strings below are copied from the workflow files. A schedule change updates this section in the same change.
+
+| Workflow | File | Trigger |
+| --- | --- | --- |
+| Benchmark | `.github/workflows/benchmark.yml` | Push to `main` and `cursor/**` (path filter); weekly Sunday 02:00 UTC (`0 2 * * 0`); `workflow_dispatch` with `suite` and `live` |
+| CI Benchmark (PR) | `.github/workflows/ci-benchmark.yml` | `pull_request` to `main` (path filter). No schedule. |
+| Nightly Evolution | `.github/workflows/nightly-evolution.yml` | Daily 04:00 UTC (`0 4 * * *`); `workflow_dispatch` with `runs`, `force`, and `promote` |
+
+Default mode is simulate. A scheduled Benchmark run, or a dispatch with `live` set, uses `OPENROUTER_API_KEY` when that secret exists and stays on `--simulate` when it does not. PR smoke always uses `--simulate`.
+
+The weekly summary job writes `reports/summary.md` and the Actions step summary from one Markdown string. If `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, or `BENCHMARK_SUMMARY_WEBHOOK` is set, that same Markdown is posted. A missing secret skips the post and the job still succeeds.
+
 ## Cron (Phase 5)
 
-Hourly check (only evolves when the run interval is met):
+This host timer is separate from the GitHub Actions schedules above. Hourly check (only evolves when the run interval is met):
 
 ```cron
 0 * * * * cd /path/to/dual-llm-router && ./scripts/cron_evolve.sh >> .autoclaw/evals/cron.log 2>&1

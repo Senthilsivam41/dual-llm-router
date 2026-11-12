@@ -1,3 +1,10 @@
+"""Implemented planner, executor, orchestrator, and router behavior.
+
+These tests use dummy credentials and mocks. They do not call OpenRouter.
+Each expectation matches the current product and stays in CI without
+OPENROUTER_API_KEY.
+"""
+
 import json
 import tomllib
 from pathlib import Path

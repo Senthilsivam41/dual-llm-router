@@ -1,6 +1,6 @@
 # Future changes
 
-**Updated:** 2026-11-11  
+**Updated:** 2026-11-12  
 Prioritized backlog after evolution + benchmark + CI/CD slice.
 
 ## P0 — Merge & CI hygiene
@@ -31,9 +31,11 @@ Done:
 
 ## P3 — Docs / polish
 
-- Keep `docs/Evolution.md` aligned with CI schedules
-- Optional Slack / Discord webhook for weekly summary (secrets-gated)
-- Retire or implement `tests/test_p1_functionality.py` expectations
+Done:
+
+- `docs/Evolution.md` lists the Benchmark, CI Benchmark, and Nightly Evolution triggers, including `0 2 * * 0` and `0 4 * * *`. A test fails if a workflow cron is missing from that section. Default mode stays simulate; live runs still need `OPENROUTER_API_KEY`.
+- The weekly summary job posts that same Markdown when `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, or `BENCHMARK_SUMMARY_WEBHOOK` is set. A missing secret skips the post and the job exits 0.
+- `tests/test_p1_functionality.py` stays. Its expectations match the current planner, executor, orchestrator, and router, and the suite still runs without `OPENROUTER_API_KEY`.
 
 ## Process (always)
 
