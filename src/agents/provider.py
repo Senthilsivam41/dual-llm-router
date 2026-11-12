@@ -55,6 +55,15 @@ def reasoning_effort_for(model_name: str) -> str | None:
     return None
 
 
+def completion_options(model_name: str) -> dict[str, Any]:
+    options: dict[str, Any] = {"response_format": response_format_for(model_name)}
+    effort = reasoning_effort_for(model_name)
+    if effort is not None:
+        # Fireworks accepts this field even when LiteLLM's adapter omits it.
+        options.update(reasoning_effort=effort, allowed_openai_params=["reasoning_effort"])
+    return options
+
+
 def validate_provider_credentials(model_name: str, api_key: str) -> None:
     if model_name.startswith("openrouter/") and not api_key:
         raise RuntimeError("OPENROUTER_API_KEY is required for OpenRouter models")

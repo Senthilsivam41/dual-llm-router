@@ -210,6 +210,25 @@ Without `FIREWORKS_API_KEY`, the command explains what is missing and opens the 
 
 The benchmark task `medium_billing_coupon` uses the same fixture, so evolution can score planner accuracy. A non-blocking GitHub Action runs the showcase when a pull request touches the agents, prompts, or fixture, and on the weekly schedule. It writes a job summary from `run.json`, uploads `report.html`, and refreshes `benchmark/published/showcase_success_rate.json` without replacing the committed sample.
 
+### Invoice reconciliation
+
+`make showcase-reconciliation` replays a scripted example where the executor initially overwrites an invoice's payment total. The report shows the plan, the verifier's row-level diagnostic, and the reconciliation after the executor repairs the program.
+
+```bash
+# Use PYTHON=.venv/bin/python with make if dependencies are installed in .venv.
+make showcase-reconciliation
+
+# Live demo and full feedback study. Docker and the configured provider key are required.
+docker pull python:3.11-slim
+uv run python scripts/reconciliation_benchmark.py --live --demo
+uv run python scripts/reconciliation_benchmark.py --live
+
+# Render a saved study again without calling a model.
+uv run python scripts/reconciliation_benchmark.py --replay --recording reports/reconciliation/RUN/run.json
+```
+
+The study uses 12 development scenarios and 64 trials on 32 held-out scenarios. It compares generic and diagnostic retries from the same first attempt, then compares the baseline executor prompt with a development-guided candidate on first attempts. An independent Docker verifier scores private probes against expected records. Each invocation writes `report.html`, `report.md`, and `run.json` under `reports/reconciliation/`. The report identifies scripted replay, infrastructure failures, and cases where the development phase yields no candidate. [Reconciliation policy](examples/reconciliation/policy.md) · [Live benchmark results](benchmark/published/reconciliation-feedback-20261112.md)
+
 ## Benchmarks
 
 Difficulty-tiered tasks live under `benchmark/{easy,medium,hard,extreme}/`.

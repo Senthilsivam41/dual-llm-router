@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Any, Dict, Optional
+from time import perf_counter
+from typing import Any, Callable, Dict, Optional
 
 from .agents import PlannerAgent, ExecutorAgent
 from .agents.planner import build_planner_user_message
@@ -23,6 +24,10 @@ class DualLLMRouterOrchestrator:
         executor_model: Optional[str] = None,
         workspace_root: str = ".",
         planner_system_prompt: Optional[str] = None,
+        *,
+        executor_system_prompt: Optional[str] = None,
+        attempt_verifier: Callable[[Path], Dict[str, Any]] | None = None,
+        task_context: str = "",
     ):
         planner_kwargs: Dict[str, Any] = {}
         if planner_model:
@@ -33,6 +38,9 @@ class DualLLMRouterOrchestrator:
         self.executor = ExecutorAgent(
             workspace_root=workspace_root,
             **({"model_name": executor_model} if executor_model else {}),
+            system_prompt=executor_system_prompt,
+            attempt_verifier=attempt_verifier,
+            task_context=task_context,
         )
         self.metrics_logger = MetricsLogger()
 
@@ -54,16 +62,38 @@ class DualLLMRouterOrchestrator:
         if seed_files:
             write_seed_files(workspace, seed_files)
 
-        planned = self._plan(user_prompt, issue_text, metrics_logger)
+        planned = self.plan_task(user_prompt, issue_text=issue_text, metrics_logger=metrics_logger)
         if planned.get("status") == "planning_failed":
             return planned
-        task_spec: TaskSpec = planned["task_spec_model"]
+        result = self.execute_plan(
+            planned["task_spec_model"],
+            execute_tools=execute_tools,
+            max_iterations=max_iterations,
+            metrics_logger=metrics_logger,
+        )
+        return {**result, **{k: v for k, v in planned.items() if k.startswith("planner_")}}
 
+    def execute_plan(
+        self,
+        task_spec: TaskSpec,
+        *,
+        execute_tools: bool = True,
+        max_iterations: int = 1,
+        metrics_logger: MetricsLogger | None = None,
+        initial_feedback: str | None = None,
+        feedback_builder: Callable[[str, Dict[str, Any]], str] = build_executor_feedback,
+    ) -> Dict[str, Any]:
+        """Execute an accepted plan, optionally continuing a previous attempt."""
+        if max_iterations < 1:
+            raise ValueError("max_iterations must be at least 1")
+        metrics_logger = metrics_logger or MetricsLogger()
+        workspace = self.executor.workspace_root
         executor_result: Dict[str, Any] = {}
-        feedback: Optional[str] = None
+        feedback = initial_feedback
         attempts = []
         iterations = 0
         for iterations in range(1, max_iterations + 1):
+            start = perf_counter()
             try:
                 executor_result = self.executor.execute(
                     task_spec=task_spec,
@@ -72,17 +102,22 @@ class DualLLMRouterOrchestrator:
                     feedback=feedback,
                 )
             except Exception as exc:
-                return {
+                failure = {
                     "status": "execution_failed",
                     "error": str(exc),
+                    "error_type": type(exc).__name__,
                     "task_spec": task_spec.model_dump(),
                     "executor_result": None,
                     "iterations": iterations,
-                    "planner_attempts": planned["planner_attempts"],
-                    "planner_accuracy": planned["planner_accuracy"],
-                    "planner_disagreements": planned["planner_disagreements"],
                     "metrics": metrics_logger.summary(),
                 }
+                if self.executor.attempt_verifier is not None:
+                    failure["attempts"] = attempts + [{
+                        "attempt": iterations,
+                        "error_type": type(exc).__name__,
+                        "wall_seconds": perf_counter() - start,
+                    }]
+                return failure
             report = executor_result.get("verification_report") or {}
             attempts.append(
                 {
@@ -93,9 +128,16 @@ class DualLLMRouterOrchestrator:
                     "pytest_output": str((report.get("pytest") or {}).get("output") or "")[:2000],
                 }
             )
+            if self.executor.attempt_verifier is not None:
+                attempts[-1].update(
+                    wall_seconds=perf_counter() - start,
+                    verification=report,
+                    feedback=feedback,
+                )
             if executor_result.get("success", False):
                 break
-            feedback = build_executor_feedback(str(workspace), report)
+            if iterations < max_iterations:
+                feedback = feedback_builder(str(workspace), report)
 
         executor_result["attempts"] = attempts
         status = "completed" if executor_result.get("success", False) else "failed"
@@ -104,18 +146,18 @@ class DualLLMRouterOrchestrator:
             "task_spec": task_spec.model_dump(),
             "executor_result": executor_result,
             "iterations": iterations,
-            "planner_attempts": planned["planner_attempts"],
-            "planner_accuracy": planned["planner_accuracy"],
-            "planner_disagreements": planned["planner_disagreements"],
             "metrics": metrics_logger.summary(),
         }
 
-    def _plan(
+    def plan_task(
         self,
         user_prompt: str,
-        issue_text: Optional[str],
-        metrics_logger: MetricsLogger,
+        *,
+        issue_text: Optional[str] = None,
+        metrics_logger: MetricsLogger | None = None,
+        validate_plan: Callable[[TaskSpec], str | None] | None = None,
     ) -> Dict[str, Any]:
+        metrics_logger = metrics_logger or MetricsLogger()
         last_error: Optional[str] = None
         task_spec: Optional[TaskSpec] = None
         for attempt in range(1, _PLANNER_ATTEMPTS + 1):
@@ -136,15 +178,19 @@ class DualLLMRouterOrchestrator:
                     return self._planning_failed(last_error, metrics_logger, attempt)
                 continue
             except Exception as exc:
-                return self._planning_failed(str(exc), metrics_logger, attempt)
+                return {
+                    **self._planning_failed(str(exc), metrics_logger, attempt),
+                    "error_type": type(exc).__name__,
+                }
 
-            if issue_text is not None:
-                check_error = validate_report_checks(task_spec, issue_text)
-                if check_error:
-                    last_error = check_error
-                    if attempt == _PLANNER_ATTEMPTS:
-                        return self._planning_failed(check_error, metrics_logger, attempt)
-                    continue
+            check_error = validate_report_checks(task_spec, issue_text) if issue_text is not None else None
+            if not check_error and validate_plan is not None:
+                check_error = validate_plan(task_spec)
+            if check_error:
+                last_error = check_error
+                if attempt == _PLANNER_ATTEMPTS:
+                    return self._planning_failed(check_error, metrics_logger, attempt)
+                continue
             accuracy = planner_accuracy(task_spec.checks)
             return {
                 "task_spec_model": task_spec,

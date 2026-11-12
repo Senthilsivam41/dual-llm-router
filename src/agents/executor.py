@@ -2,7 +2,8 @@ import json
 import os
 import re
 import time
-from typing import Dict, Any, List, Optional
+from pathlib import Path
+from typing import Callable, Dict, Any, List, Optional
 from ..config import config
 from ..schemas.task_spec import TaskSpec
 from ..tools import apply_patch, run_shell
@@ -12,11 +13,10 @@ from ..verification.checks import verify_checks
 from ..verification.feedback import target_file_context
 from .provider import (
     call_with_retry,
+    completion_options,
     message_text,
     resolve_api_key,
     response_cost,
-    response_format_for,
-    reasoning_effort_for,
     validate_provider_credentials,
 )
 from prompts.laguna.base import LAGUNA_SYSTEM_PROMPT
@@ -51,10 +51,14 @@ class ExecutorAgent:
         model_name: Optional[str] = None,
         workspace_root: str = ".",
         system_prompt: Optional[str] = None,
+        attempt_verifier: Callable[[Path], Dict[str, Any]] | None = None,
+        task_context: str = "",
     ):
         self.model_name = model_name or config.executor_model
         self.workspace_root = workspace_root
         self.system_prompt = system_prompt or EXECUTOR_SYSTEM_PROMPT
+        self.attempt_verifier = attempt_verifier
+        self.task_context = task_context
 
     def execute(
         self,
@@ -67,13 +71,14 @@ class ExecutorAgent:
 
         file_context = target_file_context(self.workspace_root, task_spec.target_files)
         checks_block = ""
-        if task_spec.checks:
+        if task_spec.checks and self.attempt_verifier is None:
             checks_block = (
                 "Checks (assert each expected_value as a number inside an assert):\n"
                 + json.dumps([check.model_dump() for check in task_spec.checks], indent=2)
                 + "\n"
             )
         feedback_block = f"Previous attempt failed:\n{feedback}\n" if feedback else ""
+        context_block = f"{self.task_context}\n" if self.task_context else ""
         prompt_payload = (
             f"Goal: {task_spec.goal}\n"
             f"Target Files: {task_spec.target_files}\n"
@@ -81,6 +86,7 @@ class ExecutorAgent:
             f"Plan: {task_spec.step_by_step_plan}\n"
             f"Notes: {task_spec.notes or ''}\n"
             f"{checks_block}"
+            f"{context_block}"
             f"{file_context}\n"
             f"{feedback_block}"
         )
@@ -96,6 +102,8 @@ class ExecutorAgent:
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt_payload},
             ]
+            if metrics_logger:
+                metrics_logger.record_call_attempt()
             response = call_with_retry(
                 completion,
                 max_retries=config.provider_max_retries,
@@ -105,10 +113,10 @@ class ExecutorAgent:
                     "messages": messages,
                     "api_key": api_key or None,
                     "temperature": 0.2,
-                    "response_format": response_format_for(self.model_name),
-                    "reasoning_effort": reasoning_effort_for(self.model_name),
+                    **completion_options(self.model_name),
                     "max_tokens": config.max_tokens,
                     "timeout": config.provider_timeout_seconds,
+                    "num_retries": 0 if config.provider_max_retries == 0 else None,
                 },
             )
             elapsed = time.time() - start_time
@@ -137,6 +145,8 @@ class ExecutorAgent:
             cleaned_json = raw_json.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
             try:
                 execution_plan = json.loads(cleaned_json)
+                if not isinstance(execution_plan, dict):
+                    execution_plan = {"error": "Execution plan must be a JSON object"}
             except Exception as exc:
                 execution_plan = {
                     "error": f"Failed to parse execution plan JSON: {exc}",
@@ -191,6 +201,23 @@ class ExecutorAgent:
 
         # Verify only facts this process can observe. LLM-authored
         # verification_results are claims, not trusted evidence.
+        if self.attempt_verifier is not None:
+            report = self.attempt_verifier(Path(self.workspace_root)) if execute_tools else {
+                "criteria_passed": False,
+            }
+            if not report["criteria_passed"] and ("error" in execution_plan or not all_tools_succeeded):
+                report["failure_codes"] = sorted(set(report.get("failure_codes", [])) | {"invalid_actions"})
+                report["diagnostics"] = [{"code": "invalid_actions"}] + report.get("diagnostics", [])[:7]
+            return {
+                "success": bool(report["criteria_passed"]),
+                "execution_plan": execution_plan,
+                "tool_results": tool_results,
+                "verification_report": {**report, "tools_succeeded": all_tools_succeeded},
+                "latency": elapsed,
+                "tokens": {"prompt": prompt_tokens, "completion": completion_tokens},
+                "cost_usd": provider_cost,
+            }
+
         if task_spec.checks:
             check_report = verify_checks(self.workspace_root, task_spec.checks)
             check_report["tools_succeeded"] = all_tools_succeeded

@@ -769,11 +769,41 @@ class EvolutionEngine:
                 json.dump(to_store, f, indent=2)
                 f.write("\n")
 
+    def register_prompt_variant(
+        self, agent: str, prompt: str, *, source: str, parent_id: str | None = None,
+        evidence: Dict[str, Any] | None = None,
+    ) -> Dict:
+        """Persist an explicit prompt candidate without changing the active pair."""
+        if agent not in {"hermes", "laguna"} or not prompt.strip():
+            raise ValueError("A supported agent and nonempty prompt are required")
+        if parent_id is not None and (
+            parent_id not in self.genomes or self.genomes[parent_id]["_agent"] != agent
+        ):
+            raise ValueError("The parent must be a registered variant of the same agent")
+        genome = {
+            "variant_id": self._next_variant_id(agent),
+            "created": _utc_now(),
+            "parent_id": parent_id,
+            "mutation_source": source,
+            "system_prompt": prompt,
+            "evidence": evidence or {},
+            "_agent": agent,
+        }
+        self._save_genomes([genome], [])
+        self.genomes[genome["variant_id"]] = genome
+        if parent_id:
+            self._register_lineage_edges([genome])
+            self._save_lineage()
+        return {key: value for key, value in genome.items() if not key.startswith("_")}
+
     def _update_lineage(self, best: Dict) -> None:
         self.lineage.setdefault("variants", {})
         self.lineage.setdefault("edges", [])
         self.lineage["variants"]["hermes"] = best["hermes"]["variant_id"]
         self.lineage["variants"]["laguna"] = best["laguna"]["variant_id"]
+        self._save_lineage()
+
+    def _save_lineage(self) -> None:
         self.lineage["updated_at"] = _utc_now()
         self.lineage_file.parent.mkdir(parents=True, exist_ok=True)
         with open(self.lineage_file, "w", encoding="utf-8") as f:
