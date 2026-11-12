@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-11-12T12:12:53.749862Z",
+  "run_count": 100,
+  "active_hermes": "hermes_v1",
+  "active_laguna": "laguna_v1",
+  "current_hermes": {
+    "success_rate": 1.0,
+    "cost_efficiency": 1.0,
+    "quality_score": 0.85,
+    "time_efficiency": 0.5,
+    "sample_size": 100,
+    "composite": 0.9125,
+    "avg_cost": 0.1,
+    "avg_time": 30.0
+  },
+  "current_laguna": {
+    "success_rate": 1.0,
+    "cost_efficiency": 1.0,
+    "quality_score": 0.85,
+    "time_efficiency": 0.5,
+    "sample_size": 100,
+    "composite": 0.9125,
+    "avg_cost": 0.1,
+    "avg_time": 30.0
+  },
+  "history": [
+    {
+      "run_count": 100,
+      "hermes": "hermes_v1",
+      "laguna": "laguna_v1",
+      "hermes_score": 0.9125,
+      "laguna_score": 0.9125,
+      "pair_composite": 0.9125
+    }
+  ],
+  "trend": "flat",
+  "top_hermes": [
+    {
+      "variant_id": "hermes_v1",
+      "composite": 0.9125,
+      "success_rate": 1.0,
+      "sample_size": 100
+    }
+  ],
+  "top_laguna": [
+    {
+      "variant_id": "laguna_v1",
+      "composite": 0.9125,
+      "success_rate": 1.0,
+      "sample_size": 100
+    }
+  ]
+}
