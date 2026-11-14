@@ -38,3 +38,8 @@ CI workflow: `.github/workflows/benchmark.yml` (path-filtered on push/PR).
 
 1. Open [`LATEST.md`](LATEST.md) for the newest run
 2. Browse history in [`INDEX.md`](INDEX.md)
+
+## Live studies
+
+- November 14, 2026 · [Invoice architecture comparison](reconciliation-architecture-20261114/rerun.md)
+- November 12, 2026 · [Invoice reconciliation retry feedback](reconciliation-feedback-20261112.md)

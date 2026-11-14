@@ -1,0 +1,3078 @@
+{
+  "status": "complete",
+  "started_at": "2026-11-14T04:57:34.714066+00:00",
+  "mode": "live",
+  "models": {
+    "planner": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+    "default_executor": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash"
+  },
+  "routing_policy": "Select the planner-capable model as sole executor if the visible CSV repeats a payment ID. Otherwise choose the default executor.",
+  "protocol": {
+    "jobs": 4,
+    "fixture_sha256": "b84666c7fd6fe447fb72351744e00ce65ed2099e89e1ab16558db8a2c32f544b",
+    "policy_sha256": "a792947fee30c001f38854f83f21f33737f08eebc1808af98f4cc037c8fa9a81",
+    "scenario_ids": [
+      "holdout-aggregation-01",
+      "holdout-aggregation-02",
+      "holdout-aggregation-03",
+      "holdout-aggregation-04",
+      "holdout-duplicates-01",
+      "holdout-duplicates-02",
+      "holdout-duplicates-03",
+      "holdout-duplicates-04",
+      "holdout-links_and_currency-01",
+      "holdout-links_and_currency-02",
+      "holdout-links_and_currency-03",
+      "holdout-links_and_currency-04",
+      "holdout-mixed-01",
+      "holdout-mixed-02",
+      "holdout-mixed-03",
+      "holdout-mixed-04"
+    ],
+    "repetitions": 2,
+    "provider_retries": 0,
+    "max_tokens": 8192,
+    "executor_attempts": 1,
+    "planner_attempts_max": 2,
+    "price_snapshot": {
+      "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash": {
+        "input": 0.3,
+        "output": 1.2,
+        "source": "https://fireworks.ai/models/deepseek-ai/deepseek-v4p1-flash"
+      },
+      "fireworks_ai/accounts/fireworks/models/glm-5p3-flash": {
+        "input": 0.15,
+        "output": 0.5,
+        "source": "https://fireworks.ai/models/fireworks/glm-5p3-flash"
+      }
+    },
+    "docker_image": "sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535"
+  },
+  "trials": [
+    {
+      "scenario": "holdout-aggregation-01",
+      "family": "aggregation",
+      "repetition": 1,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 5.32778154197149,
+          "usd": 0.00049565,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 754,
+              "latency_seconds": 4.921957731246948,
+              "cost_estimate_usd": 0.00049565,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": true,
+          "wall_seconds": 5.854043250030372,
+          "usd": 0.00036699,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 681,
+              "latency_seconds": 5.621793985366821,
+              "cost_estimate_usd": 0.00036699,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 11.096946457982995,
+          "usd": 0.002122944,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1232,
+              "latency_seconds": 5.458731174468994,
+              "cost_estimate_usd": 0.001520844,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1324,
+              "completion_tokens": 807,
+              "latency_seconds": 5.36592698097229,
+              "cost_estimate_usd": 0.0006020999999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-aggregation-02",
+      "family": "aggregation",
+      "repetition": 1,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 5.254503166943323,
+          "usd": 0.0005561499999999999,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 875,
+              "latency_seconds": 5.254473924636841,
+              "cost_estimate_usd": 0.0005561499999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 12.638700124982279,
+          "usd": 0.002156644,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 997,
+              "latency_seconds": 4.4867939949035645,
+              "cost_estimate_usd": 0.001238844,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1482,
+              "completion_tokens": 1391,
+              "latency_seconds": 8.151360034942627,
+              "cost_estimate_usd": 0.0009177999999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 8.094839958008379,
+          "usd": 0.00049215,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 747,
+              "latency_seconds": 7.903318881988525,
+              "cost_estimate_usd": 0.00049215,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-aggregation-03",
+      "family": "aggregation",
+      "repetition": 1,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 20.371078916999977,
+          "usd": 0.0031307439999999995,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1457,
+              "latency_seconds": 7.318927049636841,
+              "cost_estimate_usd": 0.001790844,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1466,
+              "completion_tokens": 2240,
+              "latency_seconds": 13.049981117248535,
+              "cost_estimate_usd": 0.0013398999999999998,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 5.026995541993529,
+          "usd": 0.00047164999999999994,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 706,
+              "latency_seconds": 4.818376064300537,
+              "cost_estimate_usd": 0.00047164999999999994,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.958619666984305,
+          "usd": 0.00060299,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 1153,
+              "latency_seconds": 6.958556175231934,
+              "cost_estimate_usd": 0.00060299,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-aggregation-04",
+      "family": "aggregation",
+      "repetition": 1,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.460516874969471,
+          "usd": 0.00069715,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 1157,
+              "latency_seconds": 6.460268974304199,
+              "cost_estimate_usd": 0.00069715,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 5.182891083997674,
+          "usd": 0.00068365,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 1130,
+              "latency_seconds": 5.182832717895508,
+              "cost_estimate_usd": 0.00068365,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 15.836341208021622,
+          "usd": 0.0026247939999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1438,
+              "latency_seconds": 6.411536931991577,
+              "cost_estimate_usd": 0.0017680439999999999,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1535,
+              "completion_tokens": 1253,
+              "latency_seconds": 9.424407958984375,
+              "cost_estimate_usd": 0.00085675,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-duplicates-01",
+      "family": "duplicates",
+      "repetition": 1,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 11.400699083984364,
+          "usd": 0.00468,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 796,
+              "completion_tokens": 3701,
+              "latency_seconds": 11.400603294372559,
+              "cost_estimate_usd": 0.00468,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.481592957978137,
+          "usd": 0.0024755439999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1357,
+              "latency_seconds": 6.0963969230651855,
+              "cost_estimate_usd": 0.0016708439999999999,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1398,
+              "completion_tokens": 1190,
+              "latency_seconds": 7.384795904159546,
+              "cost_estimate_usd": 0.0008047,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.771583041001577,
+          "usd": 0.00065075,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 755,
+              "completion_tokens": 1075,
+              "latency_seconds": 6.771491050720215,
+              "cost_estimate_usd": 0.00065075,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-duplicates-02",
+      "family": "duplicates",
+      "repetition": 1,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 12.27599720802391,
+          "usd": 0.0021745439999999996,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1090,
+              "latency_seconds": 5.267326831817627,
+              "cost_estimate_usd": 0.001350444,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1374,
+              "completion_tokens": 1236,
+              "latency_seconds": 7.008224964141846,
+              "cost_estimate_usd": 0.0008240999999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 8.074407999985851,
+          "usd": 0.00047305,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 716,
+              "latency_seconds": 7.85162615776062,
+              "cost_estimate_usd": 0.00047305,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 8.99481966602616,
+          "usd": 0.0035630999999999996,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 809,
+              "completion_tokens": 2767,
+              "latency_seconds": 8.994765996932983,
+              "cost_estimate_usd": 0.0035630999999999996,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-duplicates-03",
+      "family": "duplicates",
+      "repetition": 1,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.847245874989312,
+          "usd": 0.00046675,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 755,
+              "completion_tokens": 707,
+              "latency_seconds": 4.5608367919921875,
+              "cost_estimate_usd": 0.00046675,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 7.822828292031772,
+          "usd": 0.0028631999999999998,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 796,
+              "completion_tokens": 2187,
+              "latency_seconds": 7.4373860359191895,
+              "cost_estimate_usd": 0.0028631999999999998,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.66636491700774,
+          "usd": 0.0023017439999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1217,
+              "latency_seconds": 5.550104141235352,
+              "cost_estimate_usd": 0.001502844,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1276,
+              "completion_tokens": 1215,
+              "latency_seconds": 8.115864038467407,
+              "cost_estimate_usd": 0.0007989,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-duplicates-04",
+      "family": "duplicates",
+      "repetition": 1,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 8.247468916990329,
+          "usd": 0.0031122719999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 809,
+              "completion_tokens": 2529,
+              "latency_seconds": 8.247389078140259,
+              "cost_estimate_usd": 0.0031122719999999997,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 12.584854791988619,
+          "usd": 0.002437344,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1279,
+              "latency_seconds": 6.089424133300781,
+              "cost_estimate_usd": 0.001577244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1394,
+              "completion_tokens": 1302,
+              "latency_seconds": 6.494771242141724,
+              "cost_estimate_usd": 0.0008600999999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 5.093173958011903,
+          "usd": 0.00043855,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 647,
+              "latency_seconds": 4.7752649784088135,
+              "cost_estimate_usd": 0.00043855,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-links_and_currency-01",
+      "family": "links_and_currency",
+      "repetition": 1,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 12.498218709020875,
+          "usd": 0.002561944,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1622,
+              "latency_seconds": 7.870077133178711,
+              "cost_estimate_usd": 0.001988844,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1474,
+              "completion_tokens": 704,
+              "latency_seconds": 4.353592157363892,
+              "cost_estimate_usd": 0.0005731,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": true,
+          "wall_seconds": 4.758369958028197,
+          "usd": 0.00042605,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 622,
+              "latency_seconds": 4.475059986114502,
+              "cost_estimate_usd": 0.00042605,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.898469916952308,
+          "usd": 0.00040356999999999996,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 746,
+              "latency_seconds": 4.55527400970459,
+              "cost_estimate_usd": 0.00040356999999999996,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-links_and_currency-02",
+      "family": "links_and_currency",
+      "repetition": 1,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.457537665963173,
+          "usd": 0.0005645499999999999,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 899,
+              "latency_seconds": 6.457472085952759,
+              "cost_estimate_usd": 0.0005645499999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 8.891047667013481,
+          "usd": 0.00046555,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 701,
+              "latency_seconds": 8.690658807754517,
+              "cost_estimate_usd": 0.00046555,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 12.314550709037576,
+          "usd": 0.0023055439999999996,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1401,
+              "latency_seconds": 6.39629602432251,
+              "cost_estimate_usd": 0.0017236439999999999,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1386,
+              "completion_tokens": 748,
+              "latency_seconds": 5.73790168762207,
+              "cost_estimate_usd": 0.0005819,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-links_and_currency-03",
+      "family": "links_and_currency",
+      "repetition": 1,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": true,
+          "wall_seconds": 4.152105459012091,
+          "usd": 0.00043955,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 649,
+              "latency_seconds": 3.9520480632781982,
+              "cost_estimate_usd": 0.00043955,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.84943379095057,
+          "usd": 0.002387294,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1221,
+              "latency_seconds": 5.935260057449341,
+              "cost_estimate_usd": 0.0015076439999999998,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1471,
+              "completion_tokens": 1318,
+              "latency_seconds": 7.913928747177124,
+              "cost_estimate_usd": 0.0008796499999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": true,
+          "wall_seconds": 4.907814915990457,
+          "usd": 0.00038107,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 701,
+              "latency_seconds": 4.716488838195801,
+              "cost_estimate_usd": 0.00038107,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-links_and_currency-04",
+      "family": "links_and_currency",
+      "repetition": 1,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.976593957981095,
+          "usd": 0.002253794,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1019,
+              "latency_seconds": 4.671276092529297,
+              "cost_estimate_usd": 0.001265244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1517,
+              "completion_tokens": 1522,
+              "latency_seconds": 9.304723978042603,
+              "cost_estimate_usd": 0.00098855,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 4.363738541956991,
+          "usd": 0.00053555,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 841,
+              "latency_seconds": 4.3636720180511475,
+              "cost_estimate_usd": 0.00053555,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 4.777010833029635,
+          "usd": 0.00055105,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 872,
+              "latency_seconds": 4.7768471240997314,
+              "cost_estimate_usd": 0.00055105,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-mixed-01",
+      "family": "mixed",
+      "repetition": 1,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.584480457997415,
+          "usd": 0.00039345,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 805,
+              "completion_tokens": 699,
+              "latency_seconds": 4.319617986679077,
+              "cost_estimate_usd": 0.00039345,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.2517695420538075,
+          "usd": 0.002500272,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 849,
+              "completion_tokens": 2009,
+              "latency_seconds": 6.251643180847168,
+              "cost_estimate_usd": 0.002500272,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 25.016085125040263,
+          "usd": 0.003651344,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1383,
+              "latency_seconds": 6.16826605796814,
+              "cost_estimate_usd": 0.001702044,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1452,
+              "completion_tokens": 3463,
+              "latency_seconds": 18.8476459980011,
+              "cost_estimate_usd": 0.0019493,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-mixed-02",
+      "family": "mixed",
+      "repetition": 1,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 9.567013708990999,
+          "usd": 0.0040406999999999995,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 849,
+              "completion_tokens": 3155,
+              "latency_seconds": 9.566936016082764,
+              "cost_estimate_usd": 0.0040406999999999995,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 14.710458583023865,
+          "usd": 0.002240594,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1329,
+              "latency_seconds": 6.139291048049927,
+              "cost_estimate_usd": 0.001637244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1429,
+              "completion_tokens": 778,
+              "latency_seconds": 8.387351036071777,
+              "cost_estimate_usd": 0.0006033499999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.425019833026454,
+          "usd": 0.00066875,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 805,
+              "completion_tokens": 1096,
+              "latency_seconds": 6.424753904342651,
+              "cost_estimate_usd": 0.00066875,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-mixed-03",
+      "family": "mixed",
+      "repetition": 1,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 12.628200333041605,
+          "usd": 0.002268544,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1283,
+              "latency_seconds": 5.9346959590911865,
+              "cost_estimate_usd": 0.001582044,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1320,
+              "completion_tokens": 977,
+              "latency_seconds": 6.693130016326904,
+              "cost_estimate_usd": 0.0006865,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.987672207993455,
+          "usd": 0.00040395,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 805,
+              "completion_tokens": 720,
+              "latency_seconds": 4.671425104141235,
+              "cost_estimate_usd": 0.00040395,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 10.920156458974816,
+          "usd": 0.004361472,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 849,
+              "completion_tokens": 3560,
+              "latency_seconds": 10.920017957687378,
+              "cost_estimate_usd": 0.004361472,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-mixed-04",
+      "family": "mixed",
+      "repetition": 1,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 9.721556791977491,
+          "usd": 0.00062475,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 805,
+              "completion_tokens": 1008,
+              "latency_seconds": 9.721203804016113,
+              "cost_estimate_usd": 0.00062475,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 7.695619917009026,
+          "usd": 0.0031287,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 849,
+              "completion_tokens": 2395,
+              "latency_seconds": 7.695265054702759,
+              "cost_estimate_usd": 0.0031287,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.199603875051253,
+          "usd": 0.002672244,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1574,
+              "latency_seconds": 7.2762439250946045,
+              "cost_estimate_usd": 0.001931244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1530,
+              "completion_tokens": 1023,
+              "latency_seconds": 5.922975063323975,
+              "cost_estimate_usd": 0.000741,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-aggregation-01",
+      "family": "aggregation",
+      "repetition": 2,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 5.537903082964476,
+          "usd": 0.00040999,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 767,
+              "latency_seconds": 5.199000120162964,
+              "cost_estimate_usd": 0.00040999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.305097958014812,
+          "usd": 0.002368394,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1356,
+              "latency_seconds": 6.451174974441528,
+              "cost_estimate_usd": 0.0016696439999999999,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1375,
+              "completion_tokens": 985,
+              "latency_seconds": 6.848138093948364,
+              "cost_estimate_usd": 0.0006987499999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.862338458013255,
+          "usd": 0.00039098999999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 729,
+              "latency_seconds": 4.590842962265015,
+              "cost_estimate_usd": 0.00039098999999999997,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-aggregation-02",
+      "family": "aggregation",
+      "repetition": 2,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 10.87739166704705,
+          "usd": 0.002077794,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1228,
+              "latency_seconds": 5.678299188613892,
+              "cost_estimate_usd": 0.001516044,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1305,
+              "completion_tokens": 732,
+              "latency_seconds": 4.992838144302368,
+              "cost_estimate_usd": 0.00056175,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 9.147341916046571,
+          "usd": 0.0006981499999999999,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 1159,
+              "latency_seconds": 9.147226095199585,
+              "cost_estimate_usd": 0.0006981499999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 5.636310874950141,
+          "usd": 0.00051665,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 796,
+              "latency_seconds": 5.444360971450806,
+              "cost_estimate_usd": 0.00051665,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-aggregation-03",
+      "family": "aggregation",
+      "repetition": 2,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.63586891698651,
+          "usd": 0.00040198999999999996,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 751,
+              "latency_seconds": 4.4202258586883545,
+              "cost_estimate_usd": 0.00040198999999999996,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": true,
+          "wall_seconds": 5.479155124980025,
+          "usd": 0.00038848999999999996,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 724,
+              "latency_seconds": 5.212770223617554,
+              "cost_estimate_usd": 0.00038848999999999996,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 14.561808999977075,
+          "usd": 0.002404824,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1234,
+              "latency_seconds": 5.938364267349243,
+              "cost_estimate_usd": 0.001523244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1372,
+              "completion_tokens": 1413,
+              "latency_seconds": 8.623249292373657,
+              "cost_estimate_usd": 0.00088158,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-aggregation-04",
+      "family": "aggregation",
+      "repetition": 2,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 10.331168540986255,
+          "usd": 0.00050115,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 765,
+              "latency_seconds": 10.111135959625244,
+              "cost_estimate_usd": 0.00050115,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 17.464712416986004,
+          "usd": 0.0023551939999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1146,
+              "latency_seconds": 5.448301076889038,
+              "cost_estimate_usd": 0.001417644,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1527,
+              "completion_tokens": 1417,
+              "latency_seconds": 12.01590085029602,
+              "cost_estimate_usd": 0.0009375499999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 7.977424250042532,
+          "usd": 0.00067815,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 791,
+              "completion_tokens": 1119,
+              "latency_seconds": 7.97733211517334,
+              "cost_estimate_usd": 0.00067815,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-duplicates-01",
+      "family": "duplicates",
+      "repetition": 2,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 12.9116716250428,
+          "usd": 0.002316574,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1271,
+              "latency_seconds": 5.822281837463379,
+              "cost_estimate_usd": 0.001567644,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1301,
+              "completion_tokens": 1169,
+              "latency_seconds": 7.0890631675720215,
+              "cost_estimate_usd": 0.00074893,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 5.716882958018687,
+          "usd": 0.00067025,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 755,
+              "completion_tokens": 1114,
+              "latency_seconds": 5.7168169021606445,
+              "cost_estimate_usd": 0.00067025,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 9.020642083021812,
+          "usd": 0.0033753959999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 796,
+              "completion_tokens": 2777,
+              "latency_seconds": 9.020567178726196,
+              "cost_estimate_usd": 0.0033753959999999997,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-duplicates-02",
+      "family": "duplicates",
+      "repetition": 2,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 8.513876708981115,
+          "usd": 0.00048604999999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 742,
+              "latency_seconds": 8.234199047088623,
+              "cost_estimate_usd": 0.00048604999999999997,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 8.25727491703583,
+          "usd": 0.00315918,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 809,
+              "completion_tokens": 2597,
+              "latency_seconds": 8.257171869277954,
+              "cost_estimate_usd": 0.00315918,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 11.66911820799578,
+          "usd": 0.002206224,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1294,
+              "latency_seconds": 5.745253086090088,
+              "cost_estimate_usd": 0.001595244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1338,
+              "completion_tokens": 882,
+              "latency_seconds": 5.700249910354614,
+              "cost_estimate_usd": 0.00061098,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-duplicates-03",
+      "family": "duplicates",
+      "repetition": 2,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 7.763003375031985,
+          "usd": 0.0028425959999999998,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 796,
+              "completion_tokens": 2333,
+              "latency_seconds": 7.7628490924835205,
+              "cost_estimate_usd": 0.0028425959999999998,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 17.490137916000094,
+          "usd": 0.0021791939999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1024,
+              "latency_seconds": 4.6085522174835205,
+              "cost_estimate_usd": 0.001271244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1483,
+              "completion_tokens": 1371,
+              "latency_seconds": 12.881269216537476,
+              "cost_estimate_usd": 0.00090795,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.529422624967992,
+          "usd": 0.00038227,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 755,
+              "completion_tokens": 707,
+              "latency_seconds": 4.337207078933716,
+              "cost_estimate_usd": 0.00038227,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-duplicates-04",
+      "family": "duplicates",
+      "repetition": 2,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.482169708004221,
+          "usd": 0.0024609239999999998,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1304,
+              "latency_seconds": 6.117837190628052,
+              "cost_estimate_usd": 0.0016072439999999999,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1396,
+              "completion_tokens": 1350,
+              "latency_seconds": 7.363988876342773,
+              "cost_estimate_usd": 0.0008536799999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.700195209006779,
+          "usd": 0.00039506999999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 729,
+              "latency_seconds": 4.504730939865112,
+              "cost_estimate_usd": 0.00039506999999999997,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 9.616035124985501,
+          "usd": 0.00377958,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 809,
+              "completion_tokens": 3114,
+              "latency_seconds": 9.61588191986084,
+              "cost_estimate_usd": 0.00377958,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-links_and_currency-01",
+      "family": "links_and_currency",
+      "repetition": 2,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.914389832993038,
+          "usd": 0.00039007,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 719,
+              "latency_seconds": 4.740243911743164,
+              "cost_estimate_usd": 0.00039007,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 5.329896665993147,
+          "usd": 0.00040156999999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 742,
+              "latency_seconds": 5.08979606628418,
+              "cost_estimate_usd": 0.00040156999999999997,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 13.906942375004292,
+          "usd": 0.0022154239999999997,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1310,
+              "latency_seconds": 7.719005107879639,
+              "cost_estimate_usd": 0.0016144439999999998,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1338,
+              "completion_tokens": 862,
+              "latency_seconds": 5.9842002391815186,
+              "cost_estimate_usd": 0.00060098,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-links_and_currency-02",
+      "family": "links_and_currency",
+      "repetition": 2,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 5.854884500033222,
+          "usd": 0.00057455,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 919,
+              "latency_seconds": 5.854687929153442,
+              "cost_estimate_usd": 0.00057455,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 9.04422712494852,
+          "usd": 0.001847744,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 937,
+              "latency_seconds": 4.326416730880737,
+              "cost_estimate_usd": 0.001166844,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1456,
+              "completion_tokens": 925,
+              "latency_seconds": 4.532403945922852,
+              "cost_estimate_usd": 0.0006808999999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.770618750015274,
+          "usd": 0.00068505,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 1140,
+              "latency_seconds": 6.770549774169922,
+              "cost_estimate_usd": 0.00068505,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-links_and_currency-03",
+      "family": "links_and_currency",
+      "repetition": 2,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 12.451400207995903,
+          "usd": 0.0020984239999999998,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1003,
+              "latency_seconds": 4.5646748542785645,
+              "cost_estimate_usd": 0.001246044,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1474,
+              "completion_tokens": 1324,
+              "latency_seconds": 7.886176109313965,
+              "cost_estimate_usd": 0.0008523799999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": true,
+          "wall_seconds": 4.746031709015369,
+          "usd": 0.00034757,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 634,
+              "latency_seconds": 4.558355808258057,
+              "cost_estimate_usd": 0.00034757,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 5.289787334040739,
+          "usd": 0.00039256999999999996,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 724,
+              "latency_seconds": 5.108424186706543,
+              "cost_estimate_usd": 0.00039256999999999996,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-links_and_currency-04",
+      "family": "links_and_currency",
+      "repetition": 2,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.312231040967163,
+          "usd": 0.00066155,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 1093,
+              "latency_seconds": 6.31204080581665,
+              "cost_estimate_usd": 0.00066155,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.944157625024673,
+          "usd": 0.00055505,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 767,
+              "completion_tokens": 880,
+              "latency_seconds": 13.9442720413208,
+              "cost_estimate_usd": 0.00055505,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 15.38818358303979,
+          "usd": 0.002713094,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1508,
+              "latency_seconds": 7.192409992218018,
+              "cost_estimate_usd": 0.001852044,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1517,
+              "completion_tokens": 1267,
+              "latency_seconds": 8.195883989334106,
+              "cost_estimate_usd": 0.0008610499999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-mixed-01",
+      "family": "mixed",
+      "repetition": 2,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.99895983299939,
+          "usd": 0.00263862,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 849,
+              "completion_tokens": 2163,
+              "latency_seconds": 6.998761892318726,
+              "cost_estimate_usd": 0.00263862,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 11.957505917001981,
+          "usd": 0.002222824,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1269,
+              "latency_seconds": 5.9107749462127686,
+              "cost_estimate_usd": 0.001565244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1482,
+              "completion_tokens": 932,
+              "latency_seconds": 5.828744888305664,
+              "cost_estimate_usd": 0.0006575800000000001,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.888871417031623,
+          "usd": 0.0005882699999999999,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 805,
+              "completion_tokens": 1128,
+              "latency_seconds": 6.888920068740845,
+              "cost_estimate_usd": 0.0005882699999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-mixed-02",
+      "family": "mixed",
+      "repetition": 2,
+      "order": [
+        "planner_executor",
+        "single_executor",
+        "dynamic_router"
+      ],
+      "arms": {
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.085770750010852,
+          "usd": 0.0019422439999999999,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 934,
+              "latency_seconds": 4.583837985992432,
+              "cost_estimate_usd": 0.001163244,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1430,
+              "completion_tokens": 1129,
+              "latency_seconds": 8.501891136169434,
+              "cost_estimate_usd": 0.000779,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 11.945099541975651,
+          "usd": 0.00070225,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 805,
+              "completion_tokens": 1163,
+              "latency_seconds": 11.945373058319092,
+              "cost_estimate_usd": 0.00070225,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 6.931195707991719,
+          "usd": 0.00267222,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 849,
+              "completion_tokens": 2191,
+              "latency_seconds": 6.931219100952148,
+              "cost_estimate_usd": 0.00267222,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-mixed-03",
+      "family": "mixed",
+      "repetition": 2,
+      "order": [
+        "single_executor",
+        "dynamic_router",
+        "planner_executor"
+      ],
+      "arms": {
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 5.512698791979346,
+          "usd": 0.00041927,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 805,
+              "completion_tokens": 790,
+              "latency_seconds": 5.297482967376709,
+              "cost_estimate_usd": 0.00041927,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "dynamic_router": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 7.364733792026527,
+          "usd": 0.00263262,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 849,
+              "completion_tokens": 2158,
+              "latency_seconds": 7.105316162109375,
+              "cost_estimate_usd": 0.00263262,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 13.57207350002136,
+          "usd": 0.002368024,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 1370,
+              "latency_seconds": 6.360051870346069,
+              "cost_estimate_usd": 0.0016864439999999998,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1492,
+              "completion_tokens": 977,
+              "latency_seconds": 6.94330096244812,
+              "cost_estimate_usd": 0.00068158,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    },
+    {
+      "scenario": "holdout-mixed-04",
+      "family": "mixed",
+      "repetition": 2,
+      "order": [
+        "dynamic_router",
+        "planner_executor",
+        "single_executor"
+      ],
+      "arms": {
+        "dynamic_router": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 7.253077666973695,
+          "usd": 0.00271422,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 849,
+              "completion_tokens": 2226,
+              "latency_seconds": 7.253103733062744,
+              "cost_estimate_usd": 0.00271422,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "planner_executor": {
+          "passed": false,
+          "public_pass": false,
+          "wall_seconds": 13.301897917001043,
+          "usd": 0.0021150739999999998,
+          "estimated_calls": 0,
+          "attempted_calls": 2,
+          "model_calls": [
+            {
+              "node": "PlannerAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/deepseek-v4p1-flash",
+              "prompt_tokens": 753,
+              "completion_tokens": 947,
+              "latency_seconds": 4.41439414024353,
+              "cost_estimate_usd": 0.0011788439999999999,
+              "cost_source": "provider"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 1473,
+              "completion_tokens": 1492,
+              "latency_seconds": 8.886364936828613,
+              "cost_estimate_usd": 0.0009362299999999999,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        },
+        "single_executor": {
+          "passed": true,
+          "public_pass": true,
+          "wall_seconds": 4.468902666994836,
+          "usd": 0.00047174999999999995,
+          "estimated_calls": 0,
+          "attempted_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+              "prompt_tokens": 805,
+              "completion_tokens": 702,
+              "latency_seconds": 4.177001237869263,
+              "cost_estimate_usd": 0.00047174999999999995,
+              "cost_source": "provider"
+            }
+          ],
+          "executor_model": "fireworks_ai/accounts/fireworks/models/glm-5p3-flash",
+          "infrastructure_error": null,
+          "human_intervened": false,
+          "human_intervention_reason": null
+        }
+      }
+    }
+  ],
+  "finished_at": "2026-11-14T05:01:44.854308+00:00",
+  "summary": {
+    "arms": {
+      "single_executor": {
+        "attempted": 32,
+        "scored": 32,
+        "passed": 16,
+        "unscored": 0,
+        "human_interventions": 0,
+        "total_usd": 0.016552519999999998,
+        "usd_per_verified_success": 0.0010345324999999999,
+        "median_seconds": 5.420240166975418,
+        "p95_seconds": 9.721556791977491,
+        "cost_known": 32,
+        "model_calls": 32,
+        "estimated_model_calls": 0
+      },
+      "dynamic_router": {
+        "attempted": 32,
+        "scored": 32,
+        "passed": 9,
+        "unscored": 0,
+        "human_interventions": 0,
+        "total_usd": 0.059873668,
+        "usd_per_verified_success": 0.006652629777777777,
+        "median_seconds": 7.126018749986542,
+        "p95_seconds": 11.400699083984364,
+        "cost_known": 32,
+        "model_calls": 32,
+        "estimated_model_calls": 0
+      },
+      "planner_executor": {
+        "attempted": 32,
+        "scored": 32,
+        "passed": 10,
+        "unscored": 0,
+        "human_interventions": 0,
+        "total_usd": 0.07565757799999999,
+        "usd_per_verified_success": 0.007565757799999999,
+        "median_seconds": 13.303497937507927,
+        "p95_seconds": 20.371078916999977,
+        "cost_known": 32,
+        "model_calls": 64,
+        "estimated_model_calls": 0
+      }
+    },
+    "comparisons": {
+      "dynamic_router vs single_executor": {
+        "pairs": 32,
+        "scenarios": 16,
+        "by_family": {
+          "aggregation": {
+            "pairs": 8,
+            "gains": 2,
+            "regressions": 4
+          },
+          "duplicates": {
+            "pairs": 8,
+            "gains": 0,
+            "regressions": 5
+          },
+          "links_and_currency": {
+            "pairs": 8,
+            "gains": 3,
+            "regressions": 0
+          },
+          "mixed": {
+            "pairs": 8,
+            "gains": 0,
+            "regressions": 3
+          }
+        },
+        "delta_pp": -21.875,
+        "ci95_pp": [
+          -46.875,
+          3.125
+        ],
+        "verdict": "inconclusive"
+      },
+      "planner_executor vs single_executor": {
+        "pairs": 32,
+        "scenarios": 16,
+        "by_family": {
+          "aggregation": {
+            "pairs": 8,
+            "gains": 1,
+            "regressions": 4
+          },
+          "duplicates": {
+            "pairs": 8,
+            "gains": 0,
+            "regressions": 5
+          },
+          "links_and_currency": {
+            "pairs": 8,
+            "gains": 3,
+            "regressions": 0
+          },
+          "mixed": {
+            "pairs": 8,
+            "gains": 2,
+            "regressions": 3
+          }
+        },
+        "delta_pp": -18.75,
+        "ci95_pp": [
+          -46.875,
+          9.375
+        ],
+        "verdict": "inconclusive"
+      },
+      "planner_executor vs dynamic_router": {
+        "pairs": 32,
+        "scenarios": 16,
+        "by_family": {
+          "aggregation": {
+            "pairs": 8,
+            "gains": 1,
+            "regressions": 2
+          },
+          "duplicates": {
+            "pairs": 8,
+            "gains": 1,
+            "regressions": 1
+          },
+          "links_and_currency": {
+            "pairs": 8,
+            "gains": 1,
+            "regressions": 1
+          },
+          "mixed": {
+            "pairs": 8,
+            "gains": 2,
+            "regressions": 0
+          }
+        },
+        "delta_pp": 3.125,
+        "ci95_pp": [
+          -12.5,
+          18.75
+        ],
+        "verdict": "inconclusive"
+      }
+    }
+  }
+}
