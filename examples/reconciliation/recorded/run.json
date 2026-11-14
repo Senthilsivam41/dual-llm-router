@@ -1,0 +1,539 @@
+{
+  "schema_version": 1,
+  "mode": "scripted",
+  "scope": "demo",
+  "status": "complete",
+  "started_at": "2026-11-12T01:06:31.651693+00:00",
+  "models": {
+    "planner": "scripted/planner",
+    "executor": "scripted/executor"
+  },
+  "protocol": {
+    "development_cases": 0,
+    "holdout_cases": 1,
+    "trials_per_case": 1,
+    "max_provider_calls": 8,
+    "max_tokens": 4096,
+    "provider_retries": 2,
+    "provider_timeout_seconds": 120.0,
+    "planner_temperature": 0.1,
+    "executor_temperature": 0.2,
+    "fixture_sha256": {
+      "development": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "holdout": "51e63c84ee2c1bdacf57d58702b628e62fb565508488e6de2ed0bed75e4f239d"
+    },
+    "policy_sha256": "a792947fee30c001f38854f83f21f33737f08eebc1808af98f4cc037c8fa9a81",
+    "prompt_sha256": {
+      "planner": "bccccae4592ca56825d6d7c473fe7f426b55e40f72e627ce854e49ec969d30dc",
+      "executor": "2148eb7c6508e6a53f8a70fd1e316f2b470dd9b4132c7d376e30c9a966b355ae"
+    }
+  },
+  "preflight": {},
+  "development": [],
+  "candidate": null,
+  "trials": [
+    {
+      "scenario": "holdout-aggregation-01",
+      "family": "aggregation",
+      "repetition": 1,
+      "planning": {
+        "wall_seconds": 0.00014166696928441525,
+        "calls": 1,
+        "cost_usd": 3e-05,
+        "estimated_calls": 1,
+        "model_calls": [
+          {
+            "node": "PlannerAgent",
+            "model": "scripted/planner",
+            "prompt_tokens": 10,
+            "completion_tokens": 10,
+            "latency_seconds": 1.5020370483398438e-05,
+            "cost_estimate_usd": 3.0000000000000004e-05,
+            "cost_source": "estimate"
+          }
+        ],
+        "task_spec": {
+          "goal": "Produce a verified reconciliation CLI",
+          "target_files": [
+            "reconcile.py"
+          ],
+          "acceptance_criteria": [
+            "Summaries and exceptions follow the policy"
+          ],
+          "step_by_step_plan": [
+            "Validate payment rows",
+            "Aggregate accepted payments in cents",
+            "Emit sorted JSON"
+          ],
+          "notes": null,
+          "checks": null
+        },
+        "attempts": 1,
+        "status": "accepted",
+        "infrastructure_error": null
+      },
+      "executions": {
+        "first": {
+          "wall_seconds": 0.02169145899824798,
+          "calls": 1,
+          "cost_usd": 3e-05,
+          "estimated_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "scripted/executor",
+              "prompt_tokens": 10,
+              "completion_tokens": 10,
+              "latency_seconds": 2.4080276489257812e-05,
+              "cost_estimate_usd": 3.0000000000000004e-05,
+              "cost_source": "estimate"
+            }
+          ],
+          "attempts": [
+            {
+              "attempt": 1,
+              "success": false,
+              "cost_usd": null,
+              "unmatched": [],
+              "pytest_output": "",
+              "wall_seconds": 0.021640958031639457,
+              "verification": {
+                "criteria_passed": false,
+                "failure_codes": [
+                  "paid_cents",
+                  "status"
+                ],
+                "diagnostics": [
+                  {
+                    "code": "paid_cents",
+                    "group": "invoices",
+                    "row": "INV-1001-A",
+                    "field": "paid_cents",
+                    "expected": 14010,
+                    "observed": 13
+                  },
+                  {
+                    "code": "status",
+                    "group": "invoices",
+                    "row": "INV-1001-A",
+                    "field": "status",
+                    "expected": "paid",
+                    "observed": "partial"
+                  }
+                ],
+                "output": null,
+                "tools_succeeded": true
+              },
+              "feedback": null
+            }
+          ],
+          "diagnostic": {
+            "criteria_passed": false,
+            "failure_codes": [
+              "paid_cents",
+              "status"
+            ],
+            "diagnostics": [
+              {
+                "code": "paid_cents",
+                "group": "invoices",
+                "row": "INV-1001-A",
+                "field": "paid_cents",
+                "expected": 14010,
+                "observed": 13
+              },
+              {
+                "code": "status",
+                "group": "invoices",
+                "row": "INV-1001-A",
+                "field": "status",
+                "expected": "paid",
+                "observed": "partial"
+              }
+            ],
+            "output": null,
+            "tools_succeeded": true
+          },
+          "public_pass": false,
+          "private_pass": false,
+          "infrastructure_error": null,
+          "initial_program_sha256": null,
+          "final_program_sha256": "fa60ac996d3901abe7e2c912352125a7d627ad3232a0ba973f8b0c8dff6e8ce8"
+        },
+        "generic": {
+          "wall_seconds": 0.03406045795418322,
+          "calls": 2,
+          "cost_usd": 6e-05,
+          "estimated_calls": 2,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "scripted/executor",
+              "prompt_tokens": 10,
+              "completion_tokens": 10,
+              "latency_seconds": 9.179115295410156e-05,
+              "cost_estimate_usd": 3.0000000000000004e-05,
+              "cost_source": "estimate"
+            },
+            {
+              "node": "ExecutorAgent",
+              "model": "scripted/executor",
+              "prompt_tokens": 10,
+              "completion_tokens": 10,
+              "latency_seconds": 0.00015425682067871094,
+              "cost_estimate_usd": 3.0000000000000004e-05,
+              "cost_source": "estimate"
+            }
+          ],
+          "attempts": [
+            {
+              "attempt": 1,
+              "success": false,
+              "cost_usd": null,
+              "unmatched": [],
+              "pytest_output": "",
+              "wall_seconds": 0.01686712499940768,
+              "verification": {
+                "criteria_passed": false,
+                "failure_codes": [
+                  "paid_cents",
+                  "status"
+                ],
+                "diagnostics": [
+                  {
+                    "code": "paid_cents",
+                    "group": "invoices",
+                    "row": "INV-1001-A",
+                    "field": "paid_cents",
+                    "expected": 14010,
+                    "observed": 13
+                  },
+                  {
+                    "code": "status",
+                    "group": "invoices",
+                    "row": "INV-1001-A",
+                    "field": "status",
+                    "expected": "paid",
+                    "observed": "partial"
+                  }
+                ],
+                "output": null,
+                "tools_succeeded": true
+              },
+              "feedback": "The independent reconciliation verifier failed. Review the current program and policy."
+            },
+            {
+              "attempt": 2,
+              "success": false,
+              "cost_usd": null,
+              "unmatched": [],
+              "pytest_output": "",
+              "wall_seconds": 0.017080374993383884,
+              "verification": {
+                "criteria_passed": false,
+                "failure_codes": [
+                  "paid_cents",
+                  "status"
+                ],
+                "diagnostics": [
+                  {
+                    "code": "paid_cents",
+                    "group": "invoices",
+                    "row": "INV-1001-A",
+                    "field": "paid_cents",
+                    "expected": 14010,
+                    "observed": 13
+                  },
+                  {
+                    "code": "status",
+                    "group": "invoices",
+                    "row": "INV-1001-A",
+                    "field": "status",
+                    "expected": "paid",
+                    "observed": "partial"
+                  }
+                ],
+                "output": null,
+                "tools_succeeded": true
+              },
+              "feedback": "The independent reconciliation verifier failed. Review the current program and policy."
+            }
+          ],
+          "diagnostic": {
+            "criteria_passed": false,
+            "failure_codes": [
+              "paid_cents",
+              "status"
+            ],
+            "diagnostics": [
+              {
+                "code": "paid_cents",
+                "group": "invoices",
+                "row": "INV-1001-A",
+                "field": "paid_cents",
+                "expected": 14010,
+                "observed": 13
+              },
+              {
+                "code": "status",
+                "group": "invoices",
+                "row": "INV-1001-A",
+                "field": "status",
+                "expected": "paid",
+                "observed": "partial"
+              }
+            ],
+            "output": null,
+            "tools_succeeded": true
+          },
+          "public_pass": false,
+          "private_pass": false,
+          "infrastructure_error": null,
+          "initial_program_sha256": "fa60ac996d3901abe7e2c912352125a7d627ad3232a0ba973f8b0c8dff6e8ce8",
+          "final_program_sha256": "fa60ac996d3901abe7e2c912352125a7d627ad3232a0ba973f8b0c8dff6e8ce8"
+        },
+        "diagnostics": {
+          "wall_seconds": 0.016298583010211587,
+          "calls": 1,
+          "cost_usd": 3e-05,
+          "estimated_calls": 1,
+          "model_calls": [
+            {
+              "node": "ExecutorAgent",
+              "model": "scripted/executor",
+              "prompt_tokens": 10,
+              "completion_tokens": 10,
+              "latency_seconds": 7.224082946777344e-05,
+              "cost_estimate_usd": 3.0000000000000004e-05,
+              "cost_source": "estimate"
+            }
+          ],
+          "attempts": [
+            {
+              "attempt": 1,
+              "success": true,
+              "cost_usd": null,
+              "unmatched": [],
+              "pytest_output": "",
+              "wall_seconds": 0.01621750002959743,
+              "verification": {
+                "criteria_passed": true,
+                "failure_codes": [],
+                "diagnostics": [],
+                "output": {
+                  "invoices": [
+                    {
+                      "invoice_id": "INV-1001-A",
+                      "currency": "USD",
+                      "invoiced_cents": 14010,
+                      "paid_cents": 14010,
+                      "status": "paid"
+                    },
+                    {
+                      "invoice_id": "INV-1001-B",
+                      "currency": "EUR",
+                      "invoiced_cents": 7245,
+                      "paid_cents": 1,
+                      "status": "partial"
+                    },
+                    {
+                      "invoice_id": "INV-1001-C",
+                      "currency": "USD",
+                      "invoiced_cents": 250,
+                      "paid_cents": 0,
+                      "status": "unpaid"
+                    },
+                    {
+                      "invoice_id": "INV-1001-D",
+                      "currency": "USD",
+                      "invoiced_cents": 49,
+                      "paid_cents": 54,
+                      "status": "overpaid"
+                    }
+                  ],
+                  "exceptions": []
+                },
+                "tools_succeeded": true
+              },
+              "feedback": "The independent reconciliation verifier failed. Review the current program and policy.\nVerifier diagnostics for the diagnostic fixture: [{\"code\":\"paid_cents\",\"group\":\"invoices\",\"row\":\"INV-1001-A\",\"field\":\"paid_cents\",\"expected\":14010,\"observed\":13},{\"code\":\"status\",\"group\":\"invoices\",\"row\":\"INV-1001-A\",\"field\":\"status\",\"expected\":\"paid\",\"observed\":\"partial\"}]"
+            }
+          ],
+          "diagnostic": {
+            "criteria_passed": true,
+            "failure_codes": [],
+            "diagnostics": [],
+            "output": {
+              "invoices": [
+                {
+                  "invoice_id": "INV-1001-A",
+                  "currency": "USD",
+                  "invoiced_cents": 14010,
+                  "paid_cents": 14010,
+                  "status": "paid"
+                },
+                {
+                  "invoice_id": "INV-1001-B",
+                  "currency": "EUR",
+                  "invoiced_cents": 7245,
+                  "paid_cents": 1,
+                  "status": "partial"
+                },
+                {
+                  "invoice_id": "INV-1001-C",
+                  "currency": "USD",
+                  "invoiced_cents": 250,
+                  "paid_cents": 0,
+                  "status": "unpaid"
+                },
+                {
+                  "invoice_id": "INV-1001-D",
+                  "currency": "USD",
+                  "invoiced_cents": 49,
+                  "paid_cents": 54,
+                  "status": "overpaid"
+                }
+              ],
+              "exceptions": []
+            },
+            "tools_succeeded": true
+          },
+          "public_pass": true,
+          "private_pass": true,
+          "infrastructure_error": null,
+          "initial_program_sha256": "fa60ac996d3901abe7e2c912352125a7d627ad3232a0ba973f8b0c8dff6e8ce8",
+          "final_program_sha256": "26039ec4865fd91e1a592c8c6a06228793e2981ef3e29ddabd7d66f392e21db0"
+        }
+      },
+      "arms": {
+        "first": {
+          "passed": false,
+          "infrastructure_error": null,
+          "wall_seconds": 0.021833125967532396,
+          "calls": 2,
+          "cost_usd": 6e-05,
+          "estimated_calls": 2
+        },
+        "generic": {
+          "passed": false,
+          "infrastructure_error": null,
+          "wall_seconds": 0.05589358392171562,
+          "calls": 4,
+          "cost_usd": 0.00012,
+          "estimated_calls": 4
+        },
+        "diagnostics": {
+          "passed": true,
+          "infrastructure_error": null,
+          "wall_seconds": 0.03813170897774398,
+          "calls": 3,
+          "cost_usd": 9e-05,
+          "estimated_calls": 3
+        }
+      },
+      "order": [
+        "first",
+        "generic",
+        "diagnostics"
+      ]
+    }
+  ],
+  "finished_at": "2026-11-12T01:06:31.651693+00:00",
+  "summary": {
+    "arms": {
+      "first": {
+        "passed": 0,
+        "scored": 1,
+        "incomplete": 0,
+        "pass_rate": 0.0,
+        "recovered": 0,
+        "first_failures": 1,
+        "cost_per_verified_task_usd": null,
+        "median_wall_seconds": 0.021833125967532396,
+        "p95_wall_seconds": 0.021833125967532396,
+        "model_calls": 2,
+        "estimated_cost_calls": 2
+      },
+      "generic": {
+        "passed": 0,
+        "scored": 1,
+        "incomplete": 0,
+        "pass_rate": 0.0,
+        "recovered": 0,
+        "first_failures": 1,
+        "cost_per_verified_task_usd": null,
+        "median_wall_seconds": 0.05589358392171562,
+        "p95_wall_seconds": 0.05589358392171562,
+        "model_calls": 4,
+        "estimated_cost_calls": 4
+      },
+      "diagnostics": {
+        "passed": 1,
+        "scored": 1,
+        "incomplete": 0,
+        "pass_rate": 1.0,
+        "recovered": 1,
+        "first_failures": 1,
+        "cost_per_verified_task_usd": 9e-05,
+        "median_wall_seconds": 0.03813170897774398,
+        "p95_wall_seconds": 0.03813170897774398,
+        "model_calls": 3,
+        "estimated_cost_calls": 3
+      }
+    },
+    "effects": {
+      "retry_feedback": {
+        "pairs": 1,
+        "scenarios": 1,
+        "by_family": {
+          "aggregation": {
+            "pairs": 1,
+            "gains": 1,
+            "regressions": 0
+          }
+        },
+        "delta_pp": 100.0,
+        "ci95_pp": null,
+        "verdict": "inconclusive"
+      },
+      "prompt_feedback": {
+        "pairs": 0,
+        "scenarios": 0,
+        "by_family": {},
+        "delta_pp": null,
+        "ci95_pp": null,
+        "verdict": "inconclusive"
+      },
+      "generic_vs_first": {
+        "pairs": 1,
+        "scenarios": 1,
+        "by_family": {
+          "aggregation": {
+            "pairs": 1,
+            "gains": 0,
+            "regressions": 0
+          }
+        },
+        "delta_pp": 0.0,
+        "ci95_pp": null,
+        "verdict": "inconclusive"
+      },
+      "diagnostics_vs_first": {
+        "pairs": 1,
+        "scenarios": 1,
+        "by_family": {
+          "aggregation": {
+            "pairs": 1,
+            "gains": 1,
+            "regressions": 0
+          }
+        },
+        "delta_pp": 100.0,
+        "ci95_pp": null,
+        "verdict": "inconclusive"
+      }
+    },
+    "attempted_study_calls": 5,
+    "incomplete": [],
+    "retry_opportunities": 1
+  }
+}

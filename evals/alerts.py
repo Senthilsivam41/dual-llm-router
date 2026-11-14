@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import logging
 import os
-import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -72,8 +72,8 @@ def post_json_webhook(url: str, payload: Dict[str, Any], timeout: float = 5.0) -
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
             return 200 <= getattr(resp, "status", 200) < 300
-    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
-        logger.warning("Webhook post failed: %s", exc)
+    except (OSError, http.client.HTTPException, ValueError) as exc:
+        logger.warning("Webhook post failed: %s", type(exc).__name__)
         return False
 
 

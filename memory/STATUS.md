@@ -80,5 +80,5 @@ Docs: [`benchmark/benchmark-cicd.md`](../benchmark/benchmark-cicd.md), [`benchma
 ## Known gaps
 
 1. Optional `OPENROUTER_API_KEY` is not required for CI. Live weekly runs use the secret when it is set and otherwise stay on `--simulate`.
-2. Weekly summary posts to Slack or Discord only when `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, or `BENCHMARK_SUMMARY_WEBHOOK` is set. Missing secrets leave the step summary in place and do not fail the job.
+2. Weekly summary posts to Slack or Discord only when `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, or `BENCHMARK_SUMMARY_WEBHOOK` is set. Missing secrets leave the step summary in place and do not fail the job. A configured webhook that rejects the post fails the job.
 3. Human-intervention rate is on each benchmark result and in the published system metrics. Simulate runs record `human_intervened=false`, so the rate is 0 rather than missing.

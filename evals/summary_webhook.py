@@ -26,11 +26,15 @@ def weekly_summary_markdown(reports_dir: Path) -> str:
         f"Artifact JSON files: **{len(files)}**",
         "",
     ]
-    for path in files[:40]:
+    shown = files[:40]
+    for path in shown:
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             lines.append(f"- `{path}`: parse error ({exc})")
+            continue
+        if not isinstance(data, dict):
+            lines.append(f"- `{path.name}`: keys=[]")
             continue
         overall = data.get("overall") or data.get("variants") or data
         if isinstance(overall, dict) and "success_rate" in overall:
@@ -38,15 +42,16 @@ def weekly_summary_markdown(reports_dir: Path) -> str:
                 f"- `{path.name}`: success={overall.get('success_rate')} "
                 f"quality={overall.get('avg_quality', overall.get('quality_score', 'n/a'))}"
             )
-        elif isinstance(overall, dict) and data.get("winner"):
+        elif data.get("winner"):
             lines.append(
                 f"- `{path.name}`: winner=`{data.get('winner')}` "
                 f"ranking={data.get('ranking')}"
             )
-        elif isinstance(data, dict):
-            lines.append(f"- `{path.name}`: keys={list(data)[:8]}")
         else:
-            lines.append(f"- `{path.name}`: keys=[]")
+            lines.append(f"- `{path.name}`: keys={list(data)[:8]}")
+    omitted = len(files) - len(shown)
+    if omitted:
+        lines.append(f"- {omitted} more JSON files omitted")
     lines.append("")
     return "\n".join(lines)
 
@@ -86,10 +91,13 @@ def notify_weekly_summary(
     """Post the summary. No configured secret returns skipped=True and sends nothing."""
     destinations = webhook_destinations(environ)
     if not destinations:
-        return {"skipped": True, "sent": []}
+        return {"skipped": True, "sent": [], "failed": []}
 
     sent: List[str] = []
+    failed: List[str] = []
     for kind, url in destinations:
         if post_json_webhook(url, message_payload(kind, text)):
             sent.append(kind)
-    return {"skipped": False, "sent": sent}
+        else:
+            failed.append(kind)
+    return {"skipped": False, "sent": sent, "failed": failed}

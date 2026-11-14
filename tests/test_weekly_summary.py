@@ -1,10 +1,14 @@
 """Weekly summary text and optional Slack/Discord delivery."""
 
+import http.client
 import json
+import logging
 import re
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
+from evals.alerts import post_json_webhook
 from evals.summary_webhook import (
     message_payload,
     notify_weekly_summary,
@@ -41,7 +45,7 @@ def test_missing_secret_skips_without_posting(monkeypatch):
         "## Weekly benchmark summary",
         environ={"SLACK_WEBHOOK_URL": "  ", "DISCORD_WEBHOOK_URL": ""},
     )
-    assert result == {"skipped": True, "sent": []}
+    assert result == {"skipped": True, "sent": [], "failed": []}
     assert calls == []
 
 
@@ -60,7 +64,7 @@ def test_slack_post_uses_the_summary_text(monkeypatch):
         text,
         environ={"SLACK_WEBHOOK_URL": "https://hooks.example/slack"},
     )
-    assert result == {"skipped": False, "sent": ["slack"]}
+    assert result == {"skipped": False, "sent": ["slack"], "failed": []}
     assert seen["payload"] == {"text": text}
 
 
@@ -81,13 +85,72 @@ def test_discord_payload_is_truncated(monkeypatch):
     assert len(seen["content"]) < 2000
 
 
-def test_failed_post_does_not_raise(monkeypatch):
+def test_failed_post_is_reported(monkeypatch):
     monkeypatch.setattr("evals.summary_webhook.post_json_webhook", lambda *a, **k: False)
     result = notify_weekly_summary(
         "summary",
         environ={"SLACK_WEBHOOK_URL": "https://hooks.example/slack"},
     )
-    assert result == {"skipped": False, "sent": []}
+    assert result == {"skipped": False, "sent": [], "failed": ["slack"]}
+
+
+def test_partial_delivery_names_the_failure(monkeypatch):
+    def fake_post(url, payload, timeout=5.0):
+        return "slack" in url
+
+    monkeypatch.setattr("evals.summary_webhook.post_json_webhook", fake_post)
+    result = notify_weekly_summary(
+        "summary",
+        environ={
+            "SLACK_WEBHOOK_URL": "https://hooks.example/slack",
+            "DISCORD_WEBHOOK_URL": "https://discord.com/api/webhooks/1/token",
+        },
+    )
+    assert result["sent"] == ["slack"]
+    assert result["failed"] == ["discord"]
+
+
+def test_cli_fails_when_configured_post_fails(tmp_path, monkeypatch, capsys):
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    monkeypatch.setenv("SLACK_WEBHOOK_URL", "https://hooks.example/slack")
+    monkeypatch.delenv("DISCORD_WEBHOOK_URL", raising=False)
+    monkeypatch.delenv("BENCHMARK_SUMMARY_WEBHOOK", raising=False)
+    monkeypatch.setattr("evals.summary_webhook.post_json_webhook", lambda *a, **k: False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["weekly_summary.py", "--reports", str(reports), "--output", str(reports / "summary.md")],
+    )
+    assert main() == 1
+    assert "failed for slack" in capsys.readouterr().out
+
+
+def test_list_json_does_not_abort_summary(tmp_path):
+    (tmp_path / "results.json").write_text(json.dumps([{"status": "success"}]), encoding="utf-8")
+    text = weekly_summary_markdown(tmp_path)
+    assert "results.json" in text
+    assert "keys=[]" in text
+
+
+def test_summary_notes_files_past_the_first_forty(tmp_path):
+    for index in range(41):
+        (tmp_path / f"r{index:02d}.json").write_text("{}", encoding="utf-8")
+    text = weekly_summary_markdown(tmp_path)
+    assert "Artifact JSON files: **41**" in text
+    assert "1 more JSON files omitted" in text
+
+
+def test_transport_error_returns_false_without_logging_the_url(caplog):
+    secret = "https://hooks.slack.com/services/T/B/secret-token"
+
+    def boom(*args, **kwargs):
+        raise http.client.RemoteDisconnected(secret)
+
+    with caplog.at_level(logging.WARNING):
+        with patch("evals.alerts.urllib.request.urlopen", boom):
+            assert post_json_webhook(secret, {"text": "hi"}) is False
+    assert "secret-token" not in caplog.text
 
 
 def test_cli_writes_summary_and_exits_when_unset(tmp_path, monkeypatch, capsys):

@@ -81,7 +81,7 @@ The cron strings below are copied from the workflow files. A schedule change upd
 
 Default mode is simulate. A scheduled Benchmark run, or a dispatch with `live` set, uses `OPENROUTER_API_KEY` when that secret exists and stays on `--simulate` when it does not. PR smoke always uses `--simulate`.
 
-The weekly summary job writes `reports/summary.md` and the Actions step summary from one Markdown string. If `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, or `BENCHMARK_SUMMARY_WEBHOOK` is set, that same Markdown is posted. A missing secret skips the post and the job still succeeds.
+The weekly summary job writes `reports/summary.md` and the Actions step summary from one Markdown string. If `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, or `BENCHMARK_SUMMARY_WEBHOOK` is set, that same Markdown is posted. A missing secret skips the post and the job still succeeds. A configured webhook that rejects the post fails the job.
 
 ## Cron (Phase 5)
 
