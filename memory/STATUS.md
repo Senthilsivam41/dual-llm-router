@@ -1,7 +1,7 @@
 # Current status
 
-**Updated:** 2026-11-11  
-**Branch:** `fix/p0-ci-green`  
+**Updated:** 2026-11-12  
+**Branch:** `feature/plan-use-case`  
 **Base:** `origin/main` after PR #8 merged the evolution loop.
 
 ## Portfolio productization (2026-08-25)
@@ -69,6 +69,7 @@ Docs: [`benchmark/benchmark-cicd.md`](../benchmark/benchmark-cicd.md), [`benchma
 5. Feasible CI/CD (PR smoke, weekly suite/comparative, nightly evolution)
 6. Issue-to-fix showcase: `examples/issue_to_fix/`, structured `checks`, pytest assertion verifier, `make showcase`
 7. P2 evolution productization: gated genome snapshots, durable fitness dashboard, [ADR 0001](../docs/adr/0001-careful-genome-promotion.md)
+8. P3 docs and polish: Evolution CI schedule table, secrets-gated weekly summary webhook, P1 functionality tests kept as the live contract
 
 ## Verification snapshot
 
@@ -79,5 +80,5 @@ Docs: [`benchmark/benchmark-cicd.md`](../benchmark/benchmark-cicd.md), [`benchma
 ## Known gaps
 
 1. Optional `OPENROUTER_API_KEY` is not required for CI. Live weekly runs use the secret when it is set and otherwise stay on `--simulate`.
-2. Slack notifications deferred (step summaries used instead)
+2. Weekly summary posts to Slack or Discord only when `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, or `BENCHMARK_SUMMARY_WEBHOOK` is set. Missing secrets leave the step summary in place and do not fail the job. A configured webhook that rejects the post fails the job.
 3. Human-intervention rate is on each benchmark result and in the published system metrics. Simulate runs record `human_intervened=false`, so the rate is 0 rather than missing.

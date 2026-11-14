@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import logging
 import os
-import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -60,7 +60,8 @@ def _append_alert_log(alert: Dict[str, Any], path: Path = ALERTS_LOG_PATH) -> No
         f.write(json.dumps(alert) + "\n")
 
 
-def _post_webhook(url: str, payload: Dict[str, Any], timeout: float = 5.0) -> bool:
+def post_json_webhook(url: str, payload: Dict[str, Any], timeout: float = 5.0) -> bool:
+    """POST JSON. A transport error is logged and returned as False."""
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         url,
@@ -71,9 +72,13 @@ def _post_webhook(url: str, payload: Dict[str, Any], timeout: float = 5.0) -> bo
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
             return 200 <= getattr(resp, "status", 200) < 300
-    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
-        logger.warning("Webhook alert failed: %s", exc)
+    except (OSError, http.client.HTTPException, ValueError) as exc:
+        logger.warning("Webhook post failed: %s", type(exc).__name__)
         return False
+
+
+def _post_webhook(url: str, payload: Dict[str, Any], timeout: float = 5.0) -> bool:
+    return post_json_webhook(url, payload, timeout)
 
 
 def emit_alerts(

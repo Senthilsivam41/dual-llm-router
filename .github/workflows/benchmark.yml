@@ -360,37 +360,11 @@ jobs:
           path: reports/
 
       - name: Build summary markdown
-        run: |
-          uv run python - <<'PY'
-          import json, os
-          from pathlib import Path
-          root = Path("reports")
-          files = sorted(root.rglob("*.json"))
-          lines = ["## Weekly benchmark summary", "", f"Artifact JSON files: **{len(files)}**", ""]
-          for path in files[:40]:
-              try:
-                  data = json.loads(path.read_text(encoding="utf-8"))
-              except Exception as exc:  # noqa: BLE001
-                  lines.append(f"- `{path}`: parse error ({exc})")
-                  continue
-              overall = data.get("overall") or data.get("variants") or data
-              if isinstance(overall, dict) and "success_rate" in overall:
-                  lines.append(
-                      f"- `{path.name}`: success={overall.get('success_rate')} "
-                      f"quality={overall.get('avg_quality', overall.get('quality_score', 'n/a'))}"
-                  )
-              elif isinstance(overall, dict) and data.get("winner"):
-                  lines.append(f"- `{path.name}`: winner=`{data.get('winner')}` ranking={data.get('ranking')}")
-              else:
-                  lines.append(f"- `{path.name}`: keys={list(data)[:8]}")
-          lines.append("")
-          text = "\n".join(lines)
-          summary = os.environ.get("GITHUB_STEP_SUMMARY")
-          if summary:
-              Path(summary).write_text(text, encoding="utf-8")
-          Path("reports/summary.md").write_text(text, encoding="utf-8")
-          print(text)
-          PY
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          BENCHMARK_SUMMARY_WEBHOOK: ${{ secrets.BENCHMARK_SUMMARY_WEBHOOK }}
+        run: uv run python scripts/weekly_summary.py --reports reports --output reports/summary.md
 
       - name: Upload summary
         uses: actions/upload-artifact@v4

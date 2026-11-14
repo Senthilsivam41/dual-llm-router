@@ -14,7 +14,7 @@ Adapted from the research-labs design for this repo’s real CLIs, genomes, and 
 | Comparative variant A/B | Yes* | Needs `evolve.py --force` first — `hermes_v2/v3` do not exist after `reset.py` alone |
 | Publish Markdown to `benchmark/published/` | Yes | Already existed; kept on push + schedule |
 | Live OpenRouter in CI | Conditional | Only when `OPENROUTER_API_KEY` secret is set; default remains simulate |
-| Slack notifications | Deferred | No Slack secret required; use Actions step summaries + artifacts instead |
+| Slack / Discord weekly summary | Optional | Posts the same Markdown as the step summary when a webhook secret is set; missing secrets skip the post |
 | Locked dependency cache | Yes | `uv.lock` is CI source of truth |
 | Dashboard `--output` path | Yes | Alias added for `--save` |
 | Semicolon `--variants a;b` | No | This repo uses space-separated: `--variants h1,l1 h2,l1` |
@@ -50,6 +50,9 @@ Repo → Settings → Secrets and variables → Actions:
 | --- | --- | --- |
 | `OPENROUTER_API_KEY` | No | Live publish on schedule / dispatch `--live` |
 | `OPENAI_API_KEY` | No | Unused by current scripts (reserved) |
+| `SLACK_WEBHOOK_URL` | No | Weekly summary job; Slack incoming webhook |
+| `DISCORD_WEBHOOK_URL` | No | Weekly summary job; Discord webhook |
+| `BENCHMARK_SUMMARY_WEBHOOK` | No | Weekly summary job; Slack-shaped URL, or a Discord URL when it contains `discord.com/api/webhooks` |
 
 Without secrets, all workflows stay on `--simulate` and still produce useful regression signal.
 
