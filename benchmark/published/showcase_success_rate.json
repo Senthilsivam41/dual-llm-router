@@ -29,8 +29,14 @@
       "verified": true,
       "attempts": 1,
       "cost_usd": 0.001956
+    },
+    {
+      "at": "2026-11-15T09:02:05Z",
+      "verified": true,
+      "attempts": 1,
+      "cost_usd": 0.002958
     }
   ],
-  "verified": 5,
-  "total": 5
+  "verified": 6,
+  "total": 6
 }
