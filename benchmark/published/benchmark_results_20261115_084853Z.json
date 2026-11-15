@@ -1,0 +1,415 @@
+{
+  "timestamp": "20261115_084853Z",
+  "meta": {
+    "commit": "8c6d37e",
+    "branch": "main",
+    "subject": "Merge pull request #16 from Senthilsivam41/codex/invoice-architecture-benchmark-results"
+  },
+  "suite": "all",
+  "variant": "hermes_v1,laguna_v1",
+  "simulate": true,
+  "trigger": "schedule",
+  "fingerprint": {
+    "suite": "all",
+    "variant": "hermes_v1,laguna_v1",
+    "simulate": true,
+    "overall": {
+      "success_rate": 0.4286,
+      "avg_cost": 0.4375,
+      "cost_efficiency": 1.1301,
+      "avg_time_seconds": 0.0,
+      "avg_quality": 0.5714,
+      "avg_iterations": 2.0952,
+      "total_cost": 9.188,
+      "throughput_tasks_per_hour": 0.0,
+      "spec_rejection_rate": 0.2857,
+      "spec_acceptance_rate": 0.7143,
+      "handoff_failure_rate": 0.2381,
+      "human_intervention_rate": 0.0
+    },
+    "tasks": [
+      {
+        "task_id": "easy_basic_function",
+        "category": "easy",
+        "domain": "basic",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.016,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_file_creation",
+        "category": "easy",
+        "domain": "basic",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.036,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_simple_class",
+        "category": "easy",
+        "domain": "oop",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.048,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_simple_fix",
+        "category": "easy",
+        "domain": "debugging",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.04,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_simple_function",
+        "category": "easy",
+        "domain": "basic",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.04,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "easy_simple_refactor",
+        "category": "easy",
+        "domain": "refactor",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.064,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "medium_api_endpoint",
+        "category": "medium",
+        "domain": "backend",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.24,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "medium_billing_coupon",
+        "category": "medium",
+        "domain": "debugging",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.008,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "medium_class_with_methods",
+        "category": "medium",
+        "domain": "oop",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.18,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "medium_edge_case_bug",
+        "category": "medium",
+        "domain": "debugging",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.24,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "medium_moderate_complexity",
+        "category": "medium",
+        "domain": "backend",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.216,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "medium_multi_file_feature",
+        "category": "medium",
+        "domain": "backend",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.3,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "medium_test_coverage",
+        "category": "medium",
+        "domain": "testing",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.12,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "hard_architecture_change",
+        "category": "hard",
+        "domain": "architecture",
+        "status": "success",
+        "quality_score": 1.0,
+        "cost": 0.56,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "hard_bug_hunt",
+        "category": "hard",
+        "domain": "debugging",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.6,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "hard_feature_from_scratch",
+        "category": "hard",
+        "domain": "feature",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.54,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "hard_performance_optimization",
+        "category": "hard",
+        "domain": "performance",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 0.66,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "extreme_multi_service",
+        "category": "extreme",
+        "domain": "systems",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 1.56,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "extreme_performance_critical",
+        "category": "extreme",
+        "domain": "performance",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 1.08,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "extreme_security_audit",
+        "category": "extreme",
+        "domain": "security",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 1.2,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      },
+      {
+        "task_id": "extreme_system_design",
+        "category": "extreme",
+        "domain": "architecture",
+        "status": "failure",
+        "quality_score": 0.25,
+        "cost": 1.44,
+        "time_seconds": 0.0,
+        "variant_hermes": "hermes_v1",
+        "variant_laguna": "laguna_v1",
+        "human_intervened": false
+      }
+    ]
+  },
+  "report": {
+    "generated_at": "2026-11-15T08:48:53.942256Z",
+    "total_runs": 21,
+    "by_category": {
+      "easy": {
+        "count": 6,
+        "success_rate": 0.8333,
+        "avg_cost": 0.0407,
+        "avg_time": 0.0,
+        "avg_quality": 0.875,
+        "avg_iterations": 1.0
+      },
+      "medium": {
+        "count": 7,
+        "success_rate": 0.4286,
+        "avg_cost": 0.1863,
+        "avg_time": 0.0,
+        "avg_quality": 0.5714,
+        "avg_iterations": 2.0
+      },
+      "hard": {
+        "count": 4,
+        "success_rate": 0.25,
+        "avg_cost": 0.59,
+        "avg_time": 0.0,
+        "avg_quality": 0.4375,
+        "avg_iterations": 3.0
+      },
+      "extreme": {
+        "count": 4,
+        "success_rate": 0.0,
+        "avg_cost": 1.32,
+        "avg_time": 0.0,
+        "avg_quality": 0.25,
+        "avg_iterations": 3.0
+      }
+    },
+    "by_variant": {
+      "hermes_v1+laguna_v1": {
+        "count": 21,
+        "success_rate": 0.4286,
+        "avg_cost": 0.4375,
+        "avg_time": 0.0,
+        "avg_quality": 0.5714
+      }
+    },
+    "by_domain": {
+      "basic": {
+        "count": 3,
+        "success_rate": 0.6667,
+        "avg_cost": 0.0307,
+        "avg_quality": 0.75
+      },
+      "oop": {
+        "count": 2,
+        "success_rate": 0.5,
+        "avg_cost": 0.114,
+        "avg_quality": 0.625
+      },
+      "debugging": {
+        "count": 4,
+        "success_rate": 0.5,
+        "avg_cost": 0.222,
+        "avg_quality": 0.625
+      },
+      "refactor": {
+        "count": 1,
+        "success_rate": 1.0,
+        "avg_cost": 0.064,
+        "avg_quality": 1.0
+      },
+      "backend": {
+        "count": 3,
+        "success_rate": 0.3333,
+        "avg_cost": 0.252,
+        "avg_quality": 0.5
+      },
+      "testing": {
+        "count": 1,
+        "success_rate": 1.0,
+        "avg_cost": 0.12,
+        "avg_quality": 1.0
+      },
+      "architecture": {
+        "count": 2,
+        "success_rate": 0.5,
+        "avg_cost": 1.0,
+        "avg_quality": 0.625
+      },
+      "feature": {
+        "count": 1,
+        "success_rate": 0.0,
+        "avg_cost": 0.54,
+        "avg_quality": 0.25
+      },
+      "performance": {
+        "count": 2,
+        "success_rate": 0.0,
+        "avg_cost": 0.87,
+        "avg_quality": 0.25
+      },
+      "systems": {
+        "count": 1,
+        "success_rate": 0.0,
+        "avg_cost": 1.56,
+        "avg_quality": 0.25
+      },
+      "security": {
+        "count": 1,
+        "success_rate": 0.0,
+        "avg_cost": 1.2,
+        "avg_quality": 0.25
+      }
+    },
+    "overall": {
+      "success_rate": 0.4286,
+      "avg_cost": 0.4375,
+      "avg_time_seconds": 0.0,
+      "avg_quality": 0.5714,
+      "avg_iterations": 2.0952,
+      "total_cost": 9.188,
+      "total_time_seconds": 0,
+      "cost_efficiency": 1.1301,
+      "spec_rejection_rate": 0.2857,
+      "handoff_failure_rate": 0.2381,
+      "spec_acceptance_rate": 0.7143,
+      "human_intervention_rate": 0.0,
+      "throughput_tasks_per_hour": 0.0
+    }
+  }
+}
