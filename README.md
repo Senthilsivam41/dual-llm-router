@@ -12,6 +12,23 @@ Detailed evolution docs: [`docs/Evolution.md`](docs/Evolution.md)
 Original proposal: [`docs/Project_Proposal.md`](docs/Project_Proposal.md)  
 Portfolio manifest: [`portfolio.yaml`](portfolio.yaml) · Quickstart: [`docs/quickstart.md`](docs/quickstart.md)
 
+## Technical tools
+
+| Tool | Where it is used |
+|---|---|
+| Python 3.10+ (CI on 3.11) | Runtime for the router, evals, benchmarks, and scripts |
+| [uv](https://docs.astral.sh/uv/) | Locked installs (`uv sync --locked`); `make setup` falls back to pip |
+| [LiteLLM](https://docs.litellm.ai/) | Model calls in `src/agents/provider.py` |
+| Pydantic 2 | `TaskSpec` and action-schema validation |
+| PyYAML | `config/evolution.yaml` and `config/ab_tests.yaml` |
+| python-dotenv | Loads `OPENROUTER_API_KEY` and related settings from `.env` |
+| pytest | Unit tests and the showcase / reconciliation verifier |
+| Docker (`python:3.11-slim`) | Isolated pytest sandbox when the image can import pytest |
+| Make | Portfolio commands: `setup`, `demo`, `check`, `showcase` |
+| GitHub Actions | PR smoke (`ci-benchmark`), showcase, weekly benchmark, nightly evolution |
+| OpenRouter | Default planner and executor: Hermes 4 and Laguna S 2.1 |
+| Fireworks | Showcase models (`deepseek-v4p1-flash` plans, `glm-5p3-flash` executes) |
+
 ---
 
 ## Architecture
